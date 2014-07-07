@@ -42,6 +42,7 @@ Other features:
  * custom registration logo (non MS installations)
  * email confirmation (non MS installations)
  * form confirmation (non MS installations)
+ * username equal to the email address (non MS installations)
  * much more!
 
 The plug-in adds two new menu voices in the admin for the administrator and two for users.
@@ -79,10 +80,10 @@ Rules are:
 
 Visualization rules
     * field can be hidden during registration
-	[all]
+	[all except the email address]
 
     * field can be hidden in user's profile
-	[all]
+	[all except the WordPress fields]
 
     * field can be hidden in Users Extended page
 	[all]
@@ -423,11 +424,11 @@ if (count($allFields) > 0) {
 	foreach ($allFields as $field) {
 		echo "ID: ".$field['ID']." \n";
 		echo "F_ORDER: ".$field['F_ORDER']." \n";
-		echo "NAME: ".$field['NAME']." \n";
-		echo "TYPE: ".$field['TYPE']." \n";
-		echo "VALUE: ".$field['VALUE']." \n";
-		echo "LABEL: ".$field['LABEL']." \n";
-		echo "DESCRIPTION: ".$field['DESCRIPTION']." \n";
+		echo "NAME: ".cimy_uef_sanitize_content($field['NAME'])." \n";
+		echo "TYPE: ".cimy_uef_sanitize_content($field['TYPE'])." \n";
+		echo "VALUE: ".cimy_uef_sanitize_content($field['VALUE'])." \n";
+		echo "LABEL: ".cimy_uef_sanitize_content($field['LABEL'])." \n";
+		echo "DESCRIPTION: ".cimy_uef_sanitize_content($field['DESCRIPTION'])." \n";
 
 		echo "RULES: ";
 		print_r($field['RULES']);
@@ -472,6 +473,13 @@ crop_x1=0,crop_y1=0,crop_x2=80,crop_y2=90 - pre-select cropping window
 
 [AVATAR, PICTURE, FILE]
 filename=default.pdf - rename the uploaded file to the given file name
+
+
+HOW TO USE WPML SUPPORT:
+Since v2.4.0 field's label and description can be translated using the WordPress Multilingual plug-in.
+To use it in your code you can get the get_cimyFields example above and change only the following lines:
+    echo "LABEL: ".cimy_uef_sanitize_content(cimy_wpml_translate_string($field['NAME']."_label", $field['LABEL']))." \n";
+    echo "DESCRIPTION: ".cimy_uef_sanitize_content(cimy_wpml_translate_string($field['NAME']."_desc", $field['DESCRIPTION']))." \n";
 
 
 KNOWN ISSUES:
@@ -619,6 +627,54 @@ A lot of times I cannot reproduce the problem and I need more details, so if you
 
 
 CHANGELOG:
+v2.5.4 - 11/07/2013
+- Fixed extra fields were not shown on certain themes, like: 'Modular' theme and 'Emporium' theme for WooCommerce (thanks to eArtboard, detoner and Rinaldo Pavanello)
+- Fixed default directory's permissions on Unix servers was set to 0777, now is handled by WordPress if FS_CHMOD_DIR is not set (thanks to KZeni)
+- Fixed 'no username registration' were causing some unrelated html paragraph to be hidden (thanks to flymike for the patch)
+
+v2.5.3 - 24/06/2013
+- Fixed updating extra fields from a different blog doesn't work (MS per-blog only) (thanks to GilesFarrow)
+- Fixed Securimage captcha sometimes does not validate correctly codes (thanks to websitesareus)
+- Fixed two PHP warnings produced in the plug-in's admin panel (thanks to Ov3rfly)
+- Fixed tabindex is no longer needed for WordPress 3.5 and Theme My Login users with Securimage captcha too
+
+v2.5.2 - 03/06/2013
+- Added support for Theme My Login v6.3.x
+- Fixed Users Extended page is blank when the WordPress installation hosts a lot (10.000+) of users (thanks to mightypixel, eArtboard and more)
+- Fixed cimy_uef_register.css file inclusion does not happen (MS only) (introduced in v2.5.0)
+- Fixed strlen doesn't count correctly special accented characters, changed to mb_strlen (thanks to Batischev Oleg for the patch)
+- Fixed user activation email's subject doesn't get translated (non-MS only) (thanks to Torstein Knutsen for the patch)
+- Updated Italian translation
+
+v2.5.1 - 06/05/2013
+- Updated Securimage Captcha to v3.5.0
+- Fixed captcha check was performed on /wp-admin/user-new.php page even without a captcha showed (MS only) (thanks to KZeni)
+- Fixed strength password hint description is showed inline with the password strength when reCAPTCHA is also showed (thanks to coopersita)
+
+v2.5.0 - 18/03/2013
+- Added support for hiding the username under standard WP registration, email will substitute it (non-MS only) (thanks to Matt Hoffman)
+- Added support for WordPress hidden fields rules under profile update
+
+v2.4.2 - 18/02/2013
+- Fixed missing 'cimy_update_ExtraFields' PHP warning (introduced in v2.4.1) (thanks to Ashton Clark and vtxyzzy)
+- Fixed WordPress MS per-blog installation was not working for non main sites since WordPress MS 3.5 (thanks to Denis Lam)
+- Fixed WordPress MS per-blog installation was not deleting cimy tables when blog is deleted
+
+v2.4.1 - 11/02/2013
+- Added support for welcome email, extra fields title and fieldset titles under the WordPress Multilingual plug-in (thanks to Piet for testing it)
+- Added Arabic translation (Mamoun Elkheir)
+- Fixed tabindex is no longer needed for WordPress 3.5 and Theme My Login users
+- Fixed PHP files inclusion, do not include the admin's files if not in the admin area
+- Fixed cursor doesn't appear at the end of the text edit under 'Users Extended'
+
+v2.4.0 - 27/12/2012
+- Added support for the WordPress Multilingual plug-in.
+- Fixed plain text password was staying in the DataBase for registered users (WordPress MS and WordPress + confirmation email only)
+- Fixed (better) background logo was stretched under Safari (thanks to DarioDN)
+- Fixed PHP warnings wpdb::supports_collation usage on WordPress 3.5
+- Fixed PHP warnings wpdb::prepare usage on WordPress 3.5
+- Fixed PHP warnings on 'Users Extended' page on WordPress 3.5
+
 v2.3.11 - 29/10/2012
 - Fixed reCAPTCHA was not working on secure webservers (thanks to invisnet for the patch)
 - Fixed extra lines outputted by php files (thanks to Ov3rfly)

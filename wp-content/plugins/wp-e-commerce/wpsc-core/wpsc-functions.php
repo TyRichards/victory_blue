@@ -10,6 +10,62 @@
  * @since 3.8
  */
 
+add_filter( 'term_name', 'wpsc_term_list_levels', 10, 2 );
+
+/**
+ * When doing variation and product category drag&drop sort, we want to restrict
+ * drag & drop to the same level (children of a category cannot be dropped under
+ * another parent category). To do this, we need to be able to specify depth level
+ * of the term items being output to the term list table.
+ *
+ * Unfortunately, there's no way we can do that with WP hooks. So this is a work around.
+ * This function is added to "term_name" filter. Its job is to record the depth level of
+ * each terms into a global variable. This global variable will later be output to JS in
+ * wpsc_print_term_list_levels_script().
+ *
+ * Not an elegant solution, but it works.
+ *
+ * @param  string $term_name
+ * @param  object $term
+ * @return string
+ */
+function wpsc_term_list_levels( $term_name, $term ) {
+	global $wp_list_table, $wpsc_term_list_levels;
+
+	$screen = get_current_screen();
+	if ( ! is_object( $screen ) || ! in_array( $screen->id, array( 'edit-wpsc-variation', 'edit-wpsc_product_category' ) ) )
+		return $term_name;
+
+	if ( ! isset( $wpsc_term_list_levels ) )
+		$wpsc_term_list_levels = array();
+
+	$wpsc_term_list_levels[$term->term_id] = $wp_list_table->level;
+
+	return $term_name;
+}
+
+add_filter( 'admin_footer', 'wpsc_print_term_list_levels_script' );
+
+/**
+ * Print $wpsc_term_list_levels as JS.
+ * @see wpsc_term_list_levels()
+ * @return void
+ */
+function wpsc_print_term_list_levels_script() {
+	global $wpsc_term_list_levels;
+	$screen = get_current_screen();
+	if ( ! in_array( $screen->id, array( 'edit-wpsc-variation', 'edit-wpsc_product_category' ) ) )
+		return;
+
+	?>
+	<script type="text/javascript">
+	//<![CDATA[
+	var WPSC_Term_List_Levels = <?php echo json_encode( $wpsc_term_list_levels ); ?>;
+	//]]>
+	</script>
+	<?php
+}
+
 add_filter( 'intermediate_image_sizes_advanced', 'wpsc_intermediate_image_sizes_advanced', 10, 1 );
 
 function wpsc_intermediate_image_sizes_advanced($sizes){
@@ -69,26 +125,26 @@ function wpsc_core_load_thumbnail_sizes() {
  */
 
 function wpsc_core_load_checkout_data() {
-	$form_types = Array(
-		"Text" => "text",
-		"Email Address" => "email",
-		"Street Address" => "address",
-		"City" => "city",
-		"Country" => "country",
-		"Delivery Address" => "delivery_address",
-		"Delivery City" => "delivery_city",
-		"Delivery Country" => "delivery_country",
-		"Text Area" => "textarea",
-		"Heading" => "heading",
-		"Select" => "select",
-		"Radio Button" => "radio",
-		"Checkbox" => "checkbox"
+	$form_types = array(
+		__( 'Text', 'wpsc' )             => 'text',
+		__( 'Email Address', 'wpsc' )    => 'email',
+		__( 'Street Address', 'wpsc' )   => 'address',
+		__( 'City', 'wpsc' )             => 'city',
+		__( 'Country', 'wpsc' )          => 'country',
+		__( 'Delivery Address', 'wpsc' ) => 'delivery_address',
+		__( 'Delivery City', 'wpsc' )    => 'delivery_city',
+		__( 'Delivery Country', 'wpsc' ) => 'delivery_country',
+		__( 'Text Area', 'wpsc' )        => 'textarea',
+		__( 'Heading', 'wpsc' )          => 'heading',
+		__( 'Select', 'wpsc' )           => 'select',
+		__( 'Radio Button', 'wpsc' )     => 'radio',
+		__( 'Checkbox', 'wpsc' )         => 'checkbox'
 	);
 
-	$form_types = apply_filters('wpsc_add_form_types' , $form_types);
-	update_option('wpsc_checkout_form_fields', $form_types);
+	$form_types = apply_filters( 'wpsc_add_form_types', $form_types );
+	update_option( 'wpsc_checkout_form_fields', $form_types );
 
-	$unique_names = Array(
+	$unique_names = array(
 		'billingfirstname',
 		'billinglastname',
 		'billingaddress',
@@ -108,8 +164,8 @@ function wpsc_core_load_checkout_data() {
 		'shippingpostcode'
 	);
 
-	$unique_names = apply_filters('wpsc_add_unique_names' , $unique_names);
-	update_option('wpsc_checkout_unique_names', $unique_names);
+	$unique_names = apply_filters( 'wpsc_add_unique_names' , $unique_names );
+	update_option( 'wpsc_checkout_unique_names', $unique_names );
 
 }
 /**
@@ -167,7 +223,10 @@ function wpsc_core_load_purchase_log_statuses() {
  */
 function wpsc_core_load_page_titles() {
 	global $wpsc_page_titles;
-	$wpsc_page_titles = wpsc_get_page_post_names();
+	$wpsc_page_titles = apply_filters( 'wpsc_page_titles', false );
+
+	if ( empty( $wpsc_page_titles ) )
+		$wpsc_page_titles = wpsc_get_page_post_names();
 }
 
 /***
@@ -212,7 +271,7 @@ function wpsc_core_load_gateways() {
  * the shipping directory for modules.
  */
 function wpsc_core_load_shipping_modules() {
-	global $wpsc_shipping_modules;
+	global $wpsc_shipping_modules, $wpsc_cart;
 
 	$shipping_directory     = WPSC_FILE_PATH . '/wpsc-shipping';
 	$nzshpcrt_shipping_list = wpsc_list_dir( $shipping_directory );
@@ -224,6 +283,9 @@ function wpsc_core_load_shipping_modules() {
 	}
 
 	$wpsc_shipping_modules = apply_filters( 'wpsc_shipping_modules', $wpsc_shipping_modules );
+
+	if ( ! get_option( 'do_not_use_shipping' ) && empty( $wpsc_cart->selected_shipping_method ) )
+		$wpsc_cart->get_shipping_method();
 }
 
 /**
@@ -270,112 +332,130 @@ add_action( 'rdf_item', 'wpsc_add_product_price_to_rss' );
  */
 function wpsc_register_post_types() {
 	global $wpsc_page_titles;
-        $labels = array(
-            'name' => _x( 'Products', 'post type name', 'wpsc' ),
-            'singular_name' => _x( 'Product', 'post type singular name', 'wpsc' ),
-            'add_new' => _x( 'Add New', 'admin menu: add new product', 'wpsc' ),
-            'add_new_item' => __('Add New Product', 'wpsc' ),
-            'edit_item' => __('Edit Product', 'wpsc' ),
-            'new_item' => __('New Product', 'wpsc' ),
-            'view_item' => __('View Product', 'wpsc' ),
-            'search_items' => __('Search Products', 'wpsc' ),
-            'not_found' =>  __('No products found', 'wpsc' ),
-            'not_found_in_trash' => __( 'No products found in Trash', 'wpsc' ),
-            'parent_item_colon' => '',
-            'menu_name' => __( 'Products', 'wpsc' )
-          );
+
 	// Products
-	register_post_type( 'wpsc-product', array(
-		'capability_type' => 'post',
-		'hierarchical' => true,
-		'exclude_from_search' => false,
-		'public' => true,
-		'show_ui' => true,
-		'show_in_nav_menus' => true,
-                'menu_icon' => WPSC_CORE_IMAGES_URL . "/credit_cards.png",
-		'labels' => $labels,
-		'query_var' => true,
+    $labels = array(
+		'name'               => _x( 'Products'                  , 'post type name'             , 'wpsc' ),
+		'singular_name'      => _x( 'Product'                   , 'post type singular name'    , 'wpsc' ),
+		'add_new'            => _x( 'Add New'                   , 'admin menu: add new product', 'wpsc' ),
+		'add_new_item'       => __( 'Add New Product'           , 'wpsc' ),
+		'edit_item'          => __( 'Edit Product'              , 'wpsc' ),
+		'new_item'           => __( 'New Product'               , 'wpsc' ),
+		'view_item'          => __( 'View Product'              , 'wpsc' ),
+		'search_items'       => __( 'Search Products'           , 'wpsc' ),
+		'not_found'          => __( 'No products found'         , 'wpsc' ),
+		'not_found_in_trash' => __( 'No products found in Trash', 'wpsc' ),
+		'menu_name'          => __( 'Products'                  , 'wpsc' ),
+		'parent_item_colon'  => '',
+      );
+    $args = array(
+		'capability_type'      => 'post',
+		'supports'             => array( 'title', 'editor', 'thumbnail' ),
+		'hierarchical'         => true,
+		'exclude_from_search'  => false,
+		'public'               => true,
+		'show_ui'              => true,
+		'show_in_nav_menus'    => true,
+		'menu_icon'            => WPSC_CORE_IMAGES_URL . "/credit_cards.png",
+		'labels'               => $labels,
+		'query_var'            => true,
 		'register_meta_box_cb' => 'wpsc_meta_boxes',
-		'rewrite' => array(
-			'slug' => $wpsc_page_titles['products'] . '/%wpsc_product_category%',
+		'rewrite'              => array(
+			'slug'       => str_replace( basename( home_url() ), '', $wpsc_page_titles['products'] ) . '/%wpsc_product_category%',
 			'with_front' => false
 		)
-	) );
+	);
+	$args = apply_filters( 'wpsc_register_post_types_products_args', $args );
+	register_post_type( 'wpsc-product', $args );
 
 	// Purchasable product files
-	register_post_type( 'wpsc-product-file', array(
-		'capability_type' => 'post',
-		'hierarchical' => false,
+	$args = array(
+		'capability_type'     => 'post',
+		'map_meta_cap'        => true,
+		'hierarchical'        => false,
 		'exclude_from_search' => true,
-		'rewrite' => false
-	) );
+		'rewrite'             => false,
+		'labels'              => array(
+			'name'          => __( 'Product Files', 'wpsc' ),
+			'singular_name' => __( 'Product File' , 'wpsc' ),
+		),
+	);
+	$args = apply_filters( 'wpsc_register_post_types_product_files_args', $args );
+	register_post_type( 'wpsc-product-file', $args );
 
 	// Product tags
-	$labels = array( 'name' => _x( 'Product Tags', 'taxonomy general name', 'wpsc' ),
-		'singular_name' => _x( 'Product Tag', 'taxonomy singular name', 'wpsc' ),
-		'search_items' => __( 'Product Search Tags', 'wpsc' ),
-		'all_items' => __( 'All Product Tags' , 'wpsc'),
-		'edit_item' => __( 'Edit Tag', 'wpsc' ),
-		'update_item' => __( 'Update Tag', 'wpsc' ),
-		'add_new_item' => __( 'Add new Product Tag', 'wpsc' ),
-		'new_item_name' => __( 'New Product Tag Name', 'wpsc' ) );
+	$labels = array(
+		'name'          => _x( 'Product Tags'        , 'taxonomy general name' , 'wpsc' ),
+		'singular_name' => _x( 'Product Tag'         , 'taxonomy singular name', 'wpsc' ),
+		'search_items'  => __( 'Product Search Tags' , 'wpsc' ),
+		'all_items'     => __( 'All Product Tags'    , 'wpsc' ),
+		'edit_item'     => __( 'Edit Tag'            , 'wpsc' ),
+		'update_item'   => __( 'Update Tag'          , 'wpsc' ),
+		'add_new_item'  => __( 'Add new Product Tag' , 'wpsc' ),
+		'new_item_name' => __( 'New Product Tag Name', 'wpsc' ),
+	);
 
-	register_taxonomy( 'product_tag', 'wpsc-product', array(
+	$args = array(
 		'hierarchical' => false,
 		'labels' => $labels,
 		'rewrite' => array(
 			'slug' => '/' . sanitize_title_with_dashes( _x( 'tagged', 'slug, part of url', 'wpsc' ) ),
 			'with_front' => false )
-	) );
+	);
+	$args = apply_filters( 'wpsc_register_taxonomies_product_tag_args', $args );
+	register_taxonomy( 'product_tag', 'wpsc-product', $args );
 
 	// Product categories, is heirarchical and can use permalinks
 	$labels = array(
-		'name' => _x( 'Product Categories', 'taxonomy general name', 'wpsc' ),
-		'singular_name' => _x( 'Product Category', 'taxonomy singular name', 'wpsc' ),
-		'search_items' => __( 'Search Product Categories', 'wpsc' ),
-		'all_items' => __( 'All Product Categories', 'wpsc' ),
-		'parent_item' => __( 'Parent Product Category', 'wpsc' ),
-		'parent_item_colon' => __( 'Parent Product Category:', 'wpsc' ),
-		'edit_item' => __( 'Edit Product Category', 'wpsc' ),
-		'update_item' => __( 'Update Product Category', 'wpsc' ),
-		'add_new_item' => __( 'Add New Product Category', 'wpsc' ),
-		'new_item_name' => __( 'New Product Category Name', 'wpsc' ),
-		'menu_name' => _x( 'Categories', 'taxonomy general name', 'wpsc' )
+		'name'              => _x( 'Product Categories'       , 'taxonomy general name' , 'wpsc' ),
+		'singular_name'     => _x( 'Product Category'         , 'taxonomy singular name', 'wpsc' ),
+		'search_items'      => __( 'Search Product Categories', 'wpsc' ),
+		'all_items'         => __( 'All Product Categories'   , 'wpsc' ),
+		'parent_item'       => __( 'Parent Product Category'  , 'wpsc' ),
+		'parent_item_colon' => __( 'Parent Product Category:' , 'wpsc' ),
+		'edit_item'         => __( 'Edit Product Category'    , 'wpsc' ),
+		'update_item'       => __( 'Update Product Category'  , 'wpsc' ),
+		'add_new_item'      => __( 'Add New Product Category' , 'wpsc' ),
+		'new_item_name'     => __( 'New Product Category Name', 'wpsc' ),
+		'menu_name'         => _x( 'Categories'               , 'taxonomy general name', 'wpsc' ),
 	);
-
-	register_taxonomy( 'wpsc_product_category', 'wpsc-product', array(
+	$args = array(
+		'labels'       => $labels,
 		'hierarchical' => true,
-		'rewrite' => array(
-			'slug' => $wpsc_page_titles['products'],
-			'with_front' => false,
+		'rewrite'      => array(
+			'slug'         => str_replace( basename( home_url() ), '', $wpsc_page_titles['products'] ),
+			'with_front'   => false,
 			'hierarchical' => (bool) get_option( 'product_category_hierarchical_url', 0 ),
 		),
-		'labels' => $labels,
-	) );
-	$labels = array(
-		'name' => _x( 'Variations', 'taxonomy general name', 'wpsc' ),
-		'singular_name' => _x( 'Variation', 'taxonomy singular name', 'wpsc' ),
-		'search_items' => __( 'Search Variations', 'wpsc' ),
-		'all_items' => __( 'All Variations', 'wpsc' ),
-		'parent_item' => __( 'Parent Variation', 'wpsc' ),
-		'parent_item_colon' => __( 'Parent Variations:', 'wpsc' ),
-		'edit_item' => __( 'Edit Variation', 'wpsc' ),
-		'update_item' => __( 'Update Variation', 'wpsc' ),
-		'add_new_item' => __( 'Add New Variation/Set', 'wpsc' ),
-		'new_item_name' => __( 'New Variation Name', 'wpsc' ),
 	);
+	$args = apply_filters( 'wpsc_register_taxonomies_product_category_args', $args );
 
-	// Product Variations, is internally heirarchical, externally, two separate types of items, one containing the other
-	register_taxonomy( 'wpsc-variation', 'wpsc-product', array(
+	register_taxonomy( 'wpsc_product_category', 'wpsc-product', $args );
+	$labels = array(
+		'name'              => _x( 'Variations'        , 'taxonomy general name' , 'wpsc' ),
+		'singular_name'     => _x( 'Variation'         , 'taxonomy singular name', 'wpsc' ),
+		'search_items'      => __( 'Search Variations' , 'wpsc' ),
+		'all_items'         => __( 'All Variations'    , 'wpsc' ),
+		'parent_item'       => __( 'Parent Variation'  , 'wpsc' ),
+		'parent_item_colon' => __( 'Parent Variations:', 'wpsc' ),
+		'edit_item'         => __( 'Edit Variation'    , 'wpsc' ),
+		'update_item'       => __( 'Update Variation'  , 'wpsc' ),
+		'add_new_item'      => __( 'Add New Variation' , 'wpsc' ),
+		'new_item_name'     => __( 'New Variation Name', 'wpsc' ),
+	);
+	$args = array(
 		'hierarchical' => true,
-		'query_var' => 'variations',
-		'rewrite' => false,
-		'public' => true,
-		'labels' => $labels
-	) );
-	$role = get_role( 'administrator' );
-	$role->add_cap( 'read_wpsc-product' );
-	$role->add_cap( 'read_wpsc-product-file' );
+		'query_var'    => 'variations',
+		'rewrite'      => false,
+		'public'       => true,
+		'labels'       => $labels
+	);
+	$args = apply_filters( 'wpsc_register_taxonomies_product_variation_args', $args );
+	// Product Variations, is internally heirarchical, externally, two separate types of items, one containing the other
+	register_taxonomy( 'wpsc-variation', 'wpsc-product', $args );
+
+	do_action( 'wpsc_register_post_types_after' );
+	do_action( 'wpsc_register_taxonomies_after' );
 }
 add_action( 'init', 'wpsc_register_post_types', 8 );
 
@@ -434,7 +514,8 @@ function wpsc_filter_request( $q ) {
 
 	if ( ! empty( $posts ) ) {
 		$q['wpsc-product'] = $q['name'] = $end_node;
-		$q['wpsc_product_category'] = $parent_node;
+		if ( !empty( $parent_node ) )
+			$q['wpsc_product_category'] = $parent_node;
 	} else {
 		$q['wpsc_product_category'] = $end_node;
 		unset( $q['name'] );
@@ -453,39 +534,119 @@ if ( get_option( 'product_category_hierarchical_url' ) )
 function wpsc_serialize_shopping_cart() {
 	global $wpdb, $wpsc_start_time, $wpsc_cart;
 
+	// avoid flooding transients with bots hitting feeds
+	if ( is_feed() ) {
+		wpsc_delete_all_customer_meta();
+		return;
+	}
+
 	if ( is_object( $wpsc_cart ) )
 		$wpsc_cart->errors = array( );
 
-	$_SESSION['wpsc_cart'] = serialize( $wpsc_cart );
+	// need to prevent set_cookie from being called at this stage in case the user just logged out
+	// because by now, some output must have been printed out
+	$customer_id = wpsc_get_current_customer_id();
+	if ( $customer_id )
+		wpsc_update_customer_meta( 'cart', serialize( $wpsc_cart ) );
 
 	return true;
 }
 add_action( 'shutdown', 'wpsc_serialize_shopping_cart' );
 
-add_filter( 'query_string', 'wpsc_filter_query_string' );
+add_filter( 'request', 'wpsc_filter_query_request' );
 
 /**
- * Fixes for some inconsistencies about $wp_query when viewing WPEC pages
+ * Fixes for some inconsistencies about $wp_query when viewing WPEC pages.
+ *
+ * Causes the following URLs to work (with pagination enabled):
+ *
+ * /products-page/ (product listing)
+ * /products-page/car-audio/ (existing product category)
+ * /products-page/car-audio/page/2/ (existing product category, page 2)
+ * /products-page/page/2/  (product listing, page 2)
+ * /products-page/checkout/  (existing built-in sub page)
+ * /products-page/anotherpage/  (another sub page that may exist)
  *
  * @param string $q Query String
  */
-function wpsc_filter_query_string( $q ) {
+function wpsc_filter_query_request( $args ) {
 	global $wpsc_page_titles;
-	parse_str( $q, $args );
+	if ( is_admin() )
+		return $args;
 
-	// Make sure no 404 error is thrown for products-page's sub pages
-	if ( ! empty( $args['wpsc_product_category'] ) && in_array( $args['wpsc_product_category'], $wpsc_page_titles ) ) {
-		$q = "pagename={$wpsc_page_titles['products']}/{$args['wpsc_product_category']}";
+	$is_sub_page =    ! empty( $args['wpsc_product_category'] )
+	               &&   'page' != $args['wpsc_product_category']
+	               && ! term_exists( $args['wpsc_product_category'], 'wpsc_product_category' );
+
+	// Make sure no 404 error is thrown for any sub pages of products-page
+	if ( $is_sub_page ) {
+		// Probably requesting a page that is a sub page of products page
+		$pagename = "{$wpsc_page_titles['products']}/{$args['wpsc_product_category']}";
+		if ( isset($args['name']) ) {
+			$pagename .= "/{$args['name']}";
+		}
+		$args = array();
+		$args['pagename'] = $pagename;
 	}
 
 	// When product page is set to display all products or a category, and pagination is enabled, $wp_query is messed up
 	// and is_home() is true. This fixes that.
-	if ( ! is_admin() && isset( $args['post_type'] ) && $args['post_type'] == 'wpsc-product' && ! empty( $args['paged'] ) && empty( $args['wpsc_product_category'] ) ) {
+	$needs_pagination_fix =      isset( $args['post_type'] )
+	                        && ! empty( $args['wpsc_product_category'] )
+	                        &&   'wpsc-product' == $args['post_type']
+	                        && ! empty( $args['wpsc-product'] )
+	                        &&   'page' == $args['wpsc_product_category'];
+	if ( $needs_pagination_fix ) {
 		$default_category = get_option( 'wpsc_default_category' );
-		if ( $default_category == 'all' || $default_category != 'list' )
-			$q = "pagename={$wpsc_page_titles['products']}&page={$args['paged']}";
+		if ( $default_category == 'all' || $default_category != 'list' ) {
+			$page = $args['wpsc-product'];
+			$args = array();
+			$args['pagename'] = "{$wpsc_page_titles['products']}";
+			$args['page'] = $page;
+		}
 	}
-	return $q;
+	return $args;
+}
+
+function _wpsc_menu_exists( $args ) {
+	$args = (object) $args;
+	// Get the nav menu based on the requested menu
+	$menu = wp_get_nav_menu_object( $args->menu );
+
+	// Get the nav menu based on the theme_location
+	if ( ! $menu && $args->theme_location && ( $locations = get_nav_menu_locations() ) && isset( $locations[ $args->theme_location ] ) )
+		$menu = wp_get_nav_menu_object( $locations[ $args->theme_location ] );
+
+	// get the first menu that has items if we still can't find a menu
+	if ( ! $menu && ! $args->theme_location ) {
+		$menus = wp_get_nav_menus();
+		foreach ( $menus as $menu_maybe ) {
+			if ( $menu_items = wp_get_nav_menu_items( $menu_maybe->term_id ) ) {
+				$menu = $menu_maybe;
+				break;
+			}
+		}
+	}
+
+	// If the menu exists, get its items.
+	if ( $menu && ! is_wp_error( $menu ) && ! isset( $menu_items ) )
+		$menu_items = wp_get_nav_menu_items( $menu->term_id );
+
+	// If no menu was found or if the menu has no items and no location was requested, call the fallback_cb if it exists
+	if ( ( ! $menu || is_wp_error( $menu ) || ( isset( $menu_items ) && empty( $menu_items ) && ! $args->theme_location ) ) )
+		return false;
+
+	// If no fallback function was specified and the menu doesn't exists, bail.
+	if ( ! $menu || is_wp_error( $menu ) || empty( $menu_items ) )
+		return false;
+
+	return (bool) $menu;
+}
+
+function _wpsc_switch_the_query( $stuff = '' ) {
+	global $wp_query, $wpsc_query;
+	list( $wp_query, $wpsc_query ) = array( $wpsc_query, $wp_query );
+	return $stuff;
 }
 
 /**
@@ -502,29 +663,57 @@ function wpsc_filter_query_string( $q ) {
  * @param mixed $stuff
  * @return mixed
  */
-function wpsc_switch_the_query( $stuff ) {
+function wpsc_switch_the_query( $args ) {
 	global $wp_query, $wpsc_query;
 	$qv = $wpsc_query->query_vars;
-	if ( ! empty( $qv['wpsc_product_category'] ) && ! empty( $qv['taxonomy'] ) && ! empty( $qv['term'] ) && ! is_single() )
-		list( $wp_query, $wpsc_query ) = array( $wpsc_query, $wp_query );
-	return $stuff;
+	if ( ! empty( $qv['wpsc_product_category'] ) && ! empty( $qv['taxonomy'] ) && ! empty( $qv['term'] ) && ! is_single() && _wpsc_menu_exists( $args ) ) {
+		_wpsc_switch_the_query();
+		add_filter( 'wp_nav_menu', '_wpsc_switch_the_query', 99 );
+	}
+	return $args;
 }
 
 // switch $wp_query and $wpsc_query at the beginning and the end of wp_nav_menu()
-add_filter( 'wp_nav_menu_args', 'wpsc_switch_the_query' );
-add_filter( 'wp_nav_menu', 'wpsc_switch_the_query' );
+add_filter( 'wp_nav_menu_args', 'wpsc_switch_the_query', 99 );
+
+function _wpsc_pre_get_posts_reset_taxonomy_globals( $query ) {
+	global $wp_the_query;
+
+	if ( is_admin() || $query !== $wp_the_query )
+		return;
+
+	if ( ! $query->get( 'page' ) && ! $query->get( 'paged' ) )
+		return;
+
+	if ( ! get_option( 'use_pagination' ) )
+		return;
+
+	if ( ! is_page( wpsc_get_the_post_id_by_shortcode( '[productspage]' ) ) && ! $query->get( 'wpsc_product_category' ) )
+		return;
+
+	$query->set( 'posts_per_page', get_option( 'wpsc_products_per_page' ) );
+
+	$post_type_object = get_post_type_object( 'wpsc-product' );
+
+	if ( current_user_can( $post_type_object->cap->edit_posts ) )
+		$query->set( 'post_status', 'private,draft,pending,publish' );
+	else
+		$query->set( 'post_status', 'publish' );
+}
+add_action( 'pre_get_posts', '_wpsc_pre_get_posts_reset_taxonomy_globals', 1 );
 
 /**
  * wpsc_start_the_query
  */
 function wpsc_start_the_query() {
 	global $wpsc_page_titles, $wp_query, $wpsc_query, $wpsc_query_vars;
+
 	$is_404 = false;
 	if ( null == $wpsc_query ) {
 		if( ( $wp_query->is_404 && !empty($wp_query->query_vars['paged']) ) || (isset( $wp_query->query['pagename']) && strpos( $wp_query->query['pagename'] , $wpsc_page_titles['products'] ) !== false ) && !isset($wp_query->post)){
 			global $post;
 			$is_404 = true;
-			if( !isset( $wp_query->query_vars['wpsc_product_category'] ) )
+			if( !isset( $wp_query->query_vars['wpsc_product_category'] ) && ! isset( $wp_query->query_vars['product_tag'] ) )
 				$wp_query = new WP_Query('post_type=wpsc-product&name='.$wp_query->query_vars['name']);
 
 			if(isset($wp_query->post->ID))
@@ -533,10 +722,11 @@ function wpsc_start_the_query() {
 				$wpsc_query_vars['wpsc_product_category'] = $wp_query->query_vars['name'];
 		}
 		if ( count( $wpsc_query_vars ) <= 1 ) {
+			$post_type_object = get_post_type_object( 'wpsc-product' );
 			$wpsc_query_vars = array(
-				'post_status' => 'publish, locked, private',
+				'post_status' => apply_filters( 'wpsc_product_display_status', array( 'publish' ) ),
 				'post_parent' => 0,
-				'order'       => apply_filters('wpsc_product_order','ASC')
+				'order'       => apply_filters( 'wpsc_product_order', get_option( 'wpsc_product_order', 'ASC' ) )
 			);
 			if($wp_query->query_vars['preview'])
 				$wpsc_query_vars['post_status'] = 'any';
@@ -548,20 +738,19 @@ function wpsc_start_the_query() {
 				$wpsc_query_vars['product_tag'] = $wp_query->query_vars['product_tag'];
 				$wpsc_query_vars['taxonomy'] = get_query_var( 'taxonomy' );
 				$wpsc_query_vars['term'] = get_query_var( 'term' );
-
-
 			}elseif( isset($wp_query->query_vars['wpsc_product_category']) ){
 				$wpsc_query_vars['wpsc_product_category'] = $wp_query->query_vars['wpsc_product_category'];
 				$wpsc_query_vars['taxonomy'] = get_query_var( 'taxonomy' );
 				$wpsc_query_vars['term'] = get_query_var( 'term' );
 			}else{
 				$wpsc_query_vars['post_type'] = 'wpsc-product';
-				$wpsc_query_vars['pagename'] = 'products-page';
+				$wpsc_query_vars['pagename']  = wpsc_get_page_slug( '[productspage]' );
 			}
 			if(1 == get_option('use_pagination')){
 				$wpsc_query_vars['nopaging'] = false;
 
 				$wpsc_query_vars['posts_per_page'] = get_option('wpsc_products_per_page');
+
 				$wpsc_query_vars['paged'] = get_query_var('paged');
 				if(isset($wpsc_query_vars['paged']) && empty($wpsc_query_vars['paged'])){
 					$wpsc_query_vars['paged'] = get_query_var('page');
@@ -569,32 +758,9 @@ function wpsc_start_the_query() {
 				}
 
 			}
-			$orderby = get_option( 'wpsc_sort_by' );
-			if( isset( $_GET['product_order'] ) )
-				$orderby = 'title';
 
-			switch ( $orderby ) {
-
-				case "dragndrop":
-					$wpsc_query_vars["orderby"] = 'menu_order';
-					break;
-
-				case "name":
-					$wpsc_query_vars["orderby"] = 'title';
-					break;
-
-				//This only works in WP 3.0.
-				case "price":
-					add_filter( 'posts_join', 'wpsc_add_meta_table' );
-					add_filter( 'posts_where', 'wpsc_add_meta_table_where' );
-					$wpsc_query_vars["meta_key"] = '_wpsc_price';
-					$wpsc_query_vars["orderby"] = 'meta_value_num';
-					break;
-
-				case "id":
-					$wpsc_query_vars["orderby"] = 'ID';
-					break;
-			}
+			$orderby = ( isset( $_GET['product_order'] ) ) ? 'title' : null;
+			$wpsc_query_vars = array_merge( $wpsc_query_vars, wpsc_product_sort_order_query_vars($orderby) );
 
 			add_filter( 'pre_get_posts', 'wpsc_generate_product_query', 11 );
 
@@ -612,7 +778,6 @@ function wpsc_start_the_query() {
 				}
 				$wpsc_query = new WP_Query( $wpsc_query_vars );
 
-
 			}
 		}
 	}
@@ -623,7 +788,7 @@ function wpsc_start_the_query() {
 		$wp_query = new WP_Query($args);
 
 		if( empty( $wp_query->posts ) ){
-			$product_page_id = wpec_get_the_post_id_by_shortcode('[productspage]');
+			$product_page_id = wpsc_get_the_post_id_by_shortcode('[productspage]');
 			$wp_query = new WP_Query( 'page_id='.$product_page_id);
 		}
 	}
@@ -636,6 +801,49 @@ function wpsc_start_the_query() {
 		$_SESSION['wpsc_has_been_to_checkout'] = true;
 }
 add_action( 'template_redirect', 'wpsc_start_the_query', 8 );
+
+/**
+ * Obtain the necessary product sort order query variables based on the specified product sort order.
+ * If no sort order is specified, the sort order configured in Dashboard -> Settings -> Store -> Presentation -> 'Sort Product By' is used.
+ *
+ * @param string $orderby optional product sort order
+ * @return array Array of query variables
+ */
+function wpsc_product_sort_order_query_vars( $orderby = null ) {
+	if ( is_null($orderby) )
+		$orderby = get_option( 'wpsc_sort_by' );
+
+	$query_vars = array();
+
+	switch ( $orderby ) {
+
+		case "dragndrop":
+			$query_vars["orderby"] = 'menu_order';
+			break;
+
+		case "name":
+			$query_vars["orderby"] = 'title';
+			break;
+
+		//This only works in WP 3.0.
+		case "price":
+			add_filter( 'posts_join', 'wpsc_add_meta_table' );
+			add_filter( 'posts_where', 'wpsc_add_meta_table_where' );
+			$query_vars["meta_key"] = '_wpsc_price';
+			$query_vars["orderby"] = 'meta_value_num';
+			break;
+
+		case "id":
+			$query_vars["orderby"] = 'ID';
+			break;
+		default:
+			// Allow other WordPress 'ordery' values as defined in http://codex.wordpress.org/Class_Reference/WP_Query#Order_.26_Orderby_Parameters
+			$query_vars["orderby"] = $orderby;
+			break;
+	}
+	return $query_vars;
+}
+
 
 /**
  * add meta table where section for ordering by price
@@ -696,7 +904,6 @@ function wpsc_taxonomy_rewrite_rules( $rewrite_rules ) {
 	$new_rewrite_rules[$products_page . '/(.+?)/([^/]+)/comment-page-([0-9]{1,})/?$'] = 'index.php?post_type=wpsc-product&products=$matches[1]&wpsc_item=$matches[2]&cpage=$matches[3]';
 	$new_rewrite_rules[$products_page . '/(.+?)/([^/]+)?$'] = 'index.php?post_type=wpsc-product&products=$matches[1]&wpsc_item=$matches[2]';
 
-
 	$last_target_rule = array_pop( $target_rule_set );
 
 	$rebuilt_rewrite_rules = array( );
@@ -707,6 +914,28 @@ function wpsc_taxonomy_rewrite_rules( $rewrite_rules ) {
 		$rebuilt_rewrite_rules[$rewrite_key] = $rewrite_query;
 	}
 
+	// fix pagination issue with product category hirarchical URL
+	if ( get_option( 'product_category_hierarchical_url', false ) ) {
+		$rule = $rebuilt_rewrite_rules[$products_page . '/(.+?)/page/?([0-9]{1,})/?$'];
+		unset( $rebuilt_rewrite_rules[$products_page . '/(.+?)/page/?([0-9]{1,})/?$'] );
+		$rebuilt_rewrite_rules = array_merge(
+			array(
+				'(' . $products_page . ')/page/([0-9]+)/?' => 'index.php?pagename=$matches[1]&page=$matches[2]',
+				$products_page . '/(.+?)(/.+?)?/page/?([0-9]{1,})/?$' => 'index.php?wpsc_product_category=$matches[1]&wpsc-product=$matches[2]&page=$matches[3]',
+			),
+			$rebuilt_rewrite_rules
+		);
+	}
+
+	// fix pagination in WordPress 3.4
+	if ( version_compare( get_bloginfo( 'version' ), '3.4', '>=' ) ) {
+		$rebuilt_rewrite_rules = array_merge(
+			array(
+				'(' . $products_page . ')/([0-9]+)/?$' => 'index.php?pagename=$matches[1]&page=$matches[2]',
+			),
+			$rebuilt_rewrite_rules
+		);
+	}
 	return $rebuilt_rewrite_rules;
 }
 
@@ -798,7 +1027,7 @@ function wpsc_split_the_query( $query ) {
  */
 function wpsc_generate_product_query( $query ) {
 	global $wp_query;
-	$prod_page = wpec_get_the_post_id_by_shortcode('[productspage]');
+	$prod_page = wpsc_get_the_post_id_by_shortcode('[productspage]');
 	$prod_page = get_post($prod_page);
 	remove_filter( 'pre_get_posts', 'wpsc_generate_product_query', 11 );
 	$query->query_vars['taxonomy'] = null;
@@ -877,13 +1106,16 @@ function wpsc_generate_product_query( $query ) {
 	if(1 == get_option('use_pagination')){
 		$query->query_vars['posts_per_page'] = get_option('wpsc_products_per_page');
 		if( isset( $_GET['items_per_page'] ) ) {
-			if ( is_numeric( $_GET['items_per_page'] ) )
+			if ( is_numeric( $_GET['items_per_page'] ) ) {
 				$query->query_vars['posts_per_page'] = (int) $_GET['items_per_page'];
-			elseif ( $_GET['items_per_page'] == 'all' )
+			} elseif ( $_GET['items_per_page'] == 'all' ) {
 				$query->query_vars['posts_per_page'] = -1;
+				$query->query_vars['nopaging'] = 1;
+			}
 		}
 	} else {
-		$query->query_vars['posts_per_page'] = '-1';
+		$query->query_vars['posts_per_page'] = -1;
+		$query->query_vars['nopaging'] = 1;
 	}
 	if ( $query->is_tax == true )
 		new wpsc_products_by_category( $query );
@@ -948,8 +1180,11 @@ class wpsc_products_by_category {
 				$in_cats = "'" . implode( "', '", $in_cats ) . "'";
 				$whichcat .= "AND $wpdb->term_taxonomy.term_id IN ($in_cats)";
 			}
-			$whichcat .= " AND $wpdb->posts.post_status IN ('publish', 'locked', 'private') ";
 
+			$post_type_object = get_post_type_object( 'wpsc-product' );
+			$permitted_post_statuses = "'" . implode( "', '", $query->query_vars['post_status'] ) . "'";
+
+			$whichcat .= " AND $wpdb->posts.post_status IN ($permitted_post_statuses) ";
 			$groupby = "{$wpdb->posts}.ID";
 
 			$this->sql_components['join']     = $join;
@@ -1081,8 +1316,7 @@ function wpsc_is_checkout() {
  * @return void
  */
 function wpsc_product_link( $permalink, $post, $leavename ) {
-	global $wp_query, $wpsc_page_titles;
-	$term_url = '';
+	global $wp_query, $wpsc_page_titles, $wpsc_query, $wp_current_filter;
 	$rewritecode = array(
 		'%wpsc_product_category%',
 		$leavename ? '' : '%postname%',
@@ -1102,13 +1336,13 @@ function wpsc_product_link( $permalink, $post, $leavename ) {
 		return $permalink;
 
 	$permalink_structure = get_option( 'permalink_structure' );
-	// This may become customiseable later
 
-	$our_permalink_structure = $wpsc_page_titles['products'] . "/%wpsc_product_category%/%postname%/";
+	// This may become customiseable later
+	$our_permalink_structure = str_replace( basename( home_url() ), '', $wpsc_page_titles['products'] ) . "/%wpsc_product_category%/%postname%/";
 	// Mostly the same conditions used for posts, but restricted to items with a post type of "wpsc-product "
 
 	if ( '' != $permalink_structure && !in_array( $post->post_status, array( 'draft', 'pending' ) ) ) {
-		$product_categories = wp_get_object_terms( $post_id, 'wpsc_product_category' );
+		$product_categories = wpsc_get_product_terms( $post_id, 'wpsc_product_category' );
 		$product_category_slugs = array( );
 		foreach ( $product_categories as $product_category ) {
 			$product_category_slugs[] = $product_category->slug;
@@ -1120,15 +1354,16 @@ function wpsc_product_link( $permalink, $post, $leavename ) {
 			if ( (isset( $wp_query->query_vars['products'] ) && $wp_query->query_vars['products'] != null) && in_array( $wp_query->query_vars['products'], $product_category_slugs ) ) {
 				$product_category = $wp_query->query_vars['products'];
 			} else {
-				if ( ( $current_cat = get_query_var( 'wpsc_product_category' ) ) && in_array( $current_cat, $product_category_slugs ) )
-					$link = $current_cat;
-				else
-					$link = $product_categories[0]->slug;
+				$link = $product_categories[0]->slug;
+				if ( ! in_array( 'wp_head', $wp_current_filter) && isset( $wpsc_query->query_vars['wpsc_product_category'] ) ) {
+					$current_cat = $wpsc_query->query_vars['wpsc_product_category'];
+					if ( in_array( $current_cat, $product_category_slugs ) )
+						$link = $current_cat;
+				}
 
 				$product_category = $link;
 			}
 			$category_slug = $product_category;
-			$term_url = get_term_link( $category_slug, 'wpsc_product_category' );
 		} else {
 			// If the product is associated with only one category, we only have one choice
 			if ( !isset( $product_categories[0] ) )
@@ -1143,8 +1378,6 @@ function wpsc_product_link( $permalink, $post, $leavename ) {
 				$product_category->slug = null;
 
 			$category_slug = $product_category->slug;
-
-			$term_url = get_term_link( $category_slug, 'wpsc_product_category' );
 		}
 
 		$post_name = $post->post_name;
@@ -1161,7 +1394,10 @@ function wpsc_product_link( $permalink, $post, $leavename ) {
 			}
 		}
 
-		if(isset($category_slug) && empty($category_slug)) $category_slug = 'product';
+		if( isset( $category_slug ) && empty( $category_slug ) )
+			$category_slug = 'product';
+
+		$category_slug = apply_filters( 'wpsc_product_permalink_cat_slug', $category_slug, $post_id );
 
 		$rewritereplace = array(
 			$category_slug,
@@ -1170,6 +1406,7 @@ function wpsc_product_link( $permalink, $post, $leavename ) {
 
 		$permalink = str_replace( $rewritecode, $rewritereplace, $our_permalink_structure );
 		$permalink = user_trailingslashit( $permalink, 'single' );
+
 		$permalink = home_url( $permalink );
 	}
 	return apply_filters( 'wpsc_product_permalink', $permalink, $post->ID );
@@ -1216,18 +1453,17 @@ function wpsc_checkout_template_fallback() {
 
 /**
  * wpsc_get_page_post_names function.
- * Seems that using just one SQL query and then processing the results is probably going to be around as efficient as just doing three separate queries
- * But using three queries is a hell of a lot simpler to write and easier to read.
+ *
  * @since 3.8
  * @access public
  * @return void
  */
 function wpsc_get_page_post_names() {
-	global $wpdb;
-	$wpsc_page['products']            = $wpdb->get_var( "SELECT post_name FROM `" . $wpdb->posts . "` WHERE `post_content` LIKE '%[productspage]%'  AND `post_type` = 'page' LIMIT 1" );
-	$wpsc_page['checkout']            = $wpdb->get_var( "SELECT post_name FROM `" . $wpdb->posts . "` WHERE `post_content` LIKE '%[shoppingcart]%'  AND `post_type` = 'page' LIMIT 1" );
-	$wpsc_page['transaction_results'] = $wpdb->get_var( "SELECT post_name FROM `" . $wpdb->posts . "` WHERE `post_content` LIKE '%[transactionresults]%'  AND `post_type` = 'page' LIMIT 1" );
-	$wpsc_page['userlog']             = $wpdb->get_var( "SELECT post_name FROM `" . $wpdb->posts . "` WHERE `post_content` LIKE '%[userlog]%'  AND `post_type` = 'page' LIMIT 1" );
+	$wpsc_page['products']            = basename( get_option( 'product_list_url' ) );
+	$wpsc_page['checkout']            = basename( get_option( 'checkout_url' ) );
+	$wpsc_page['transaction_results'] = basename( get_option( 'transact_url' ) );
+	$wpsc_page['userlog']             = basename( get_option( 'user_account_url' ) );
+
 	return $wpsc_page;
 }
 
@@ -1269,13 +1505,16 @@ add_action( 'wp', 'wpsc_select_theme_functions', 10, 1 );
  */
 function wpsc_force_ssl() {
 	global $wp_query;
-	if ( get_option( 'wpsc_force_ssl' ) && !is_ssl() && strpos( $wp_query->post->post_content, '[shoppingcart]' ) !== FALSE ) {
+	if ( '1' == get_option( 'wpsc_force_ssl' ) &&
+	    ! is_ssl() &&
+	    ! empty ( $wp_query->post->post_content ) &&
+	    false !== strpos( $wp_query->post->post_content, '[shoppingcart]' ) ) {
 		$sslurl = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-		header( 'Location: ' . $sslurl );
-		echo 'Redirecting';
+		wp_redirect( $sslurl );
+		exit;
 	}
 }
-add_action( 'get_header', 'wpsc_force_ssl' );
+add_action( 'wp', 'wpsc_force_ssl' );
 
 
 /**
@@ -1317,6 +1556,367 @@ function wpsc_cron() {
 			wp_schedule_event( time(), $cron, "wpsc_{$cron}_cron_task" );
 	}
 }
-
 add_action( 'init', 'wpsc_cron' );
-?>
+
+/**
+ * Checks if current page is shopping cart, and it should be SSL, but is not.
+ * Used primarily for str_replacing links or content for https
+ *
+ * @since 3.8.8.1
+ * @deprecated 3.8.8.2
+ * @return boolean true if we're on the shopping cart page and should be ssl, false if not
+ */
+function wpsc_is_ssl() {
+	global $wp_query;
+
+	return '1' == get_option( 'wpsc_force_ssl' ) && ! is_ssl() && false !== strpos( $wp_query->post->post_content, '[shoppingcart]' );
+}
+
+
+/**
+ * In case the user is not logged in, create a customer cookie with a unique
+ * ID to pair with the transient in the database.
+ *
+ * @access public
+ * @since 3.8.9
+ * @return string Customer ID
+ */
+function wpsc_create_customer_id() {
+	$expire = time() + WPSC_CUSTOMER_DATA_EXPIRATION; // valid for 48 hours
+	$secure = is_ssl();
+	$id = '_' . wp_generate_password(); // make sure the ID is a string
+	$data = $id . $expire;
+	$hash = hash_hmac( 'md5', $data, wp_hash( $data ) );
+	// store ID, expire and hash to validate later
+	$cookie = $id . '|' . $expire . '|' . $hash;
+
+	setcookie( WPSC_CUSTOMER_COOKIE, $cookie, $expire, WPSC_CUSTOMER_COOKIE_PATH, COOKIE_DOMAIN, $secure, true );
+	$_COOKIE[WPSC_CUSTOMER_COOKIE] = $cookie;
+	return $id;
+}
+
+/**
+ * Make sure the customer cookie is not compromised.
+ *
+ * @access public
+ * @since 3.8.9
+ * @return mixed Return the customer ID if the cookie is valid, false if otherwise.
+ */
+function wpsc_validate_customer_cookie() {
+	$cookie = $_COOKIE[WPSC_CUSTOMER_COOKIE];
+	list( $id, $expire, $hash ) = explode( '|', $cookie );
+	$data = $id . $expire;
+	$hmac = hash_hmac( 'md5', $data, wp_hash( $data ) );
+
+	if ( $hmac != $hash )
+		return false;
+
+	return $id;
+}
+
+/**
+ * Merge anonymous customer data (stored in transient) with an account meta data when the customer
+ * logs in.
+ *
+ * This is done to preserve customer settings and cart.
+ *
+ * @since 3.8.9
+ * @access private
+ */
+function _wpsc_merge_customer_data() {
+	$account_id = get_current_user_id();
+	$cookie_id = wpsc_validate_customer_cookie();
+
+	if ( ! $cookie_id )
+		return;
+
+	$cookie_data = get_transient( "wpsc_customer_meta_{$cookie_id}" );
+	if ( ! is_array( $cookie_data ) || empty( $cookie_data ) )
+		return;
+
+	foreach ( $cookie_data as $key => $value ) {
+		wpsc_update_customer_meta( $key, $value, $account_id );
+	}
+
+	delete_transient( "wpsc_customer_meta_{$cookie_id}" );
+	setcookie( WPSC_CUSTOMER_COOKIE, '', time() - 3600, WPSC_CUSTOMER_COOKIE_PATH, COOKIE_DOMAIN, is_ssl(), true );
+	unset( $_COOKIE[WPSC_CUSTOMER_COOKIE] );
+}
+
+/**
+ * Get current customer ID.
+ *
+ * If the user is logged in, return the user ID. Otherwise return the ID associated
+ * with the customer's cookie.
+ *
+ * If $mode is set to 'create', WPEC will create the customer ID if it hasn't
+ * already been created yet.
+ *
+ * @access public
+ * @since 3.8.9
+ * @param  string $mode Set to 'create' to create customer cookie and ID
+ * @return mixed        User ID (if logged in) or customer cookie ID
+ */
+function wpsc_get_current_customer_id( $mode = '' ) {
+	if ( is_user_logged_in() && isset( $_COOKIE[WPSC_CUSTOMER_COOKIE] ) )
+		_wpsc_merge_customer_data();
+
+	if ( is_user_logged_in() )
+		return get_current_user_id();
+	elseif ( isset( $_COOKIE[WPSC_CUSTOMER_COOKIE] ) )
+		return wpsc_validate_customer_cookie();
+	elseif ( $mode == 'create' )
+		return wpsc_create_customer_id();
+
+	return false;
+}
+
+/**
+ * Return an array containing all metadata of a customer
+ *
+ * @access public
+ * @since 3.8.9
+ * @param  mixed $id Customer ID. Default to the current user ID.
+ * @return WP_Error|array Return an array of metadata if no error occurs, WP_Error
+ *                        if otherwise.
+ */
+function wpsc_get_all_customer_meta( $id = false ) {
+	global $wpdb;
+
+	if ( ! $id )
+		$id = wpsc_get_current_customer_id();
+
+	if ( ! $id )
+		return new WP_Error( 'wpsc_customer_meta_invalid_customer_id', __( 'Invalid customer ID', 'wpsc' ), $id );
+
+	// take multisite into account
+	$blog_prefix = is_multisite() ? $wpdb->get_blog_prefix() : '';
+	if ( is_numeric( $id ) )
+		$profile = get_user_meta( $id, "_wpsc_{$blog_prefix}customer_profile", true );
+	else
+		$profile = get_transient( "wpsc_customer_meta_{$blog_prefix}{$id}" );
+
+	if ( ! is_array( $profile ) )
+		$profile = array();
+
+	return apply_filters( 'wpsc_get_all_customer_meta', $profile, $id );
+}
+
+/**
+ * Get a customer meta value.
+ *
+ * @access public
+ * @since  3.8.9
+ * @param  string  $key Meta key
+ * @param  int|string $id  Customer ID. Optional, defaults to current customer
+ * @return mixed           Meta value, or null if it doesn't exist or if the
+ *                         customer ID is invalid.
+ */
+function wpsc_get_customer_meta( $key = '', $id = false ) {
+	global $wpdb;
+
+	$profile = wpsc_get_all_customer_meta( $id );
+
+	// attempt to regenerate current customer ID if it's invalid
+	if ( is_wp_error( $profile ) && ! $id ) {
+		wpsc_create_customer_id();
+		$profile = wpsc_get_all_customer_meta();
+	}
+
+	if ( is_wp_error( $profile ) || ! array_key_exists( $key, $profile ) )
+		return null;
+
+	return $profile[$key];
+}
+
+/**
+ * Overwrite customer meta with an array of meta_key => meta_value.
+ *
+ * @access public
+ * @since  3.8.9
+ * @param  array      $profile Customer meta array
+ * @param  int|string $id      Customer ID. Optional. Defaults to current customer.
+ * @return boolean             True if meta values are updated successfully. False
+ *                             if otherwise.
+ */
+function wpsc_update_all_customer_meta( $profile, $id = false ) {
+	global $wpdb;
+
+	if ( ! $id )
+		$id = wpsc_get_current_customer_id( 'create' );
+
+	$blog_prefix = is_multisite() ? $wpdb->get_blog_prefix() : '';
+
+	if ( is_numeric( $id ) )
+		return update_user_meta( $id, "_wpsc_{$blog_prefix}customer_profile", $profile );
+	else
+		return set_transient( "wpsc_customer_meta_{$blog_prefix}{$id}", $profile, WPSC_CUSTOMER_DATA_EXPIRATION );
+}
+
+/**
+ * Update a customer meta.
+ *
+ * @access public
+ * @since  3.8.9
+ * @param  string     $key   Meta key
+ * @param  mixed      $value Meta value
+ * @param  string|int $id    Customer ID. Optional. Defaults to current customer.
+ * @return boolean|WP_Error  True if successful, false if not successful, WP_Error
+ *                           if there are any errors.
+ */
+function wpsc_update_customer_meta( $key, $value, $id = false ) {
+	global $wpdb;
+
+	if ( ! $id )
+		$id = wpsc_get_current_customer_id( 'create' );
+
+	$profile = wpsc_get_all_customer_meta( $id );
+
+	if ( is_wp_error( $profile ) )
+		return $profile;
+
+	$profile[$key] = $value;
+
+	return wpsc_update_all_customer_meta( $profile, $id );
+}
+
+/**
+ * Delete customer meta.
+ *
+ * @access public
+ * @since  3.8.9
+ * @param  string     $key  Meta key
+ * @param  string|int $id   Customer ID. Optional. Defaults to current customer.
+ * @return boolean|WP_Error True if successful. False if not successful. WP_Error
+ *                          if there are any errors.
+ */
+function wpsc_delete_customer_meta( $key, $id = false ) {
+	$profile = wpsc_get_all_customer_meta( $id );
+
+	if ( is_wp_error( $profile ) )
+		return $profile;
+
+	if ( array_key_exists( $key, $profile ) )
+		unset( $profile[$key] );
+
+	return wpsc_update_all_customer_meta( $profile, $id );
+}
+
+/**
+ * Create customer ID upon 'plugins_loaded' to make sure there's one exists before
+ * anything else.
+ *
+ * @access private
+ * @since  3.8.9
+ */
+function _wpsc_action_create_customer_id() {
+	wpsc_get_current_customer_id( 'create' );
+}
+
+/**
+ * Delete all customer meta for a certain customer ID
+ *
+ * @since  3.8.9.4
+ * @param  string|int $id Customer ID. Optional. Defaults to current customer
+ * @return boolean        True if successful, False if otherwise
+ */
+function wpsc_delete_all_customer_meta( $id = false ) {
+	global $wpdb;
+
+	if ( ! $id )
+		$id = wpsc_get_current_customer_id();
+
+	$blog_prefix = is_multisite() ? $wpdb->get_blog_prefix() : '';
+
+	if ( is_numeric( $id ) )
+		return delete_user_meta( $id, "_wpsc_{$blog_prefix}customer_profile" );
+	else
+		return delete_transient( "wpsc_customer_meta_{$blog_prefix}{$id}" );
+}
+
+/**
+ * Updates permalink slugs
+ *
+ * @since 3.8.9
+ * @return type
+ */
+function wpsc_update_permalink_slugs() {
+	global $wpdb;
+
+	$wpsc_pageurl_option = array(
+		'product_list_url'  => '[productspage]',
+		'shopping_cart_url' => '[shoppingcart]',
+		'checkout_url'      => '[shoppingcart]',
+		'transact_url'      => '[transactionresults]',
+		'user_account_url'  => '[userlog]'
+	);
+
+	$ids = array();
+
+	foreach ( $wpsc_pageurl_option as $option_key => $page_string ) {
+		$id = $wpdb->get_var( "SELECT `ID` FROM `{$wpdb->posts}` WHERE `post_type` = 'page' AND `post_content` LIKE '%$page_string%' LIMIT 1" );
+
+		if ( ! $id )
+			continue;
+
+		$ids[$page_string] = $id;
+
+		$the_new_link = get_page_link( $id );
+
+		if ( stristr( get_option( $option_key ), "https://" ) )
+			$the_new_link = str_replace( 'http://', "https://", $the_new_link );
+
+		if ( $option_key == 'shopping_cart_url' )
+			update_option( 'checkout_url', $the_new_link );
+
+		update_option( $option_key, $the_new_link );
+	}
+
+	update_option( 'wpsc_shortcode_page_ids', $ids );
+}
+
+/**
+ * Return an array of terms assigned to a product.
+ *
+ * This function is basically a wrapper for get_the_terms(), and should be used
+ * instead of get_the_terms() and wp_get_object_terms() because of two reasons:
+ *
+ * - wp_get_object_terms() doesn't utilize object cache.
+ * - get_the_terms() returns false when no terms are found. We want something
+ *   that returns an empty array instead.
+ *
+ * @since 3.8.10
+ * @param  int    $product_id Product ID
+ * @param  string $tax        Taxonomy
+ * @param  string $field      If you want to return only an array of a certain field, specify it here.
+ * @return stdObject[]
+ */
+function wpsc_get_product_terms( $product_id, $tax, $field = '' ) {
+	$terms = get_the_terms( $product_id, $tax );
+
+	if ( ! $terms )
+		$terms = array();
+
+	if ( $field )
+		$terms = wp_list_pluck( $terms, $field );
+
+	// remove the redundant array keys, could cause issues in loops with iterator
+	$terms = array_values( $terms );
+	return $terms;
+}
+
+/**
+ * Returns page slug that corresponds to a given WPEC-specific shortcode.
+ *
+ * @since 3.8.10
+ *
+ * @uses   wpsc_get_the_post_id_by_shortcode()  Gets page ID of shortcode.
+ * @uses   get_post_field()                     Returns post name of page ID.
+ *
+ * @param  string $shortcode                    Shortcode of WPEC-specific page, e.g. '[productspage]''
+ * @return string                               Post slug
+ */
+function wpsc_get_page_slug( $shortcode ) {
+     $id = wpsc_get_the_post_id_by_shortcode( $shortcode );
+     return get_post_field( 'post_name', $id );
+}

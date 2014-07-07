@@ -1,17 +1,20 @@
 === Plugin Name ===
 Contributors: christopherross
-Plugin URI: http://thisismyurl.com/downloads/wordpress/plugins/wordpress-login-redirect/
+Plugin URI: http://thisismyurl.com/plugins/wordpress-login-redirect/
 Tags: subscriber, login, redirect
 Donate link:  http://thisismyurl.com/
 Requires at least: 3.0.0
-Tested up to: 3.1
-Stable tag: 1.1.0
+Tested up to: 3.5.1
+Stable tag: 2.5.0
 
 A plugin which redirects subscriber level users back to the homepage after they've logged in. By <a href='http://thisismyurl.com'>Christopher Ross</a>.
 
 == Description ==
 
 A plugin which redirects subscriber level users back to the homepage after they've logged in.
+
+This plugin is maintained by Christopher Ross, http://thisismyurl.com or you can find him on Twitter at http://twitter.com/thisismyurl/
+
 
 == Installation ==
 
@@ -39,6 +42,11 @@ If you would like to donate to help support future development of this tool, ple
 
 
 == Change Log ==
+
+= 2.0.0 =
+
+* optimized code for WordPress 3.3
+* minimized code
 
 = 1.1 =
 

@@ -2,7 +2,7 @@
 /**
  * A class with functions the perform a backup of WordPress
  *
- * @copyright Copyright (C) 2011 Michael De Wildt. All rights reserved.
+ * @copyright Copyright (C) 2011-2013 Michael De Wild. All rights reserved.
  * @author Michael De Wildt (http://www.mikeyd.com.au/)
  * @license This program is free software; you can redistribute it and/or modify
  *          it under the terms of the GNU General Public License as published by
@@ -18,60 +18,71 @@
  *          along with this program; if not, write to the Free Software
  *          Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110, USA.
  */
-class WP_Backup_Output {
+class WP_Backup_Output extends WP_Backup_Extension {
 
 	const MAX_ERRORS = 10;
 
-	private $dropbox;
-	private $config;
-	private $last_backup_time;
-	private $dropbox_location;
-	private $max_file_size;
-	private $error_count;
+	private
+		$error_count,
+		$root
+		;
 
-	public function __construct($dropbox = false, $config = false) {
-		$this->dropbox = $dropbox ? $dropbox : new Dropbox_Facade();
-		$this->config = $config ? $config : new WP_Backup_Config();
+	public function set_root($root) {
+		$this->root = $root;
 
-		$this->last_backup_time = $this->config->get_option('last_backup_time');
-
-		$this->dropbox_location = null;
-		if ($this->config->get_option('store_in_subfolder'))
-			$this->dropbox_location = $this->config->get_option('dropbox_location');
-
-		$this->max_file_size = $this->config->get_max_file_size();
+		return $this;
 	}
 
-	public function out($source, $file) {
-
-		if ($this->error_count > self::MAX_ERRORS) {
+	public function out($source, $file, $processed_file = null) {
+		if ($this->error_count > self::MAX_ERRORS)
 			throw new Exception(sprintf(__('The backup is having trouble uploading files to Dropbox, it has failed %s times and is aborting the backup.'), self::MAX_ERRORS));
-		}
 
-		if (filesize($file) > $this->max_file_size) {
-			$this->config->log(WP_Backup_Config::BACKUP_STATUS_WARNING,
-						sprintf(__("file '%s' exceeds 40 percent of your PHP memory limit. The limit must be increased to back up this file.", 'wpbtd'), basename($file)));
-			return;
-		}
+		if (!$this->dropbox)
+			throw new Exception(__("Dropbox API not set"));
 
-		$dropbox_path = $this->dropbox_location . DIRECTORY_SEPARATOR . str_replace($source . DIRECTORY_SEPARATOR, '', $file);
-		if (PHP_OS == 'WINNT') {
-			//The dropbox api requires a forward slash as the directory separator
-			$dropbox_path = str_replace(DIRECTORY_SEPARATOR, '/', $dropbox_path);
-		}
+		$dropbox_path = $this->config->get_dropbox_path($source, $file, $this->root);
 
 		try {
+			$directory_contents = $this->dropbox->get_directory_contents($dropbox_path);
 
-			$directory_contents = $this->dropbox->get_directory_contents(dirname($dropbox_path));
-			if (!in_array(basename($file), $directory_contents) || filemtime($file) > $this->last_backup_time)
-				$this->dropbox->upload_file($dropbox_path, $file);
+			if (!in_array(basename($file), $directory_contents) || filemtime($file) > $this->config->get_option('last_backup_time')) {
+				$file_size = filesize($file);
+				if ($file_size > $this->get_chunked_upload_threashold()) {
+
+					$msg = __("Uploading large file '%s' (%sMB) in chunks", 'wpbtd');
+					if ($processed_file && $processed_file->offset > 0)
+						$msg = __("Resuming upload of large file '%s'", 'wpbtd');
+
+					WP_Backup_Registry::logger()->log(sprintf(
+						$msg,
+						basename($file),
+						round($file_size / 1048576, 1)
+					));
+
+					return $this->dropbox->chunk_upload_file($dropbox_path, $file, $processed_file);
+				} else {
+					return $this->dropbox->upload_file($dropbox_path, $file);
+				}
+			}
 
 		} catch (Exception $e) {
-			$msg = sprintf(__("There was an error uploading '%s' to Dropbox", 'wpbtd'), $file);
-			$this->config->log(WP_Backup_Config::BACKUP_STATUS_WARNING, $msg);
+			WP_Backup_Registry::logger()->log(sprintf(__("Error uploading '%s' to Dropbox: %s", 'wpbtd'), $file, strip_tags($e->getMessage())));
 			$this->error_count++;
 		}
 	}
 
+	public function start() {
+		return true;
+	}
+
 	public function end() {}
+	public function complete() {}
+	public function failure() {}
+
+	public function get_menu() {}
+	public function get_type() {}
+
+	public function is_enabled() {}
+	public function set_enabled($bool) {}
+	public function clean_up() {}
 }

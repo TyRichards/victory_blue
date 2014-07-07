@@ -2,7 +2,7 @@
 
 /*  Greg's Setup Handler
 	
-	Copyright (c) 2009-2011 Greg Mulhauser
+	Copyright (c) 2009-2012 Greg Mulhauser
 	http://gregsplugins.com
 	
 	Released under the GPL license
@@ -64,6 +64,7 @@ class ghpseoSetupHandler {
 				array("editing_secondary_description_posts", "0", 'intval'),
 				array("editing_secondary_description_pages", "1", 'intval'),
 				array("editing_counter", "1", 'intval'),
+				array("support_custom_post_types", "0", 'intval'),
 				array("restrict_access", "1", 'intval'),
 				array("enable_modifications", "0", 'intval'),
 				array("obnoxious_mode", "0", 'intval'),
@@ -352,7 +353,7 @@ class ghpseoSetupHandler {
 	
 	function plugin_settings_link($links) {
 		$prefix = $this->plugin_prefix;
-		$here = str_replace(basename( __FILE__),"",plugin_basename(__FILE__)); // get plugin folder name
+		$here = basename(dirname( __FILE__)) . '/'; // get plugin folder name
 		$settings = "options-general.php?page={$here}{$prefix}-options.php";
 		$settings_link = "<a href='{$settings}'>" . __('Settings') . '</a>';
 		array_unshift( $links, $settings_link );

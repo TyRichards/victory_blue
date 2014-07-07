@@ -277,3 +277,16 @@
  in /home/ty/public_html/wp-content/plugins/wordpress-login-redirect/common.php on line 40
 [07-Nov-2012 20:37:00] PHP Warning:  file_get_contents(http://thisismyurl.com/plugins.html) [<a href='function.file-get-contents'>function.file-get-contents</a>]: failed to open stream: HTTP request failed! HTTP/1.0 404 Not Found
  in /home/ty/public_html/wp-content/plugins/wordpress-login-redirect/common.php on line 127
+[23-Jul-2013 19:04:53] PHP Warning:  Invalid argument supplied for foreach() in /home/ty/public_html/wp-content/plugins/google-analyticator/google-analyticator.php on line 451
+[23-Jul-2013 19:05:00] PHP Warning:  Invalid argument supplied for foreach() in /home/ty/public_html/wp-content/plugins/google-analyticator/google-analyticator.php on line 451
+[23-Jul-2013 19:08:51] PHP Warning:  Invalid argument supplied for foreach() in /home/ty/public_html/wp-content/plugins/google-analyticator/google-analyticator.php on line 451
+[23-Jul-2013 19:09:12] PHP Warning:  Invalid argument supplied for foreach() in /home/ty/public_html/wp-content/plugins/google-analyticator/google-analyticator.php on line 451
+[23-Jul-2013 19:09:36] PHP Warning:  Invalid argument supplied for foreach() in /home/ty/public_html/wp-content/plugins/google-analyticator/google-analyticator.php on line 451
+[23-Jul-2013 19:26:25] WordPress database error Duplicate entry '242' for key 'PRIMARY' for query INSERT INTO `wp_wpsc_currency_list` (`country`,`isocode`,`currency`,`symbol`,`symbol_html`,`code`,`has_regions`,`tax`,`continent`,`visible`,`id`) VALUES ('South Sudan','SS','South Sudanese Pound','','','SSP','','','africa','0',242) made by require_once('wp-admin/admin.php'), do_action('load-dashboard_page_wpsc-db-upgrade'), call_user_func_array, _wpsc_action_load_db_upgrade, _wpsc_maybe_upgrade, call_user_func, _wpsc_db_upgrade_1, _wpsc_create_south_sudan, WPSC_Country->save
+[25-Jul-2013 19:01:48] PHP Warning:  Invalid argument supplied for foreach() in /home/ty/public_html/wp-content/plugins/google-analyticator/google-analyticator.php on line 451
+[25-Jul-2013 20:17:35] Farreaches plugin: farreaches_activating.
+[25-Jul-2013 20:17:35] Farreaches plugin: farreaches_activated.
+[10-Sep-2013 19:54:11] PHP Warning:  Invalid argument supplied for foreach() in /home4/ty/public_html/wp-content/plugins/google-analyticator/google-analyticator.php on line 451
+[10-Sep-2013 20:33:35] PHP Warning:  Invalid argument supplied for foreach() in /home4/ty/public_html/wp-content/plugins/google-analyticator/google-analyticator.php on line 451
+[24-Feb-2014 20:44:37] PHP Warning:  Invalid argument supplied for foreach() in /home4/ty/public_html/wp-content/plugins/google-analyticator/google-analyticator.php on line 451
+[20-Mar-2014 21:35:10] PHP Warning:  Invalid argument supplied for foreach() in /home4/ty/public_html/wp-content/plugins/google-analyticator/google-analyticator.php on line 451

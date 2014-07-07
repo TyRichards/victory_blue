@@ -29,7 +29,7 @@ $link=mysql_connect(DB2_HOST,DB2_USER,DB2_PASS);
 mysql_select_db(DB2_NAME,$link);
 mysql_query("SET NAMES utf8");
 $sql=$query;
-$result=mysql_query($sql,$link);
+$result=mysql_query(mysql_real_escape_string($sql),$link);
 $rez=array();
 while($row=mysql_fetch_assoc($result))
 $rez[]=$row;

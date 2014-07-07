@@ -47,10 +47,12 @@ function wpcf7_autop( $pee, $br = 1 ) {
 
 function wpcf7_strip_quote( $text ) {
 	$text = trim( $text );
+
 	if ( preg_match( '/^"(.*)"$/', $text, $matches ) )
 		$text = $matches[1];
 	elseif ( preg_match( "/^'(.*)'$/", $text, $matches ) )
 		$text = $matches[1];
+
 	return $text;
 }
 
@@ -60,11 +62,37 @@ function wpcf7_strip_quote_deep( $arr ) {
 
 	if ( is_array( $arr ) ) {
 		$result = array();
-		foreach ( $arr as $key => $text ) {
-			$result[$key] = wpcf7_strip_quote( $text );
-		}
+
+		foreach ( $arr as $key => $text )
+			$result[$key] = wpcf7_strip_quote_deep( $text );
+
 		return $result;
 	}
+}
+
+function wpcf7_normalize_newline( $text, $to = "\n" ) {
+	if ( ! is_string( $text ) )
+		return $text;
+
+	$nls = array( "\r\n", "\r", "\n" );
+
+	if ( ! in_array( $to, $nls ) )
+		return $text;
+
+	return str_replace( $nls, $to, $text );
+}
+
+function wpcf7_normalize_newline_deep( $arr, $to = "\n" ) {
+	if ( is_array( $arr ) ) {
+		$result = array();
+
+		foreach ( $arr as $key => $text )
+			$result[$key] = wpcf7_normalize_newline_deep( $text, $to );
+
+		return $result;
+	}
+
+	return wpcf7_normalize_newline( $arr, $to );
 }
 
 function wpcf7_canonicalize( $text ) {
@@ -88,6 +116,35 @@ function wpcf7_is_name( $string ) {
 function wpcf7_sanitize_unit_tag( $tag ) {
 	$tag = preg_replace( '/[^A-Za-z0-9_-]/', '', $tag );
 	return $tag;
+}
+
+function wpcf7_is_email( $email ) {
+	$result = is_email( $email );
+	return apply_filters( 'wpcf7_is_email', $result, $email );
+}
+
+function wpcf7_is_url( $url ) {
+	$result = ( false !== filter_var( $url, FILTER_VALIDATE_URL ) );
+	return apply_filters( 'wpcf7_is_url', $result, $url );
+}
+
+function wpcf7_is_tel( $tel ) {
+	$result = preg_match( '/^[+]?[0-9() -]*$/', $tel );
+	return apply_filters( 'wpcf7_is_tel', $result, $tel );
+}
+
+function wpcf7_is_number( $number ) {
+	$result = is_numeric( $number );
+	return apply_filters( 'wpcf7_is_number', $result, $number );
+}
+
+function wpcf7_is_date( $date ) {
+	$result = preg_match( '/^([0-9]{4,})-([0-9]{2})-([0-9]{2})$/', $date, $matches );
+
+	if ( $result )
+		$result = checkdate( $matches[2], $matches[3], $matches[1] );
+
+	return apply_filters( 'wpcf7_is_date', $result, $date );
 }
 
 ?>

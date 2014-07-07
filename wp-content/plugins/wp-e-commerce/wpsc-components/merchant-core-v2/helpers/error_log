@@ -1,0 +1,3 @@
+[02-Oct-2013 10:36:40] PHP Fatal error:  Call to undefined function  add_filter() in /home4/ty/public_html/wp-content/plugins/wp-e-commerce/wpsc-components/merchant-core-v2/helpers/admin.php on line 3
+[04-Oct-2013 06:22:22] PHP Fatal error:  Call to undefined function  add_action() in /home4/ty/public_html/wp-content/plugins/wp-e-commerce/wpsc-components/merchant-core-v2/helpers/gateways.php on line 212
+[04-Oct-2013 07:07:05] PHP Fatal error:  Call to undefined function  add_filter() in /home4/ty/public_html/wp-content/plugins/wp-e-commerce/wpsc-components/merchant-core-v2/helpers/checkout.php on line 3

@@ -1,17 +1,17 @@
 <?php
-$nzshpcrt_gateways[$num]['name'] = 'ChronoPay';
+$nzshpcrt_gateways[$num]['name'] = __( 'ChronoPay', 'wpsc' );
 $nzshpcrt_gateways[$num]['internalname'] = 'chronopay';
 $nzshpcrt_gateways[$num]['function'] = 'gateway_chronopay';
 $nzshpcrt_gateways[$num]['form'] = "form_chronopay";
 $nzshpcrt_gateways[$num]['submit_function'] = "submit_chronopay";
 $nzshpcrt_gateways[$num]['payment_type'] = "credit_card";
-$nzshpcrt_gateways[$num]['display_name'] = 'Credit Card';
+$nzshpcrt_gateways[$num]['display_name'] = __( 'Credit Card', 'wpsc' );
 $nzshpcrt_gateways[$num]['image'] = WPSC_URL . '/images/cc.gif';
 
 function gateway_chronopay($separator, $sessionid)
 {
 	global $wpdb;
-	$purchase_log_sql = "SELECT * FROM `".WPSC_TABLE_PURCHASE_LOGS."` WHERE `sessionid`= ".$sessionid." LIMIT 1";
+	$purchase_log_sql = $wpdb->prepare( "SELECT * FROM `".WPSC_TABLE_PURCHASE_LOGS."` WHERE `sessionid`= %s LIMIT 1", $sessionid );
 	$purchase_log = $wpdb->get_results($purchase_log_sql,ARRAY_A) ;
 
 	$cart_sql = "SELECT * FROM `".WPSC_TABLE_CART_CONTENTS."` WHERE `purchaseid`='".$purchase_log[0]['id']."'";
@@ -24,9 +24,9 @@ function gateway_chronopay($separator, $sessionid)
 	$data['product_name'] = get_option('chronopay_product_name');
 	$data['product_price_currency'] = get_option('chronopay_curcode');
 	$data['language'] = get_option('chronopay_language');
-	$data['cb_url'] = get_option('siteurl')."/?chronopay_callback=true";
+	$data['cb_url'] = add_query_arg( 'chronopay_callback', 'true', home_url( '/' ) );
 	$data['cb_type'] = 'P';
-	$data['decline_url'] = get_option('siteurl')."/?chronopay_callback=true";
+	$data['decline_url'] = home_url( '/?chronopay_callback=true' );
 	$data['cs1'] = $sessionid;
 	$data['cs2'] = 'chronopay';
 	$salt = get_option('chronopay_salt');
@@ -49,10 +49,8 @@ function gateway_chronopay($separator, $sessionid)
     {
     	$data['city'] = $_POST['collected_data'][get_option('chronopay_form_city')];
     }
-  	if(preg_match("/^[a-zA-Z]{2}$/",$_SESSION['selected_country']))
-    {
-    	$data['country'] = $_SESSION['selected_country'];
-    }
+    
+    	$data['country'] = (string) wpsc_get_customer_meta( 'billing_country' );
 
   	// Change suggested by waxfeet@gmail.com, if email to be sent is not there, dont send an email address
   	$email_data = $wpdb->get_results("SELECT `id`,`type` FROM `".WPSC_TABLE_CHECKOUT_FORMS."` WHERE `type` IN ('email') AND `active` = '1'",ARRAY_A);
@@ -84,18 +82,20 @@ function gateway_chronopay($separator, $sessionid)
 
 	foreach($cart as $item)
 	{
-		$product_data = $wpdb->get_results("SELECT * FROM `" . $wpdb->posts . "` WHERE `id`='".$item['prodid']."' LIMIT 1",ARRAY_A);
+		$product_data = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `" . $wpdb->posts . "` WHERE `id`= %d LIMIT 1", $item['prodid'] ), ARRAY_A );
 		$product_data = $product_data[0];
 		$variation_count = count($product_variations);
 
-		$variation_sql = "SELECT * FROM `".WPSC_TABLE_CART_ITEM_VARIATIONS."` WHERE `cart_id`='".$item['id']."'";
-		$variation_data = $wpdb->get_results($variation_sql,ARRAY_A);
+		//Does this even still work in 3.8? We're not using this table.
+		$variation_sql = $wpdb->prepare( "SELECT * FROM `".WPSC_TABLE_CART_ITEM_VARIATIONS."` WHERE `cart_id` = %d", $item['id'] );
+		$variation_data = $wpdb->get_results( $variation_sql, ARRAY_A );
 		$variation_count = count($variation_data);
 
 		if($variation_count >= 1)
       	{
       		$variation_list = " (";
       		$j = 0;
+
       		foreach($variation_data as $variation)
         	{
         		if($j > 0)
@@ -103,7 +103,7 @@ function gateway_chronopay($separator, $sessionid)
           			$variation_list .= ", ";
           		}
         		$value_id = $variation['venue_id'];
-        		$value_data = $wpdb->get_results("SELECT * FROM `".WPSC_TABLE_VARIATION_VALUES."` WHERE `id`='".$value_id."' LIMIT 1",ARRAY_A);
+        		$value_data = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `".WPSC_TABLE_VARIATION_VALUES."` WHERE `id`= %d LIMIT 1", $value_id ), ARRAY_A);
         		$variation_list .= $value_data[0]['name'];
         		$j++;
         	}
@@ -113,37 +113,37 @@ function gateway_chronopay($separator, $sessionid)
         {
         	$variation_list = '';
         }
-    
+
     	$local_currency_productprice = $item['price'];
 
 			$local_currency_shipping = $item['pnp'];
-    	
+
 
 			$chronopay_currency_productprice = $local_currency_productprice;
 			$chronopay_currency_shipping = $local_currency_shipping;
-			
+
     	$data['item_name_'.$i] = $product_data['name'].$variation_list;
     	$data['amount_'.$i] = number_format(sprintf("%01.2f", $chronopay_currency_productprice),$decimal_places,'.','');
     	$data['quantity_'.$i] = $item['quantity'];
     	$data['item_number_'.$i] = $product_data['id'];
-    	
+
 		if($item['donation'] !=1)
       	{
       		$all_donations = false;
       		$data['shipping_'.$i] = number_format($chronopay_currency_shipping,$decimal_places,'.','');
-      		$data['shipping2_'.$i] = number_format($chronopay_currency_shipping,$decimal_places,'.','');      
+      		$data['shipping2_'.$i] = number_format($chronopay_currency_shipping,$decimal_places,'.','');
       	}
       	else
       	{
       		$data['shipping_'.$i] = number_format(0,$decimal_places,'.','');
       		$data['shipping2_'.$i] = number_format(0,$decimal_places,'.','');
       	}
-        
+
     	if($product_data['no_shipping'] != 1) {
       		$all_no_shipping = false;
       	}
-    
-		
+
+
 		$total_price = $total_price + ($data['amount_'.$i] * $data['quantity_'.$i]);
 
 		if( $all_no_shipping != false )
@@ -230,9 +230,7 @@ function nzshpcrt_chronopay_callback()
 						'transactid' => $transact_id,
 						'date'       => time(),
 					);
-					$where = array( 'sessionid' => $sessionid );
-					$format = array( '%d', '%s', '%s' );
-					$wpdb->update( WPSC_TABLE_PURCHASE_LOGS, $data, $where, $format );
+					wpsc_update_purchase_log_details( $sessionid, $data, 'sessionid' );
 					transaction_results($sessionid, false, $transaction_id);
 	            	break;
 
@@ -245,7 +243,7 @@ function nzshpcrt_chronopay_callback()
 	              		$cart_item_variations = $wpdb->query( $wpdb->prepare( "DELETE FROM `".WPSC_TABLE_CART_ITEM_VARIATIONS."` WHERE `cart_id` = %d", $cart_item['id'] ), ARRAY_A);
 	              	}
 	            	$wpdb->query( $wpdb->prepare( "DELETE FROM `".WPSC_TABLE_CART_CONTENTS."` WHERE `purchaseid`=%d", $log_id ) );
-	            	$wpdb->query( $wpdb->prepare( "DELETE FROM `".WPSC_TABLE_SUBMITED_FORM_DATA."` WHERE `log_id` IN ( %d )", $log_id ) );
+	            	$wpdb->query( $wpdb->prepare( "DELETE FROM `".WPSC_TABLE_SUBMITTED_FORM_DATA."` WHERE `log_id` IN ( %d )", $log_id ) );
 	            	$wpdb->query( $wpdb->prepare( "DELETE FROM `".WPSC_TABLE_PURCHASE_LOGS."` WHERE `id`=%d LIMIT 1", $log_id ) );
 	            	break;
 
@@ -365,157 +363,147 @@ function form_chronopay()
 
 	$output = "
 		<tr>
-			<td>Product ID</td>
-			<td><input type='text' size='40' value='".get_option('chronopay_product_id')."' name='chronopay_product_id' /></td>
-		</tr>
-		<tr>
-			<td>&nbsp;</td>
-			<td><small>This should be set to your product ID that has been set up in the ChronoPay client interface.
-			This is the ChronoPay product that all purchases will be processed against. The cost will be changed depending on the grand total of the users cart.</small></td>
-		</tr>
-		<tr>
-			<td>Product Name</td>
-			<td><input type='text' size='40' value='".get_option('chronopay_product_name')."' name='chronopay_product_name' /></td>
-		</tr>
-		<tr>
-			<td>&nbsp;</td>
-			<td><small>This is not important and is usually set to the name of the web shop. It is displayed on the ChronoPay secure processing page.</small></td>
-		</tr>
-		<tr>
-			<td>Accepted Currency (USD, EUR)</td>
-			<td><select name='chronopay_curcode'>
-					<option ".$select_currency['USD']." value='USD'>USD - U.S. Dollar</option>
-					<option ".$select_currency['EUR']." value='EUR'>EUR - Euros</option>
-				</select>
-			</td>
-		</tr>
-		<tr>
-			<td>&nbsp;</td>
-			<td><small>The currency code that ChronoPay will process the payment in. All products must be set up in this currency.</small></td>
-		</tr>
-		<tr>
-			<td>Language</td>
-			<td><select name='chronopay_language'>
-					<option ".$select_language['EN']." value='EN'>Engish</option>
-					<option ".$select_language['ES']." value='ES'>Spanish</option>
-					<option ".$select_language['NL']." value='NL'>Dutch</option>
-					<option ".$select_language['RU']." value='RU'>Russian</option>
-				</select>
-			</td>
-		</tr>
-		<tr>
-			<td>&nbsp;</td>
-			<td><small>The language that the ChronoPay secure processing page will be displayed in.</small></td>
-		</tr>
-		<tr>
-			<td>Processing URL</td>
-			<td><input type='text' size='40' value='".$chronopay_url."' name='chronopay_url' /></td>
-		</tr>
-		<tr>
-			<td>&nbsp;</td>
-			<td><small>URL of the secure payment page customers are sent to for payment processing. If unsure leave at default setting.</small></td>
-		</tr>
-		<tr>
-			<td>Return URL</td>
-			<td><input type='text' size='40' value='".get_option('transact_url')."' name='chronopay_return_url' /></td>
-		</tr>
-		<tr>
-			<td>&nbsp;</td>
-			<td><small>Enter this URL in the ChronoPay web client against the Product ID that you have set up. This page is the transaction details page that you have configured in Shop Options.  It can not be edited on this page.</small></td>
-		</tr>
-		<tr>
-			<td>Security Key</td>
-			<td><input type='text' size='40' value='".$chronopay_salt."' name='chronopay_salt' /></td>
-		</tr>
-		<tr>
-			<td>&nbsp;</td>
-			<td><small>A bit of security... This is a keyword that is used to ensure transaction approval calls from ChronoPay to this application are real and were instigated from this server.  Enter a unique word into this field.</small></td>
-		</tr>
-		<tr>
-			<td>Debug Mode</td>
+			<td>" . __( 'Product ID', 'wpsc' ) . "</td>
 			<td>
-				<input type='radio' value='1' name='chronopay_debug' id='chronopay_debug1' ".$chronopay_debug1." /> <label for='chronopay_debug1'>".__('Yes', 'wpsc')."</label> &nbsp;
-				<input type='radio' value='0' name='chronopay_debug' id='chronopay_debug2' ".$chronopay_debug2." /> <label for='chronopay_debug2'>".__('No', 'wpsc')."</label>
+				<input type='text' size='40' value='" . get_option( 'chronopay_product_id' ) . "' name='chronopay_product_id' />
+				<p class='description'>
+					" . __( 'This should be set to your product ID that has been set up in the ChronoPay client interface. This is the ChronoPay product that all purchases will be processed against. The cost will be changed depending on the grand total of the users cart.', 'wpsc' ) . "
+				</p>
 			</td>
 		</tr>
 		<tr>
-			<td>&nbsp;</td>
-			<td><small>Debug mode is used to write HTTP communications between the ChronoPay server and your host to a log file.  This should only be activated for testing!</small></td>
+			<td>" . __( 'Product Name', 'wpsc' ) . "</td>
+			<td>
+				<input type='text' size='40' value='" . get_option( 'chronopay_product_name' ) . "' name='chronopay_product_name' />
+				<p class='description'>
+					" . __( 'This is not important and is usually set to the name of the web shop. It is displayed on the ChronoPay secure processing page.', 'wpsc' ) . "
+				</p>
+		</tr>
+		<tr>
+			<td>" . __( 'Accepted Currency', 'wpsc' ) . "</td>
+			<td>
+				<select name='chronopay_curcode'>
+					<option " . $select_currency['USD'] . " value='USD'>" . __( 'USD - U.S. Dollar', 'wpsc' ) . "</option>
+					<option " . $select_currency['EUR'] . " value='EUR'>" . __( 'EUR - Euros', 'wpsc' ) . "</option>
+				</select>
+				<p class='description'>
+					" . __( 'The currency code that ChronoPay will process the payment in. All products must be set up in this currency.', 'wpsc' ) . "
+				</p>
+		</tr>
+		<tr>
+			<td>" . __( 'Language', 'wpsc' ) . "</td>
+			<td>
+				<select name='chronopay_language'>
+					<option " . $select_language['EN'] . " value='EN'>Engish</option>
+					<option " . $select_language['ES'] . " value='ES'>Spanish</option>
+					<option " . $select_language['NL'] . " value='NL'>Dutch</option>
+					<option " . $select_language['RU'] . " value='RU'>Russian</option>
+				</select>
+				<p class='description'>
+					" . __( 'The language that the ChronoPay secure processing page will be displayed in.', 'wpsc' ) . "
+				</p>
+		</tr>
+		<tr>
+			<td>" . __( 'Processing URL', 'wpsc' ) . "</td>
+			<td>
+				<input type='text' size='40' value='" . $chronopay_url . "' name='chronopay_url' />
+				<p class='description'>
+					" . __( 'URL of the secure payment page customers are sent to for payment processing. If unsure leave at default setting.', 'wpsc' ) . "
+				</p>
+		</tr>
+		<tr>
+			<td>" . __( 'Return URL', 'wpsc' ) . "</td>
+			<td>
+				<input type='text' size='40' value='".get_option('transact_url')."' name='chronopay_return_url' />
+				<p class='description'>
+					" . __( 'Enter this URL in the ChronoPay web client against the Product ID that you have set up. This page is the transaction details page that you have configured in Shop Options.  It can not be edited on this page.', 'wpsc' ) . "
+				</p>
+		</tr>
+		<tr>
+			<td>" . __( 'Security Key', 'wpsc' ) . "</td>
+			<td>
+				<input type='text' size='40' value='" . $chronopay_salt . "' name='chronopay_salt' />
+				<p class='description'>
+					" . __( 'A bit of security... This is a keyword that is used to ensure transaction approval calls from ChronoPay to this application are real and were instigated from this server.  Enter a unique word into this field.' , 'wpsc' ) . "
+				</p>
+		</tr>
+		<tr>
+			<td>" . __( 'Debug Mode', 'wpsc' ) . "</td>
+			<td>
+				<input type='radio' value='1' name='chronopay_debug' id='chronopay_debug1' " . $chronopay_debug1 . " /> <label for='chronopay_debug1'>".__('Yes', 'wpsc')."</label> &nbsp;
+				<input type='radio' value='0' name='chronopay_debug' id='chronopay_debug2' " . $chronopay_debug2 . " /> <label for='chronopay_debug2'>".__('No', 'wpsc')."</label>
+				<p class='description'>
+					" . __( 'Debug mode is used to write HTTP communications between the ChronoPay server and your host to a log file.  This should only be activated for testing!', 'wpsc' ) . "
+				</p>
 		</tr>
 
-
-	<tr class='update_gateway' >
-		<td colspan='2'>
-			<div class='submit'>
-			<input type='submit' value='".__('Update &raquo;', 'wpsc')."' name='updateoption'/>
-		</div>
-		</td>
-	</tr>
-
-	<tr class='firstrowth'>
-		<td style='border-bottom: medium none;' colspan='2'>
-			<strong class='form_group'>Forms Sent to Gateway</strong>
-		</td>
-	</tr>
+		<tr class='firstrowth'>
+			<td style='border-bottom: medium none;' colspan='2'>
+				<strong class='form_group'>" . __( 'Forms Sent to Gateway', 'wpsc' ) . "</strong>
+			</td>
+		</tr>
 
 		<tr>
-			<td>First Name Field</td>
-			<td><select name='chronopay_form[first_name]'>
-				".nzshpcrt_form_field_list(get_option('chronopay_form_first_name'))."
+			<td>" . __( 'First Name Field', 'wpsc' ) . "</td>
+			<td>
+				<select name='chronopay_form[first_name]'>
+				" . nzshpcrt_form_field_list(get_option('chronopay_form_first_name')) . "
 				</select>
 			</td>
 		</tr>
 		<tr>
-			<td>Last Name Field</td>
+			<td>" . __( 'Last Name Field', 'wpsc' ) . "</td>
 			<td><select name='chronopay_form[last_name]'>
-				".nzshpcrt_form_field_list(get_option('chronopay_form_last_name'))."
+				" . nzshpcrt_form_field_list( get_option ( 'chronopay_form_last_name' ) ) . "
 				</select>
 			</td>
 		</tr>
 		<tr>
-			<td>Address Field</td>
+			<td>" . __( 'Address Field', 'wpsc' ) . "</td>
 			<td><select name='chronopay_form[address]'>
-				".nzshpcrt_form_field_list(get_option('chronopay_form_address'))."
+				" . nzshpcrt_form_field_list( get_option ( 'chronopay_form_address' ) ) . "
 				</select>
 			</td>
 		</tr>
 		<tr>
-			<td>City Field</td>
+			<td>" . __( 'City Field', 'wpsc' ) . "</td>
 			<td><select name='chronopay_form[city]'>
-				".nzshpcrt_form_field_list(get_option('chronopay_form_city'))."
+				" . nzshpcrt_form_field_list( get_option ( 'chronopay_form_city' ) ) . "
 				</select>
 			</td>
 		</tr>
 		<tr>
-			<td>State Field</td>
+			<td>" . __( 'State Field', 'wpsc' ) . "</td>
 			<td><select name='chronopay_form[state]'>
-				".nzshpcrt_form_field_list(get_option('chronopay_form_state'))."
+				" . nzshpcrt_form_field_list( get_option ( 'chronopay_form_state' ) ) . "
 				</select>
 			</td>
 		</tr>
 		<tr>
-			<td>Postal code/Zip code Field</td>
+			<td>" . __( 'Postal/ZIP Code Field', 'wpsc' ) . "</td>
 			<td><select name='chronopay_form[post_code]'>
-				".nzshpcrt_form_field_list(get_option('chronopay_form_post_code'))."
+				" . nzshpcrt_form_field_list( get_option ( 'chronopay_form_post_code' ) ) . "
 				</select>
 			</td>
 		</tr>
 		<tr>
-			<td>Country Field</td>
+			<td>" . __( 'Country Field', 'wpsc' ) . "</td>
 			<td><select name='chronopay_form[country]'>
-				".nzshpcrt_form_field_list(get_option('chronopay_form_country'))."
+				" . nzshpcrt_form_field_list( get_option ( 'chronopay_form_country' ) ) . "
 				</select>
 			</td>
 		</tr>
 		   <tr>
-           <td colspan='2'>For more help configuring Chronopay, read our documentation <a href='http://docs.getshopped.org/wiki/documentation/payments/chronopay'>here </a></td>
+           <td colspan='2'>
+           	" . sprintf( __( 'For more help configuring Chronopay, read our documentation <a href="%s">here</a>', 'wpsc' ), esc_url( 'http://docs.getshopped.org/documentation/chronopay/' ) ) . "
+           </td>
        </tr>";
-	
+
 	return $output;
 }
-  
-  
+
+
 add_action('init', 'nzshpcrt_chronopay_callback');
 add_action('init', 'nzshpcrt_chronopay_results');
-	
+
 ?>

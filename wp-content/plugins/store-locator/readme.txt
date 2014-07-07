@@ -1,12 +1,12 @@
 === Google Maps Store Locator for WordPress ===
 Contributors: viadat
 Donate link: http://www.viadat.com/donate/
-Tags: store locator, store locater, google, google maps, dealer locator, dealer locater, zip code search, shop locator, shop finder, zipcode, location finder, places, stores, maps, mapping, mapper, plugin, posts, post, page, coordinates, latitude, longitude, geo, geocoding, shops, ecommerce, e-commerce, business locations
-Requires at least: 2.5
-Tested up to: 3.1.2
-Stable tag: 1.2.42.1
+Tags: business locations, dealer locator, dealer locater, store locator, store locater, mapping, mapper, google, google maps, buddypress, shop locator, shop finder,  location finder, places, stores, maps, coordinates, latitude, longitude, geo, geocoding, shops, ecommerce, e-commerce, zipcode, zip code search
+Requires at least: 2.8
+Tested up to: 3.5.1
+Stable tag: 1.9.7
 
-A store locator plugin that gives you the ability to effectively show important locations (stores, buildings, points of interest, etc.) in an easily searchable manner using Google Maps.
+A store locator plugin that gives you the ability to effectively display your important locations in an easily searchable manner using Google Maps.
 
 == Description ==
 
@@ -21,7 +21,7 @@ Its strength is in its flexibility to allow you to easily manage a few or a thou
 * You can use it for numerous countries, which will continue to be added as Google adds new countries to their Google Maps API.  See the documentation for the latest
 * Supports international languages and character sets 
 * Allows you to use unique map icons or your own custom map icons --- great for branding your map
-* Gives your map the desired look by using our Map Designer&trade; interface in the WordPress admin section
+* Gives your map the desired look by using our MapDesigner&trade; interface in the WordPress admin section
 * Pick other cool Google Maps options, such as an inset box, zoom level, map types (street, satellite, hybrid, physical), and more
 * You can use miles or kilometers
 * Automatically restricts loading of Javascript & CSS to only pages that display the map (or that might need access to the JS & CSS) for better site performance
@@ -44,39 +44,104 @@ If you need additional features, enhance your store locator with addons & themes
 * [Laifeilim](http://www.fileem.com): Simplified Chinese
 * Victor Ukhimenko: Russian
 * [Rene](http://wpwebshop.com): Turkish
+* [Outshine Solutions](http://outshinesolutions.com): Hindi
+* [Diana S.](http://www.wpcouponshop.com): Serbian
 
-(If you provide your web address, we'll link back to you)
+([How to submit your translation](http://www.viadat.com/2009/02/store-locator-translation-files-wanted-you-might-just-get-something-nice-in-return/) | If you provide your web address, we'll link back to you)
 
 == Installation ==
 
 = Main Plugin =
-
 1. Upload the `store-locator` folder to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Sign up for a Google Maps API Key for your domain at http://code.google.com/apis/maps/signup.html
+3. Sign up for a Google Maps API Key for your domain. Instructions: https://developers.google.com/maps/documentation/javascript/tutorial#api_key
 4. Add your locations through the 'Add Locations' page in the Store Locator admin panel
-5. Place the code '[STORE-LOCATOR]' (case-sensitive) in the body of a page or a post to display your store locator
+5. Place the code `[STORE-LOCATOR]` in the body of a page or a post to display your store locator
 
 = Addons =
-
-1. Unzip & Upload the entire add-on folder to the `/wp-content/uploads/sl-uploads/addons` directory (note the new location for addons as of v1.2.37).
-2. Activate the add-on by updating the Activation Key that you receive after purchase at the bottom of the "News & Upgrades" Page.
+1. Unzip & Upload the entire addon folder to the `/wp-content/uploads/sl-uploads/addons` directory (note the new location for addons as of v1.2.37).
+2. Activate the addon by updating the Activation Key that you receive after purchase at the bottom of the "News & Upgrades" Page.
 
 = Themes =
-
 1. Unzip & Upload the entire theme folder to the `wp-content/uploads/sl-uploads/themes` directory (note the new location for themes as of v1.2.37).
-2. Select theme from the theme dropdown menu under the "Design" section on the "Map Designer"&trade; Page.
+2. Select theme from the theme dropdown menu under the "Design" section on the "MapDesigner&trade;" Page.
 
 = Icons =
-
 1. There are some default icons in the `/wp-content/plugins/store-locator/icons` directory. 
 2. Add your own custom icons in to `wp-content/uploads/sl-uploads/custom-icons` (note the new location for custom icons as of v1.2.37).
 
 = Custom CSS (Stylesheet) =
-
 As of version 1.2.37, you can modify the default 'store-locator.css' and place it under `/wp-content/uploads/sl-uploads/custom-css/`. The store locator will give priority to the 'store-locator.css' in the 'custom-css/' folder over the default 'store-locator.css' in the main 'store-locator/' folder. This allows you to upgrade the main store locator plugin without worrying about losing your custom styling. 
 
 == Changelog ==
+= 1.9.7 =
+* Update for geocoding of locations for those previously having Google Geocoding API issues
+
+= 1.9.6.x =
+* Added Serbian translation (Thank you [Diana S.](http://wpcouponshop.com)). Copy translation into `/wp-content/uploads/sl-uploads/languages/` to use.
+* Additional updates/fixes added
+
+= 1.9.5 =
+* New links for custom icons on MapDesigner&trade; page
+* Minor fixes
+
+= 1.9.4 =
+* Added South Africa as a country option
+* Bug fixes
+* CSS fixes
+
+= 1.9.2 =
+* Added Philippines as a country option for one's map
+
+= 1.9.1 =
+* Update/fix for re-geocoding (thank you Seb M.)
+
+= 1.9 =
+* Tagging fixes
+* CSS fixes
+* Bug fixes
+
+= 1.8.1 =
+* Translator update
+
+= 1.8 =
+* Added Hindi translation (Thank you [Outshine Solutions](http://outshinesolutions.com)). Copy translation into `/wp-content/uploads/sl-uploads/languages/` to use.
+
+= 1.7 =
+* Improved tagging
+* More efficient loading of admin Javascript & CSS
+* Improved code for devs using 'WP_DEBUG' mode
+* CSS fix
+
+= 1.6 =
+* Much improved processing image next to search button - important to update from 1.5
+* Tag management improvement/fixes
+* Bug fixes
+
+= 1.5 =
+* Circular loading/processing image next to search button during search to know that locator is actively performing search
+* Zooms out when showing 1 location on initial load or search is zoomed in too close
+* Smoother initial loading of locations by default
+* Numerous CSS fixes to map interface
+* Ability to determine maximum number of locations shown in search results for DB health (uses same value for number of locations loaded by default)
+
+= 1.4.1 =
+* Bug fix for 'Mangage Locations' page not showing locations if Google API Key isn't entered yet
+
+= 1.4 =
+* Functionality to bulk re-geocode ungeocoded locations on 'Manage Locations' page (button only appears if you have any ungeocoded locations)
+* Small admin CSS fix
+* Updated link to get Google Maps API key
+
+= 1.3 =
+* New horizontal top navigation for Store Locator admin pages
+* Made 'Directions' link label on map & results list editable from MapDesigner&trade; page
+* Better response messages during key validation
+* Cleaned up 'News & Upgrades' page; updated navigation links of 'Manage Locations'
+* Google API Key submission/important message for new users, instead of restricting view of other pages 
+
+= 1.2.43 =
+* Bug fixes
 
 = 1.2.42.1 =
 * Added new translators to readme
@@ -120,7 +185,7 @@ As of version 1.2.37, you can modify the default 'store-locator.css' and place i
 
 = 1.2.38 =
 * Small fix with JS/CSS section message on non-store locator pages
-* Notification message added to admin panel for those switching from 'wordpress-store-locator-location-finder' to 'store-locator' to re-select their icons on the 'Map Designer' page to avoid blank icons on map
+* Notification message added to admin panel for those switching from 'wordpress-store-locator-location-finder' to 'store-locator' to re-select their icons on the 'MapDesigner&trade;' page to avoid blank icons on map
 * Higher number options for 'Locations Per Page' on 'Manage Locations' page
 * For those who don't use the default WordPress plugin updater, but instead download and paste on top of an old version, it checks if addons, themes, languages, images moved to 'wp-content/uploads/sl-uploads' and copies them over if they haven't been already
 
@@ -146,7 +211,7 @@ As of version 1.2.37, you can modify the default 'store-locator.css' and place i
 
 = 1.2.35 =
 * Improved restricted loading of JS, CSS to pages & posts on which store locator shortcode has been placed (and the archive pages only if shortcode is placed into any posts, and the home and search pages)
-* Added input field on 'Map Designer' page for editing message to website visitors shown below map
+* Added input field on 'MapDesigner&trade;' page for editing message to website visitors shown below map
 * Modified custom upgrade link on plugins page to be one-click, similar to other plugins
 * Few other admin styling changes for buttons
 * Fixed bug causing search results to not show all locations for a given radius when distance unit is set to 'km'
@@ -204,7 +269,7 @@ Make sure to check http://docs.viadat.com for the most updated information
 Yes, you will need a Google account in order to retrieve an API for your maps to work properly
 
 1. To sign up for a Google Account, visit: https://www.google.com/accounts/
-2. To sign up for a Google Maps API Key, visit: http://code.google.com/apis/maps/signup.html
+2. To sign up for a Google Maps API Key, visit: https://developers.google.com/maps/documentation/javascript/tutorial#api_key
 
 = How Do I use a Translation? =
 
@@ -215,7 +280,7 @@ Yes, you will need a Google account in order to retrieve an API for your maps to
 
 This plugin is compatible with all countries that have Google Map domains. This includes:
 
-* Austria (updated as of v1.2.28)
+* Austria (updated v1.2.28)
 * Australia
 * Belgium
 * Brazil
@@ -228,38 +293,21 @@ This plugin is compatible with all countries that have Google Map domains. This 
 * Finland
 * France
 * Italy
-* Japan (updated as of v1.2.28)
+* Japan (updated v1.2.28)
 * Netherlands
 * Norway
 * New Zealand
 * Poland
 * Russia
 * Sweden
-* Taiwan (updated as of v1.2.28)
+* Taiwan (updated v1.2.28)
 * United Kingdom
 * United States
 
-Added (as of v1.2.28):
+**Added:**
 
-* China
-* India
-* Hong Kong
-* Liechtenstein
-* South Korea
+*as of v1.2.28:* China, India, Hong Kong, Liechtenstein, South Korea
 
-Removed (inactive domain or domain can't be used to embed a map on a website yet):
+*as of v1.2.34:* Argentina, Chile, Mexico, Portugal, Singapore
 
-* Bosnia and Herzegovina (as of v1.2.28)
-* Hungary (as of v1.2.35.1)
-* Kenya (as of v1.2.35.1)
-* Malaysia (as of v1.2.35.1)
-* South Africa (as of v1.2.35.1)
-* Thailand (as of v1.2.35.1)
-
-Added (as of v1.2.34):
-
-* Argentina
-* Chile
-* Mexico
-* Portugal
-* Singapore
+*as of v1.9.xx:* Philippines, South Africa

@@ -45,3 +45,5 @@
 [11-Mar-2012 11:35:49] PHP Fatal error:  Class 'IXR_Server' not found in /home/victoryb/public_html/wp-includes/class-wp-xmlrpc-server.php on line 22
 [11-Mar-2012 11:35:49] PHP Fatal error:  Class 'IXR_Client' not found in /home/victoryb/public_html/wp-includes/class-wp-http-ixr-client.php on line 9
 [16-Jul-2013 12:19:48] PHP Fatal error:  Call to undefined function  _deprecated_file() in /home/ty/public_html/wp-includes/registration-functions.php on line 7
+[01-Apr-2014 21:23:08] PHP Fatal error:  Call to undefined function  add_action() in /home4/ty/public_html/wp-includes/admin-bar.php on line 39
+[05-Jun-2014 22:25:45 America/Chicago] PHP Fatal error:  Call to undefined function add_action() in /home4/ty/public_html/wp-includes/admin-bar.php on line 39

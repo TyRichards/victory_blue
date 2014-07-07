@@ -3,13 +3,13 @@
 Plugin Name: Cimy User Extra Fields
 Plugin URI: http://www.marcocimmino.net/cimy-wordpress-plugins/cimy-user-extra-fields/
 Description: Add some useful fields to registration and user's info
-Version: 2.3.11
+Version: 2.5.4
 Author: Marco Cimmino
 Author URI: mailto:cimmino.marco@gmail.com
 License: GPL2
 
 Cimy User Extra Fields - Allows adding mySQL Data fields to store/add more user info
-Copyright (c) 2006-2012 Marco Cimmino
+Copyright (c) 2006-2013 Marco Cimmino
 
 Code for drop-down support is in part from Raymond Elferink raymond@raycom.com
 Code for regular expression under equalTo rule is in part from Shane Hartman shane@shanehartman.com
@@ -154,27 +154,28 @@ require_once($cuef_plugin_dir.'/cimy_uef_init.php');
 require_once($cuef_plugin_dir.'/cimy_uef_email_handler.php');
 require_once($cuef_plugin_dir.'/cimy_uef_db.php');
 require_once($cuef_plugin_dir.'/cimy_uef_register.php');
-require_once($cuef_plugin_dir.'/cimy_uef_profile.php');
 require_once($cuef_plugin_dir.'/cimy_uef_functions.php');
-require_once($cuef_plugin_dir.'/cimy_uef_options.php');
-require_once($cuef_plugin_dir.'/cimy_uef_admin.php');
+require_once($cuef_plugin_dir.'/cimy_uef_profile.php');
 
 add_action('admin_init', 'cimy_uef_admin_init');
+add_action('init', 'cimy_uef_init');
 
 $cimy_uef_name = "Cimy User Extra Fields";
-$cimy_uef_version = "2.3.11";
+$cimy_uef_version = "2.5.4";
 $cimy_uef_url = "http://www.marcocimmino.net/cimy-wordpress-plugins/cimy-user-extra-fields/";
 $cimy_project_url = "http://www.marcocimmino.net/cimy-wordpress-plugins/support-the-cimy-project-paypal/";
 
-$start_cimy_uef_comment = "<!--\n";
-$start_cimy_uef_comment .= "\tStart code from ".$cimy_uef_name." ".$cimy_uef_version."\n";
-$start_cimy_uef_comment .= "\tCopyright (c) 2006-2012 Marco Cimmino\n";
-$start_cimy_uef_comment .= "\t".$cimy_uef_url."\n";
-$start_cimy_uef_comment .= "-->\n";
+// No new lines in the html comment, otherwise wpautop makes them <br /> tags and then this bug of wptexturize messes with the end tag
+// see: http://core.trac.wordpress.org/ticket/8912
+$start_cimy_uef_comment = "<!--";
+$start_cimy_uef_comment .= "\tStart code from ".$cimy_uef_name." ".$cimy_uef_version;
+$start_cimy_uef_comment .= "\tCopyright (c) 2006-2013 Marco Cimmino";
+$start_cimy_uef_comment .= "\t".$cimy_uef_url;
+$start_cimy_uef_comment .= "\t-->\n";
 
-$end_cimy_uef_comment = "\n<!--\n";
-$end_cimy_uef_comment .= "\tEnd of code from ".$cimy_uef_name."\n";
-$end_cimy_uef_comment .= "-->\n";
+$end_cimy_uef_comment = "\n<!--";
+$end_cimy_uef_comment .= "\tEnd of code from ".$cimy_uef_name;
+$end_cimy_uef_comment .= "\t-->\n";
 
 $cimy_uef_domain = 'cimy_uef';
 $cimy_uef_i18n_is_setup = false;
@@ -186,9 +187,32 @@ cimy_uef_i18n_setup();
 // 	$wp_password_description = __('<strong>Note:</strong> this website let you personalize your password; after the registration you will receive an e-mail with another password, do not care about that!', $cimy_uef_domain);
 
 $wp_hidden_fields = array(
+			'username' => array(
+						'name' => "USERNAME",
+						'userdata_name' => "user_login",
+						'post_name' => "user_login",
+						'type' => "text",
+						'label' => __("Username"),
+						'desc' => '',
+						'value' => '',
+						'store_rule' => array(
+								'max_length' => 100,
+								'can_be_empty' => false,
+								'edit' => 'ok_edit',
+								'email' => false,
+								'show_in_reg' => true,
+								'show_in_profile' => true,
+								'show_in_aeu' => true,
+								'show_in_search' => true,
+								'show_in_blog' => true,
+								'show_level' => -1,
+								'advanced_options' => '',
+								),
+					),
 			'password' => array(
 						'name' => "PASSWORD",
-						'post_name' => "user_pass",
+						'userdata_name' => "user_pass",
+						'post_name' => "pass1",
 						'type' => "password",
 						'label' => __("Password"),
 						'desc' => '',
@@ -209,7 +233,8 @@ $wp_hidden_fields = array(
 					),
 			'password2' => array(
 						'name' => "PASSWORD2",
-						'post_name' => "user_pass2",
+						'userdata_name' => "user_pass2",
+						'post_name' => "pass2",
 						'type' => "password",
 						'label' => __("Password confirmation", $cimy_uef_domain),
 						'desc' => '',
@@ -230,6 +255,7 @@ $wp_hidden_fields = array(
 					),
 			'firstname' => array(
 						'name' => "FIRSTNAME",
+						'userdata_name' => "first_name",
 						'post_name' => "first_name",
 						'type' => "text",
 						'label' => __("First name"),
@@ -251,6 +277,7 @@ $wp_hidden_fields = array(
 					),
 			'lastname' => array(
 						'name' => "LASTNAME",
+						'userdata_name' => "last_name",
 						'post_name' => "last_name",
 						'type' => "text",
 						'label' => __("Last name"),
@@ -272,6 +299,7 @@ $wp_hidden_fields = array(
 					),
 			'nickname' => array(
 						'name' => "NICKNAME",
+						'userdata_name' => "nickname",
 						'post_name' => "nickname",
 						'type' => "text",
 						'label' => __("Nickname"),
@@ -293,7 +321,8 @@ $wp_hidden_fields = array(
 					),
 			'website' => array(
 						'name' => "WEBSITE",
-						'post_name' => "user_url",
+						'userdata_name' => "user_url",
+						'post_name' => "url",
 						'type' => "text",
 						'label' => __("Website"),
 						'desc' => '',
@@ -314,6 +343,7 @@ $wp_hidden_fields = array(
 					),
 			'aim' => array(
 						'name' => "AIM",
+						'userdata_name' => "aim",
 						'post_name' => "aim",
 						'type' => "text",
 						'label' => __("AIM"),
@@ -335,6 +365,7 @@ $wp_hidden_fields = array(
 					),
 			'yahoo' => array(
 						'name' => "YAHOO",
+						'userdata_name' => "yim",
 						'post_name' => "yim",
 						'type' => "text",
 						'label' => __("Yahoo IM"),
@@ -356,6 +387,7 @@ $wp_hidden_fields = array(
 					),
 			'jgt' => array(
 						'name' => "JGT",
+						'userdata_name' => "jabber",
 						'post_name' => "jabber",
 						'type' => "text",
 						'label' => __("Jabber / Google Talk"),
@@ -377,6 +409,7 @@ $wp_hidden_fields = array(
 					),
 			'bio-info' => array(
 						'name' => "BIO-INFO",
+						'userdata_name' => "description",
 						'post_name' => "description",
 						'type' => "textarea",
 						'label' => __("Biographical Info"),
@@ -464,6 +497,9 @@ if (is_multisite()) {
 		add_action('admin_menu', 'cimy_admin_menu_custom');
 	}
 
+	// when blog is switched we need to re-set the table's names
+	add_action('switch_blog', 'cimy_uef_blog_switched', 10, 2);
+
 	// add action to delete all files/images when deleting a blog
 	add_action('delete_blog', 'cimy_delete_blog_info', 10, 2);
 
@@ -473,8 +509,9 @@ if (is_multisite()) {
 	// add extra fields to registration form
 	add_action('signup_extra_fields', 'cimy_registration_form', 1);
 
-	// add checks for extra fields in the registration form
-	add_filter('wpmu_validate_user_signup', 'cimy_registration_check_mu_wrapper');
+	// add checks for extra fields in the registration form only
+	if (!is_admin() && !is_network_admin())
+		add_filter('wpmu_validate_user_signup', 'cimy_registration_check_mu_wrapper');
 
 	// add custom login/registration css
 	add_action('signup_header', 'cimy_uef_register_css');
@@ -541,6 +578,10 @@ else {
 	add_filter('registration_redirect', 'cimy_uef_registration_redirect');
 	// this is needed only in the case where both redirection and email confirmation has been enabled
 	add_action('login_form_cimy_uef_redirect', 'cimy_uef_redirect');
+
+	// add filter to replace the username with the email
+	add_filter('sanitize_user', 'cimy_uef_sanitize_username', 1, 3);
+	add_filter('validate_username', 'cimy_uef_validate_username', 1, 2);
 }
 
 // with Theme My Login is more complicated, but we know how to workaround it
@@ -579,6 +620,3 @@ add_action('delete_user', 'cimy_delete_user_info');
 
 // add avatar filter
 add_filter('get_avatar', 'cimy_uef_avatar_filter', 1, 5);
-
-// add code to handle new value from ajax code in A&U Extended
-add_action('wp_ajax_save-extra-field-new-value', 'cimy_uef_admin_ajax_save_ef_new_value');

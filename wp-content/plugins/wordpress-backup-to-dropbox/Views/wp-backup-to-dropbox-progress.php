@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright Copyright (C) 2011-2012 Michael De Wildt. All rights reserved.
+ * @copyright Copyright (C) 2011-2013 Michael De Wildt. All rights reserved.
  * @author Michael De Wildt (http://www.mikeyd.com.au/)
  * @license This program is free software; you can redistribute it and/or modify
  *          it under the terms of the GNU General Public License as published by
@@ -16,23 +16,35 @@
  *          along with this program; if not, write to the Free Software
  *          Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110, USA.
  */
-$config = new WP_Backup_Config();
+$config = WP_Backup_Registry::config();
 
-if (!$config->in_progress())
+if (!$config->get_option('in_progress'))
 	spawn_cron();
 
-$action = $config->get_current_action();
-$file_count = count($config->get_processed_files());
+$log = WP_Backup_Registry::logger()->get_log();
 
-if ($action && $config->in_progress()): ?>
-	<p>
-		<strong><?php echo date('H:i:s', $action['time']) ?>: </strong>
-		<?php echo $action['message']; ?>
-	</p>
-	<?php if ($file_count > 0 ): ?>
-		<p>
-			<strong><?php echo date('H:i:s', strtotime(current_time('mysql'))) ?>: </strong>
-			<?php echo sprintf(__('Processed %d files.', 'wpbtd'), $file_count); ?>
-		</p>
-	<?php endif; ?>
+if (empty($log)): ?>
+	<p><?php _e('You have not run a backup yet. When you do you will see a log of it here.'); ?></p>
+<?php else: ?>
+	<ul>
+		<?php foreach (array_reverse($log) as $log_item): ?>
+			<li>
+			<?php
+				if (preg_match('/^Uploaded Files:/', $log_item)) {
+					$files = json_decode(preg_replace('/^Uploaded Files:/', '', $log_item), true);
+					continue;
+				}
+				echo esc_attr($log_item);
+			?>
+			<?php if (!empty($files)): ?>
+				<a class="view-files" href="#"><?php _e('View uploaded files', 'wpbtd') ?>&raquo;</a>
+				<ul class="files">
+					<?php foreach ($files as $file): ?>
+						<li title="<?php echo sprintf(__('Last modified: %s'), date('F j, Y, H:i:s', $file['mtime'])) ?>"><?php echo esc_attr($file['file']) ?></li>
+					<?php endforeach; ?>
+				</ul>
+			<?php $files = null; endif; ?>
+			</li>
+		<?php endforeach; ?>
+	</ul>
 <?php endif; ?>

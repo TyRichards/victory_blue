@@ -59,9 +59,11 @@ foreach ($_POST as $key=>$value) {
 			update_option("$activ", $enc);
 		}
 		print "<div class='highlight'> Successful validation using key '$value' $view_link</div><br>";
+	  } elseif ($returned_value=="") {
+		print "<div class='highlight' style='border-color:red; background-color:salmon'>Error: No response. Validation server may be down, please try again later.</div><br>";
 	  }
 	  else {
-		print "<div class='highlight' style='border-color:red; background-color:salmon'>It appears that you've already used the key '$value'. Please try a different one.</div><br>";
+		print "<div class='highlight' style='border-color:red; background-color:salmon'>$returned_value</div><br>";
 	  }
   
   }

@@ -15,7 +15,7 @@ function get_cimyFields($wp_fields=false, $order_by_section=false) {
 		$order = " ORDER BY F_ORDER";
 
 	// if tables exist then read all fields else array empty, will be read after the creation
-	if($wpdb->get_var("SHOW TABLES LIKE '".$table."'") == $table) {
+	if ($wpdb->get_var("SHOW TABLES LIKE '".$table."'") == $table) {
 		$sql = "SELECT * FROM ".$table.$order;
 		$extra_fields = $wpdb->get_results($sql, ARRAY_A);
 	
@@ -406,9 +406,7 @@ function cimy_uef_sanitize_content($content, $override_allowed_tags=null) {
 }
 
 function cimy_check_admin($permission) {
-	global $cimy_uef_plugins_dir;
-
-	if ((is_multisite()) && ($cimy_uef_plugins_dir == "mu-plugins"))
+	if (cimy_uef_is_multisite_unique_installation())
 		return is_super_admin();
 	else
 		return current_user_can($permission);
@@ -459,13 +457,18 @@ function cimy_switch_to_blog($meta=array()) {
 			$mu_blog_id = intval($_GET["blog_id"]);
 		else if (isset($_POST["blog_id"]))
 			$mu_blog_id = intval($_POST["blog_id"]);
+		// needed because WordPress 3.5+ MS doesn't like to redirect to wp-signup.php using 'blog_id' parameter
+		if (isset($meta["from_blog_id"]))
+			$mu_blog_id = intval($meta["from_blog_id"]);
+		else if (isset($_GET["from_blog_id"]))
+			$mu_blog_id = intval($_GET["from_blog_id"]);
+		else if (isset($_POST["from_blog_id"]))
+			$mu_blog_id = intval($_POST["from_blog_id"]);
 		else
 			$mu_blog_id = 1;
 
 		if (cimy_uef_mu_blog_exists($mu_blog_id)) {
-			if (switch_to_blog($mu_blog_id))
-				cimy_uef_set_tables();
-			else
+			if (!switch_to_blog($mu_blog_id))
 				$mu_blog_id = 1;
 		}
 		else
@@ -473,14 +476,30 @@ function cimy_switch_to_blog($meta=array()) {
 	}
 }
 
+function cimy_uef_blog_switched($new_blog_id, $prev_blog_id) {
+	cimy_uef_set_tables();
+}
+
+function cimy_is_at_least_wordpress35() {
+	return version_compare(get_bloginfo('version'), '3.5') >= 0;
+}
+
 function cimy_switch_current_blog($hidden_field=false) {
 	global $switched, $blog_id;
 
 	if (isset($switched)) {
-		if ($hidden_field)
-			echo "\t<input type=\"hidden\" name=\"blog_id\" value=\"".$blog_id."\" />\n";
+		if ($hidden_field) {
+			if (cimy_is_at_least_wordpress35()) {
+				echo "\t<input type=\"hidden\" name=\"from_blog_id\" value=\"".$blog_id."\" />\n";
+			}
+			else {
+				echo "\t<input type=\"hidden\" name=\"blog_id\" value=\"".$blog_id."\" />\n";
+			}
+			
+		}
 
-		//restore_current_blog();
+		if (cimy_is_at_least_wordpress35())
+			restore_current_blog();
 	}
 }
 
@@ -749,8 +768,7 @@ function cimy_manage_upload($input_name, $user_login, $rules, $old_file=false, $
 				chmod($blog_path, FS_CHMOD_DIR);
 			}
 			else {
-				mkdir($blog_path, 0777);
-				chmod($blog_path, 0777);
+				wp_mkdir_p($blog_path);
 			}
 		}
 	}
@@ -789,8 +807,7 @@ function cimy_manage_upload($input_name, $user_login, $rules, $old_file=false, $
 			chmod($user_path, FS_CHMOD_DIR);
 		}
 		else {
-			mkdir($user_path, 0777);
-			chmod($user_path, 0777);
+			wp_mkdir_p($user_path);
 		}
 	}
 
@@ -801,8 +818,7 @@ function cimy_manage_upload($input_name, $user_login, $rules, $old_file=false, $
 			chmod($file_path, FS_CHMOD_DIR);
 		}
 		else {
-			mkdir($file_path, 0777);
-			chmod($file_path, 0777);
+			wp_mkdir_p($file_path);
 		}
 	}
 
@@ -911,4 +927,73 @@ function cimy_uef_get_allowed_image_extensions() {
 		if (stristr($value, "image/") !== false)
 			$image_ext = array_merge($image_ext, explode('|', $key));
 	return $image_ext;
+}
+
+// http://wpml.org/documentation/support/translation-for-texts-by-other-plugins-and-themes/
+function cimy_wpml_register_string($name, $value) {
+	global $cimy_uef_name;
+	if (function_exists('icl_register_string'))
+		icl_register_string($cimy_uef_name, $name, $value);
+}
+
+function cimy_wpml_translate_string($name, $value) {
+	global $cimy_uef_name;
+	if (function_exists('icl_t'))
+		return icl_t($cimy_uef_name, $name, $value);
+	return $value;
+}
+
+function cimy_wpml_unregister_string($name) {
+	global $cimy_uef_name;
+	if (function_exists('icl_unregister_string'))
+		icl_unregister_string($cimy_uef_name, $name);
+}
+
+/**
+ * @since 2.5.2
+ * @return true on WordPress registration page
+ */
+function cimy_uef_is_register_page() {
+	if (cimy_uef_is_theme_my_login_register_page())
+		return true;
+	$script_file = end(explode('/', $_SERVER['SCRIPT_NAME']));
+	if (!is_multisite() && stripos($script_file, "wp-login.php") !== false && !empty($_GET['action']) && $_GET['action'] == 'register')
+		return true;
+	else if (is_multisite() && stripos($script_file, "wp-signup.php") !== false)
+		return true;
+	return false;
+}
+
+/**
+ * @since 2.5.2
+ * @return true on Themed My Login - Themed Registration page
+ */
+function cimy_uef_is_theme_my_login_register_page() {
+	// Theme My Login <= v6.2.x
+	if (!empty($GLOBALS['theme_my_login']) && $GLOBALS['theme_my_login']->is_login_page())
+		return true;
+	// Theme My Login >= v6.3.0
+	if (function_exists('Theme_My_Login') && Theme_My_Login::is_tml_page('register'))
+		return true;
+	return false;
+}
+
+/**
+ * @since 2.5.2
+ * @return true on Themed My Login - Themed Profiles pages
+ */
+function cimy_uef_is_theme_my_login_profile_page() {
+	if (!empty($GLOBALS['theme_my_login']) || function_exists('Theme_My_Login'))
+		return defined('IS_PROFILE_PAGE') && constant('IS_PROFILE_PAGE');
+	return false;
+}
+
+function cimy_uef_is_multisite_unique_installation() {
+	global $cimy_uef_plugins_dir;
+	return is_multisite() && $cimy_uef_plugins_dir == "mu-plugins";
+}
+
+function cimy_uef_is_multisite_per_blog_installation() {
+	global $cimy_uef_plugins_dir;
+	return is_multisite() && $cimy_uef_plugins_dir != "mu-plugins";
 }

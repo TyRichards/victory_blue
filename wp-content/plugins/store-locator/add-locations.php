@@ -1,5 +1,6 @@
 <?php
-
+include("variables.sl.php");
+include("top-nav.php");
 print "
 <div class='wrap'>
 <h2>".__("Add Locations", $text_domain)."</h2><br>";
@@ -8,28 +9,37 @@ global $wpdb;
 initialize_variables();
 
 //Inserting addresses by manual input
-if ($_POST[sl_store] && $_GET[mode]!="pca") {
+$mode=(!empty($_GET['mode']))? $_GET['mode'] : "";
+if (!empty($_POST['sl_store']) && $mode!="pca") {
+	$fieldList=$valueList="";
 	foreach ($_POST as $key=>$value) {
 		if (ereg("sl_", $key)) {
+			if ($key=="sl_tags") {
+				//print "before: $value <br><br>";
+				$value=prepare_tag_string($value);
+				//print "after: $value \r\n"; die();
+			}
 			$fieldList.="$key,";
 			$value=comma($value);
-			$valueList.="\"".stripslashes($value)."\",";
+			$valueList.=$wpdb->prepare("%s", stripslashes($value)).",";
 		}
 	}
 	$fieldList=substr($fieldList, 0, strlen($fieldList)-1);
 	$valueList=substr($valueList, 0, strlen($valueList)-1);
-	//$wpdb->query("INSERT into ". $wpdb->prefix . "store_locator (sl_store, sl_address, sl_city, sl_state, sl_zip) VALUES ('$_POST[sl_store]', '$_POST[sl_address]', '$_POST[sl_city]', '$_POST[sl_state]', '$_POST[sl_zip]')");
-	//print "INSERT into ". $wpdb->prefix . "store_locator ($fieldList) VALUES ($valueList)"; exit;
 	$wpdb->query("INSERT into ". $wpdb->prefix . "store_locator ($fieldList) VALUES ($valueList)");
+	$new_loc_id=$wpdb->insert_id;
 	$address="$_POST[sl_address], $_POST[sl_city], $_POST[sl_state] $_POST[sl_zip]";
 	do_geocoding($address);
+	if (!empty($_POST['sl_tags'])){
+		sl_process_tags($_POST['sl_tags'], "insert", $new_loc_id);
+	}
 	print "<div class='updated fade'>".__("Successful Addition",$text_domain).". $view_link</div> <!--meta http-equiv='refresh' content='0'-->"; //header("location:$_SERVER[HTTP_REFERER]");
 }
 
 //Importing addresses from an local or remote database
-if ($_POST[remote] && trim($_POST[query])!="" || $_POST[finish_import]) {
+if (!empty($_POST['remote']) && trim($_POST['query'])!="" || !empty($_POST['finish_import'])) {
 	
-	if (ereg(".*\..{2,}", $_POST[server])) {
+	if (!empty($_POST['server']) && ereg(".*\..{2,}", $_POST['server'])) {
 		include($sl_upload_path."/addons/db-importer/remoteConnect.php");
 	}
 	else {
@@ -41,15 +51,15 @@ if ($_POST[remote] && trim($_POST[query])!="" || $_POST[finish_import]) {
 		//}
 	}
 	//for intermediate step match column data to field headers
-	if ($_POST[finish_import]!="1") {exit();}
+	if ($_POST['finish_import']!="1") {exit();}
 }
 
 //Importing CSV file of addresses
 $newfile="temp-file.csv"; 
-$target_path="$root/";
 $root=ABSPATH."wp-content/plugins/".dirname(plugin_basename(__FILE__));
+$target_path="$root/";
 //print_r($_FILES);
-if (move_uploaded_file($_FILES['csv_import']['tmp_name'], "$root/$newfile") && file_exists($sl_upload_path."/addons/csv-xml-importer-exporter/csvImport.php")) {
+if (!empty($_FILES['csv_import']) && move_uploaded_file($_FILES['csv_import']['tmp_name'], "$root/$newfile") && file_exists($sl_upload_path."/addons/csv-xml-importer-exporter/csvImport.php")) {
 	include($sl_upload_path."/addons/csv-xml-importer-exporter/csvImport.php");
 }
 else{
@@ -57,7 +67,7 @@ else{
 }
 
 //If adding via the Point, Click, Add map (accepting AJAX)
-if ($_GET[mode]=="pca") {
+if (!empty($_GET['mode']) && $_GET['mode']=="pca") {
 	include($sl_upload_path."/addons/point-click-add/pcaImport.php");
 }
 	

@@ -25,11 +25,19 @@ function cimy_save_options() {
 	$options['wp_hidden_fields'] = array();
 
 	$options['welcome_email'] = stripslashes($_POST['welcome_email']);
+	cimy_wpml_register_string("a_opt_welcome_email", $options['welcome_email']);
 	$options['extra_fields_title'] = stripslashes($_POST['extra_fields_title']);
 	$options['extra_fields_title'] = substr($options['extra_fields_title'], 0, $max_length_extra_fields_title);
+	cimy_wpml_register_string("a_opt_extra_fields_title", $options['extra_fields_title']);
 
 	$options['fieldset_title'] = stripslashes($_POST['fieldset_title']);
 	$options['fieldset_title'] = substr($options['fieldset_title'], 0, $max_length_fieldset_value);
+	$fieldset_titles = explode(",", $options['fieldset_title']);
+	if (!empty($fieldset_titles)) {
+		foreach ($fieldset_titles as $fset_key => $fieldset) {
+			cimy_wpml_register_string("a_opt_fieldset_title_".$fset_key, $fieldset);
+		}
+	}
 
 	$old_reg_log = $options['registration-logo'];
 	$registration_logo = cimy_manage_upload("registration_logo", "", array(), empty($old_reg_log) ? false : basename($old_reg_log), isset($_POST['registration_logo_del']), "registration-logo");
@@ -169,7 +177,7 @@ function cimy_save_options() {
 		else
 			$options['password_meter'] = false;
 
-		$db_wp_fields_independent = array("firstname", "lastname", "nickname", "website", "aim", "yahoo", "jgt", "bio-info");
+		$db_wp_fields_independent = array("username", "firstname", "lastname", "nickname", "website", "aim", "yahoo", "jgt", "bio-info");
 		foreach ($db_wp_fields_independent as $wp_field_independent) {
 			if (isset($_POST['show_wp_'.$wp_field_independent])) {
 				array_push($options['wp_hidden_fields'], $wp_field_independent);
@@ -279,7 +287,7 @@ function cimy_show_options($results, $embedded) {
 				if (defined("FS_CHMOD_DIR"))
 					@mkdir($cuef_upload_path, FS_CHMOD_DIR);
 				else
-					@mkdir($cuef_upload_path, 0777);
+					wp_mkdir_p($cuef_upload_path);
 			}
 
 			if (is_multisite()) {
@@ -288,7 +296,7 @@ function cimy_show_options($results, $embedded) {
 						if (defined("FS_CHMOD_DIR"))
 							@mkdir(WP_CONTENT_DIR.'/mu-plugins', FS_CHMOD_DIR);
 						else
-							@mkdir(WP_CONTENT_DIR.'/mu-plugins', 0777);
+							wp_mkdir_p(WP_CONTENT_DIR.'/mu-plugins');
 					}
 					if (!is_file(WP_CONTENT_DIR.'/mu-plugins/cimy_uef_mu_activation.php'))
 						copy($cuef_plugin_dir.'/cimy_uef_mu_activation.php', WP_CONTENT_DIR.'/mu-plugins/cimy_uef_mu_activation.php');
@@ -671,6 +679,12 @@ function cimy_show_options($results, $embedded) {
 	<br />
 	<h3><?php _e("WordPress hidden fields", $cimy_uef_domain); ?></h3>
 	<table class="form-table">
+<?php if (!is_multisite()) { ?>
+		<tr>
+			<th scope="row" width="40%"><input type="checkbox" name="show_wp_username" value="1"<?php checked(true, in_array('username', $options['wp_hidden_fields']), true); disabled(true, $db_wp_fields < 0, true); ?> /> <?php _e("Show username", $cimy_uef_domain); ?></th>
+			<td width="60%"><?php _e("when unchecked the email address will be used as username", $cimy_uef_domain); ?></td>
+		</tr>
+<?php } ?>
 		<tr>
 			<th scope="row" width="40%"><input type="checkbox" name="show_wp_password" value="1"<?php checked(true, in_array('password', $options['wp_hidden_fields']), true); disabled(true, $db_wp_fields < 0, true); ?> /> <?php _e("Show password", $cimy_uef_domain); ?></th>
 			<td width="60%"></td>

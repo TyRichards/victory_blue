@@ -1,10 +1,7 @@
-//<![CDATA[
     var map;
     var geocoder;
-	
 	var theIcon = new GIcon(G_DEFAULT_ICON);
 	theIcon.image = sl_map_end_icon;
-	//theIcon.image = add_base + "/icons/red_flag1.png";
 	if (sl_map_end_icon.indexOf('flag')!='-1') {theIcon.shadow = add_base + "/icons/flag_shadow.png";}
 	else if (sl_map_end_icon.indexOf('arrow')!='-1') {theIcon.shadow = add_base + "/icons/arrow_shadow.png";}
 	else if (sl_map_end_icon.indexOf('bubble')!='-1') {theIcon.shadow = add_base + "/icons/bubble_shadow.png";}
@@ -12,32 +9,21 @@
 	else if (sl_map_end_icon.indexOf('sign')!='-1') {theIcon.shadow = add_base + "/icons/sign_shadow.png";}
 	else {theIcon.shadow = add_base + "/icons/blank.png";}
 	theIcon.iconSize = new GSize(sl_map_end_icon_width, sl_map_end_icon_height);
-	//theIcon.iconSize = new GSize(40, 68);
 
-	// Added by Moyo 5/23/08 11:52 am
-	//var sidebar1 = document.getElementById('sidebar');
-    //sidebar1.innerHTML = '';
-    //if (markers.length == 0) {
-		//sidebar1.innerHTML = '<h1>Enter Your Address or Zip Code Above.</h2>';
-	//}
-	
     function sl_load() {
       if (GBrowserIsCompatible()) {
         geocoder = new GClientGeocoder();
         map = new GMap2(document.getElementById('map'));
-		//map.addControl(new GSmallMapControl());
-		//map.addControl(new GSmallZoomControl());
 		if (sl_map_overview_control==1) {
 			map.addControl(new GOverviewMapControl());
 			}
-		//map.addControl(new GLargeMapControl); //11/29/08 1:19am Moyo
-        //map.addControl(new GMapTypeControl());
-		//map.addControl(new GMapTypeControl());
 		map.addMapType(G_PHYSICAL_MAP);
-		geocoder.getLatLng(sl_google_map_country, function(latlng) {
-			map.setCenter(latlng, sl_zoom_level, sl_map_type);
-			map.setUIToDefault();
-		});
+		if (sl_load_locations_default!="1") { //<--prevents jerkey, double centering of map; added 3/31/12
+			geocoder.getLatLng(sl_google_map_country, function(latlng) {
+				map.setCenter(latlng, sl_zoom_level, sl_map_type);
+				map.setUIToDefault();
+			});
+		}
       }
 	  
 	  //added by Moyo 1/25/09 to show locations by default
@@ -67,7 +53,10 @@
 			map.addOverlay(marker);
 			bounds.extend(point);
 		}
-		map.setCenter(bounds.getCenter(), (map.getBoundsZoomLevel(bounds)-1));
+		map.setCenter(bounds.getCenter(), (map.getBoundsZoomLevel(bounds)-1)); //zoom out 1 step for better view
+		if (map.getZoom()>16){ 
+			map.setZoom(9); //for instances where zoom is very close to begin with (1 location or so);  9/10 -  city level zoom ; added 3/31/12
+		}
 		map.setUIToDefault();
 	  });
      }
@@ -77,7 +66,7 @@
      var address = document.getElementById('addressInput').value;
      geocoder.getLatLng(address, function(latlng) {
        if (!latlng) {
-         alert(address + ' not found');
+         showLoadImg('stop'); alert(address + ' not found'); 
        } else {
          searchLocationsNear(latlng, address); // address param added by Moyo 5/23/08
        }
@@ -119,7 +108,8 @@
        var sidebar = document.getElementById('map_sidebar');
        sidebar.innerHTML = '';
        if (markers.length == 0) {
-         sidebar.innerHTML = '<div class="no_results_found"><h2>No results found.</h2></div>';
+		 showLoadImg('stop');
+         sidebar.innerHTML = '<div class="text_below_map">No Results Found.</div>';
          geocoder = new GClientGeocoder();
        	geocoder.getLatLng(sl_google_map_country, function(latlng) {
 			map.setCenter(point, sl_zoom_level);
@@ -147,6 +137,7 @@
          bounds.extend(point);
        }
 	  map.setCenter(bounds.getCenter(), (map.getBoundsZoomLevel(bounds)-1)); //8/28/08: -1 to zoom out one step
+	  showLoadImg('stop');
 	 });
 	  
    }
@@ -170,7 +161,7 @@
 		//address=street + city + state_zip;
 	  
 	  if (homeAddress.split(" ").join("")!="") {
-		var html = '<div id="sl_info_bubble"><!--tr><td--><strong>' + name + '</strong><br>' + street + city + state_zip + '<br/> <a href="http://' + sl_google_map_domain + '/maps?saddr=' + encodeURIComponent(homeAddress) + '&daddr=' + encodeURIComponent(address) + '" target="_blank" class="storelocatorlink">Directions</a> ' + more_html + '<br/><!--/td></tr--></div>'; // Get Directions link added by Moyo 5/23/08
+		var html = '<div id="sl_info_bubble"><!--tr><td--><strong>' + name + '</strong><br>' + street + city + state_zip + '<br/> <a href="http://' + sl_google_map_domain + '/maps?saddr=' + encodeURIComponent(homeAddress) + '&daddr=' + encodeURIComponent(address) + '" target="_blank" class="storelocatorlink">' + sl_directions_label + '</a> ' + more_html + '<br/><!--/td></tr--></div>'; // Get Directions link added by Moyo 5/23/08
 	  }
 	  else {
 		var html = '<div id="sl_info_bubble"><!--tr><td--><strong>' + name + '</strong><br>' + street + city + state_zip + '<br/> <a href="http://' + sl_google_map_domain + '/maps?q=' + encodeURIComponent(address) + '" target="_blank" class="storelocatorlink">Map</a> ' + more_html + '<!--/td></tr--></div>';
@@ -194,33 +185,27 @@
 	  var state_zip = address.split(',')[2]; 
 	  //var more = address.split(',')[3];
 	  if(url.indexOf("http://")==-1) {url="http://"+url;} //added by Moyo 10/19/2009 so that www.someurl.com will show up as http://www.someurl.com
-	  if (url.indexOf("http://")!=-1 && url.indexOf(".")!=-1) {link="<a href='"+url+"' target='_blank' class='storelocatorlink'><nobr>" + sl_website_label +"</nobr></a>&nbsp;|&nbsp;"} else {url=""; link="";}
+	  if (url.indexOf("http://")!=-1 && url.indexOf(".")!=-1) {link="&nbsp;|&nbsp;<a href='"+url+"' target='_blank' class='storelocatorlink'><nobr>" + sl_website_label +"</nobr></a>"} else {url=""; link="";}
 	  
-      var html = '<center><table width="96%" cellpadding="4px" cellspacing="0" class="searchResultsTable"><tr><td class="results_row_left_column"><span class="location_name">' + name + '</span><br>' + distance.toFixed(1) + ' ' + sl_distance_unit + '</td><td class="results_row_center_column">' + street + '<br/>' + city + state_zip +' </td><td class="results_row_right_column">' + link + '<a href="http://' + sl_google_map_domain + '/maps?saddr=' + encodeURIComponent(homeAddress) + '&daddr=' + encodeURIComponent(address) + '" target="_blank" class="storelocatorlink">Directions</a></td></tr></table></center>'; // Get Directions link added by Moyo 5/23/08
-      /*if (resultsDisplayed==0) {
-		div.innerHTML = "<table><tr><td>";
-	  }*/
+      var html = '<center><table class="searchResultsTable"><tr><td class="results_row_left_column"><span class="location_name">' + name + '</span><br>' + distance.toFixed(1) + ' ' + sl_distance_unit + '</td><td class="results_row_center_column">' + street + '<br/>' + city + state_zip +' </td><td class="results_row_right_column"> <a href="http://' + sl_google_map_domain + '/maps?saddr=' + encodeURIComponent(homeAddress) + '&daddr=' + encodeURIComponent(address) + '" target="_blank" class="storelocatorlink">' + sl_directions_label + '</a> ' + link + '</td></tr></table></center>';
 	  div.innerHTML = html;
 	  div.className='results_entry';
-      /*div.style.cursor = 'pointer';
-      div.style.padding = '4px';
-	  div.style.color = 'black'; //added by Moyo 11/2/08 10:43am
-	  div.style.borderBottom = 'solid silver 1px' ; // added by Moyo 5/23/08 11:23am
-	  div.style.backgroundColor = bgcol; //added 12/2/2208*/
 	  resultsDisplayed++;
       GEvent.addDomListener(div, 'click', function() {
         GEvent.trigger(marker, 'click');
-      }); /*
-      GEvent.addDomListener(div, 'mouseover', function() {
-        div.style.backgroundColor = 'salmon';
       });
-      GEvent.addDomListener(div, 'mouseout', function() {
-        div.style.backgroundColor = '#fff';
-      });
-	  if (bgcol=="white") {bgcol="#ffffff";} else {bgcol="white";}	  */
       return div;
     }
-    //]]>
 
-	//document.onload=load();
-//	document.onunload=GUnload();
+function showLoadImg(cmd) {
+	loadImg=document.getElementById('loadImg');
+	if (cmd=='show') {
+		//loadImg.style.display='inline';
+		loadImg.style.opacity = 1;
+		loadImg.style.filter = 'alpha(opacity=100)';
+	} else {
+		//loadImg.style.display='none';
+		loadImg.style.opacity = 0;
+		loadImg.style.filter = 'alpha(opacity=0)';
+	}
+}	

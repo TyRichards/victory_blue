@@ -20,14 +20,15 @@ if (!class_exists('ViaLatest')) {
 
 		// Register this widget -- we use a hook/function to make the widget a dashboard-only widget
 		function register_widget() {
-			wp_register_sidebar_widget( 'via_posts', __( 'Latest about Store Locator for WordPress', $text_domain ), array(&$this, 'widget'), array( 'all_link' => 'http://www.viadat.com/category/store-locator', 'feed_link' => 'http://feeds.feedburner.com/viadat', 'edit_link' => 'options.php' ) );
+			$text_domain='lol';
+			@wp_register_sidebar_widget( 'via_posts', __( 'Latest about Store Locator for WordPress', $text_domain ), array(&$this, 'widget'), array( 'all_link' => 'http://www.viadat.com/category/store-locator', 'feed_link' => 'http://feeds.feedburner.com/viadat', 'edit_link' => 'options.php' ) );
 		}
 
 		// Modifies the array of dashboard widgets and adds this plugin's
 		function add_widget( $widgets ) {
 			global $wp_registered_widgets;
-			if ( !isset($wp_registered_widgets['via_posts']) ) return $widgets;
-			array_splice( $widgets, 2, 0, 'via_posts' );
+			if (!empty($wp_registered_widgets['via_posts']) && !isset($wp_registered_widgets['via_posts']) ) return $widgets;
+			@array_splice( $widgets, 2, 0, 'via_posts' );
 			return $widgets;
 		}
 

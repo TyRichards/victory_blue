@@ -20,6 +20,10 @@
 	border-bottom: none;
 }
 
+.widefat td {
+	vertical-align:middle !important;
+}
+
 .widefat thead,.widefat thead tr {
 	background-color: #464646;
 	background-image: none;
@@ -70,4 +74,61 @@ div.feedburnerFeedBlock ul li span.headline {
 }
 .left_side {
 	border-right:solid #ddd 1px;
+}
+.sl_admin_warning {
+	background-color:pink; 
+	border-left:solid maroon 1px; 
+	border-right:solid maroon 1px; 
+	padding:7px; 
+	width:75%;
+}
+
+/* For Top Navigation Tabs */
+
+.tablist {
+    list-style:none; 
+    height:2.5em;
+    padding:0; 
+    margin:0; 
+    border-bottom: solid #5589AA 1px;
+}
+.tablist li {
+    float:left; 
+    margin-right:0.13em; 
+}
+.tablist li a {
+    display:block;
+    padding:0 1em;
+    text-decoration:none;
+    border: 1px solid gray;
+    border-bottom:0;
+    font:bold 1.1em/2.2em arial,geneva,helvetica,sans-serif;
+    color:#000;
+    background-color:#fff;
+
+    /* CSS 3 elements */
+    webkit-border-top-right-radius:0.50em;
+    -webkit-border-top-left-radius:0.50em;
+    -moz-border-radius-topright:0.50em;
+    -moz-border-radius-topleft:0.50em;
+    border-top-right-radius:0.50em;
+    border-top-left-radius:0.50em;
+}
+
+.tablist li a:hover {
+    background:white; 
+    color:maroon;
+    text-decoration:none;
+}
+.tablist li#current a {
+    background-color: #5589AA;
+    background-image: -moz-linear-gradient(center bottom , #5589AA, #619BBB);
+	text-shadow:0 -1px 0 #333333;
+    color: #fff;
+	border-bottom:none;
+	/*font-weight:bold;*/
+}
+.tablist li#current a:hover {
+	background-color: #5589AA;
+    background-image: -moz-linear-gradient(center bottom , #5589AA, #619BBB);
 }

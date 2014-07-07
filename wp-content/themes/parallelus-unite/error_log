@@ -36,3 +36,14 @@
 [14-May-2013 13:21:58] PHP Fatal error:  Call to undefined function  get_header() in /home/ty/public_html/wp-content/themes/parallelus-unite/index.php on line 1
 [12-Jul-2013 14:07:03] PHP Fatal error:  Call to undefined function  get_header() in /home/ty/public_html/wp-content/themes/parallelus-unite/index.php on line 1
 [18-Jul-2013 14:35:15] PHP Fatal error:  Call to undefined function  get_header() in /home/ty/public_html/wp-content/themes/parallelus-unite/index.php on line 1
+[04-Sep-2013 16:31:42] PHP Fatal error:  Call to undefined function  get_header() in /home4/ty/public_html/wp-content/themes/parallelus-unite/index.php on line 1
+[09-Sep-2013 17:59:22] PHP Fatal error:  Call to undefined function  get_header() in /home4/ty/public_html/wp-content/themes/parallelus-unite/index.php on line 1
+[13-Sep-2013 14:48:29] PHP Fatal error:  Call to undefined function  get_header() in /home4/ty/public_html/wp-content/themes/parallelus-unite/index.php on line 1
+[09-Oct-2013 14:57:58] PHP Fatal error:  Call to undefined function  get_header() in /home4/ty/public_html/wp-content/themes/parallelus-unite/index.php on line 1
+[16-Dec-2013 16:19:02] PHP Fatal error:  Call to undefined function  get_header() in /home4/ty/public_html/wp-content/themes/parallelus-unite/index.php on line 1
+[01-Feb-2014 23:01:09] PHP Fatal error:  Call to undefined function  get_header() in /home4/ty/public_html/wp-content/themes/parallelus-unite/index.php on line 1
+[14-Feb-2014 16:22:11] PHP Fatal error:  Call to undefined function  get_header() in /home4/ty/public_html/wp-content/themes/parallelus-unite/index.php on line 1
+[19-Mar-2014 02:09:48] PHP Fatal error:  Call to undefined function  get_header() in /home4/ty/public_html/wp-content/themes/parallelus-unite/index.php on line 1
+[19-Mar-2014 13:58:01] PHP Fatal error:  Call to undefined function  get_header() in /home4/ty/public_html/wp-content/themes/parallelus-unite/index.php on line 1
+[20-Mar-2014 10:10:55] PHP Fatal error:  Call to undefined function  get_header() in /home4/ty/public_html/wp-content/themes/parallelus-unite/index.php on line 1
+[20-Mar-2014 22:51:24] PHP Fatal error:  Call to undefined function  get_header() in /home4/ty/public_html/wp-content/themes/parallelus-unite/index.php on line 1

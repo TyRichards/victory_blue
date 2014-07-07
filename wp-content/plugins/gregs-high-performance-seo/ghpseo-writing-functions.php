@@ -2,7 +2,7 @@
 
 /*  Greg's Writing Additions
 	
-	Copyright (c) 2009-2011 Greg Mulhauser
+	Copyright (c) 2009-2012 Greg Mulhauser
 	http://gregsplugins.com
 	
 	Released under the GPL license
@@ -30,6 +30,7 @@ class ghpseoWritingAdditions { // insert our various additions to the writing pa
 	var $post_set;             // additions for post editing
 	var $page_set;             // additions for page editing
 	var $docounter;            // add a character counter to this box
+	var $cust_types;		   // support custom post types?
 
 	function ghpseoWritingAdditions($args) {
 		$this->__construct($args);
@@ -45,6 +46,7 @@ class ghpseoWritingAdditions { // insert our various additions to the writing pa
 		$this->post_set = $post_set;
 		$this->page_set = $page_set;
 		$this->docounter = $docounter;
+		$this->cust_types = $cust_types;
 		// add actions depending on where user has told us to place additions
 		if ($post_set || $page_set) {
 			add_action('admin_menu', array(&$this, 'add_boxes'));
@@ -67,6 +69,15 @@ class ghpseoWritingAdditions { // insert our various additions to the writing pa
 			add_meta_box("{$prefix}-meta", $name, array(&$this,'meta_writing_page'), 'page', 'normal', 'high');
 		if ($this->post_set)
 			add_meta_box("{$prefix}-meta", $name, array(&$this,'meta_writing_post'), 'post', 'normal', 'high');
+		if ($this->post_set && $this->cust_types) {
+			$args = array(
+					'_builtin' => false
+					); 
+			$post_types = get_post_types($args);
+			foreach ($post_types  as $post_type ) {
+				add_meta_box("{$prefix}-meta", $name, array(&$this,'meta_writing_post'), $post_type, 'normal', 'high');
+			}
+		}
 		return;
 	}
 
@@ -186,10 +197,12 @@ EOT;
 			
 			$toreplace = array ('%NAME%','%VALUE%','%DESCRIPTION%','%CHECKED%','%TAGBEFORE%','%TAGEXTRA%','%TAGAFTER%','%TABINDEX%');
 			$replacements = array ($meta['name'],$meta_value,$meta['description'],$checked,$tagbefore,$tagextra,$tagafter,'tabindex="' . $tabindex . '"');
+
+			$here = basename(dirname( __FILE__)) . '/' . basename( __FILE__); // don't use plugin_basename
 			
 			$output .= $str['label_pre'];
 			$output .= $str['label_tag_pre'] . '<label for="%NAME%">' . $meta['title'] . '</label>' . $str['label_tag_post'];
-			$output .= '<input type="hidden" name="%NAME%_noncename" id="%NAME%_noncename" value="'.wp_create_nonce( plugin_basename(__FILE__) ).'" />';
+			$output .= '<input type="hidden" name="%NAME%_noncename" id="%NAME%_noncename" value="'.wp_create_nonce( $here ).'" />';
 			$output .= $str['label_post'];
 			$output .= $str['fulltag_pre'];
 			$output .= $fulltag;
@@ -205,20 +218,25 @@ EOT;
 		return;
 	} // end function for showing boxes
 
-	function save_postdata( $post_id ) { // welcome to the old days: we have to save this stuff ourself; some day, hopefully, there will be an analogue of register_setting for this job
+	function save_postdata( $post_id ) { // welcome to the old days: we have to save this stuff ourselves; some day, hopefully, there will be an analogue of register_setting for this job
 		global $post;
 		if ($this->restrict()) return; // if restricted and current user cannot publish posts, don't do anything
 		
 		// *** NOTE problems may occur with the following line if dashboard ever has different set than post set
-		$meta_set = ( 'page' == $_POST['post_type'] ) ? $this->page_set : $this->post_set;
+		$meta_set = ( ( isset($_POST['post_type']) ) && ( 'page' == $_POST['post_type'] ) ) ? $this->page_set : $this->post_set;
 		
-		foreach($meta_set as $meta) {
+		$here = basename(dirname( __FILE__)) . '/' . basename( __FILE__); // don't use plugin_basename
+
+		foreach ($meta_set as $meta) {
 			// Verify this came from the appropriate screen and with authentication
-			if ( !wp_verify_nonce( $_POST[$meta['name'].'_noncename'], plugin_basename(__FILE__) )) {
+			if (!isset($_POST[$meta['name'].'_noncename']) || !wp_verify_nonce( $_POST[$meta['name'].'_noncename'], $here )) {
 				return $post_id;
 			}
-			
-			if ( 'page' == $_POST['post_type'] ) {
+/*			if ( !wp_verify_nonce( $_POST[$meta['name'].'_noncename'], plugin_basename(__FILE__) )) {
+				return $post_id;
+			}
+*/			
+			if ( ( isset($_POST['post_type']) ) && ( 'page' == $_POST['post_type'] ) ) {
 				if ( !current_user_can( 'edit_page', $post_id )) return $post_id;
 			}
 			else {

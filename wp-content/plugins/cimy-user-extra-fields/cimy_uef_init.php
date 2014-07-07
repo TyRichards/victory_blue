@@ -14,7 +14,7 @@ function cimy_uef_i18n_setup() {
 }
 
 function cimy_admin_menu_custom() {
-	global $cimy_uef_name, $cimy_uef_domain, $cimy_top_menu, $cimy_uef_plugins_dir;
+	global $cimy_uef_name, $cimy_uef_domain, $cimy_top_menu;
 
 	$aue_page = "";
 	if (isset($cimy_top_menu) && (!is_multisite())) {
@@ -23,7 +23,7 @@ function cimy_admin_menu_custom() {
 		$aue_page = add_submenu_page('profile.php', __('Users Extended', $cimy_uef_domain), __('Users Extended', $cimy_uef_domain), 'list_users', "users_extended", 'cimy_admin_users_list_page');
 	}
 	else {
-		if ((is_multisite()) && ($cimy_uef_plugins_dir == "mu-plugins")) {
+		if (cimy_uef_is_multisite_unique_installation()) {
 // 			$aue_page = add_submenu_page('wpmu-admin.php', __("Users Extended", $cimy_uef_domain), __("Users Extended", $cimy_uef_domain), 'list_users', "users_extended", 'cimy_admin_users_list_page');
 // 			add_submenu_page('wpmu-admin.php', $cimy_uef_name, $cimy_uef_name, 'manage_options', "user_extra_fields", 'cimy_admin_define_extra_fields');
 
@@ -43,9 +43,22 @@ function cimy_admin_menu_custom() {
 }
 
 function cimy_uef_admin_init() {
-	global $cuef_js_webpath;
+	global $cuef_js_webpath, $cuef_plugin_dir;
+	require_once($cuef_plugin_dir.'/cimy_uef_admin.php');
+	require_once($cuef_plugin_dir.'/cimy_uef_options.php');
+	// add code to handle new value from ajax code in A&U Extended
+	add_action('wp_ajax_save-extra-field-new-value', 'cimy_uef_admin_ajax_save_ef_new_value');
+
 	wp_register_script("cimy_uef_invert_sel", $cuef_js_webpath."/invert_sel.js", array(), false);
 	wp_register_script("cimy_uef_ajax_new_value", $cuef_js_webpath."/ajax_new_value.js", array(), false);
+}
+
+function cimy_uef_init() {
+	if (!cimy_uef_is_register_page())
+		return;
+	$options = cimy_get_options();
+	if ($options['captcha'] == "securimage")
+		session_start();
 }
 
 function cimy_uef_admin_init_js() {
@@ -61,21 +74,29 @@ function cimy_uef_init_upload_js() {
 
 function cimy_uef_theme_my_login_fix() {
 	// Theme My Login spam with its css _all_ pages, we like it cleaner thanks!
+	// Seems not needed any longer for TML >= 6.3.x
 	if (!empty($GLOBALS['theme_my_login'])) {
 		if ($GLOBALS['theme_my_login']->is_login_page())
 			cimy_uef_register_css();
-		// Themed profile
-		if (defined('IS_PROFILE_PAGE') && constant('IS_PROFILE_PAGE'))
-			cimy_uef_admin_profile_init_js();
 	}
+	// Theme My Login - Themed Profiles module
+	if (cimy_uef_is_theme_my_login_profile_page())
+		cimy_uef_admin_profile_init_js();
 }
 
 function cimy_uef_register_css() {
 	global $cuef_css_webpath;
+	if (!cimy_uef_is_register_page())
+		return;
 	wp_register_style("cimy_uef_register", $cuef_css_webpath."/cimy_uef_register.css", false, false);
 	wp_enqueue_style("cimy_uef_register");
+	wp_register_style("cimy_uef_register_nousername", $cuef_css_webpath."/cimy_uef_register_nousername.css", false, false);
+
 	if (!is_multisite()) {
 		$options = cimy_get_options();
+		if (!in_array("username", $options["wp_hidden_fields"])) {
+			wp_enqueue_style("cimy_uef_register_nousername");
+		}
 		if (in_array("password", $options["wp_hidden_fields"])) {
 			// this CSS will hide the label "A password will be e-mailed to you."
 			wp_register_style("cimy_uef_register_nopasswordlabel", $cuef_css_webpath."/cimy_uef_register_nopasswordlabel.css", false, false);

@@ -14,7 +14,7 @@ function wp_new_user_notification($user_id, $plaintext_pass = '') {
 	$options = cimy_get_options();
 	if (!is_multisite()) {
 		if (!$options["confirm_email"])
-			wp_new_user_notification_original($user_id, $plaintext_pass, $options["mail_include_fields"], false, $options["welcome_email"]);
+			wp_new_user_notification_original($user_id, $plaintext_pass, $options["mail_include_fields"], false, cimy_wpml_translate_string("a_opt_welcome_email", $options["welcome_email"]));
 		// if confirmation email is enabled delete the default_password_nag but checks first if has not been done on top of this function!
 		else if (!isset($_POST["cimy_uef_wp_PASSWORD"]))
 			delete_user_meta($user_id, 'default_password_nag');
@@ -96,13 +96,13 @@ function cimy_uef_mail_fields($user = false, $activation_data = false) {
 	if (empty($meta)) {
 		// normal fields
 		foreach ($wp_hidden_fields as $field) {
-			if ((!empty($user->{$field["post_name"]})) && ($field["type"] != "password")) {
+			if ((!empty($user->{$field["userdata_name"]})) && ($field["type"] != "password")) {
 				$label = $field["label"];
 				if ($field["type"] == "dropdown" || $field["type"] == "dropdown-multi") {
 					$ret = cimy_dropDownOptions($label, "");
 					$label = $ret['label'];
 				}
-				$message.= sprintf(__('%s: %s', $cimy_uef_domain), $label, $user->{$field["post_name"]}) . "\r\n";
+				$message.= sprintf(__('%s: %s', $cimy_uef_domain), $label, $user->{$field["userdata_name"]}) . "\r\n";
 			}
 		}
 	}
@@ -210,7 +210,14 @@ function cimy_signup_user_notification($user, $user_email, $key, $meta = '') {
 	$message_headers = "From: \"{$from_name}\" <{$admin_email}>\n" . "Content-Type: text/plain; charset=\"" . get_option('blog_charset') . "\"\n";
 	$message = sprintf( apply_filters( 'wpmu_signup_user_notification_email', __( "To activate your user, please click the following link:\n\n%s\n\nAfter you activate, you will receive *another email* with your login.\n\n", $cimy_uef_domain) ), site_url( "wp-login.php?cimy_key=$key$redirect_to" ), $key );
 	// TODO: Don't hard code activation link.
-	$subject = sprintf( __( apply_filters( 'wpmu_signup_user_notification_subject', '[%1$s] Activate %2$s' ), $cimy_uef_domain ), $from_name, $user);
+	$subject = sprintf(
+		apply_filters('wpmu_signup_user_notification_subject',
+			__('[%1$s] Activate %2$s', $cimy_uef_domain),
+			$user, $user_email, $key, $meta
+		),
+		$from_name,
+		$user
+	);
 	wp_mail($user_email, $subject, $message, $message_headers);
 	return true;
 }
@@ -285,7 +292,7 @@ function cimy_uef_activate_signup($key) {
 		return new WP_Error( 'user_already_exists', __( 'That username is already activated.', $cimy_uef_domain), $signup);
 
 	$options = cimy_get_options();
-	wp_new_user_notification_original($user_id, $password, $options["mail_include_fields"], $meta, $options["welcome_email"]);
+	wp_new_user_notification_original($user_id, $password, $options["mail_include_fields"], $meta, cimy_wpml_translate_string("a_opt_welcome_email", $options["welcome_email"]));
 	return array('user_id' => $user_id, 'password' => $password, 'meta' => $meta);
 }
 

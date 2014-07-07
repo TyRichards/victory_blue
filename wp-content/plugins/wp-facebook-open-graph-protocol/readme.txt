@@ -1,56 +1,128 @@
 === WP Facebook Open Graph protocol ===
-Contributors: ryno267
+Contributors: ryno267, andrewryno
 Donate link: http://goo.gl/8lGv3
-Tags: facebook, open graph, ogp, google +1, +1, google plus one, plus one, facebook meta, open graph meta, featured image, facebook share, facebook like 
+Tags: open graph, ogp, facebook open graph, google +1, +1, google plus one, plus one, linkedin share, facebook meta, open graph meta, facebook share, facebook like, linkedin
 Requires at least: 3.0
-Tested up to: 3.3.1
-Stable tag: trunk
+Tested up to: 3.4.2
+Stable tag: 2.0.7
+License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Adds the proper Facebook open graph meta tags and values to your site and/or blog so when your pages and posts are shared it looks awesome and provides Facebook with good data.
-NEW: Plugin will work for the new +Snippets for Google +1 Button!
+Adds proper Facebook Open Graph Meta tags and values to your site so when links are shared it looks awesome!
 
 == Description ==
-
-This plugin adds Facebook Open Graph Meta information to your site and properly designates if it's an article or a website page. There will be more in regard to this in soonish releases. See Roadmap info below.
-As of 08/24/2011 this plugin will also provide +Snippet data to the Google +1 Plus One Button.
+This plugin adds well executed and accurate Facebook Open Graph Meta tag information to your site. The idea is to keep minimal settings and options as to remain out of your way and in the background while still proving a powerful Open Graph plugin for your WordPress site. This plugin works on Facebook, Google Plus, and Linkedin.
 Shortname: WPFBOGP
 
 = Image Handling =
-The plugin will first look for a featured image. If there isn't one or your theme doesn't have those available, then it will pull the first image in the post/page content. If that isn't there either, then it will default to using the image you put into the plugin settings in the admin panel. If THAT isn't there then... well you fail and you won't have an image. The plugin will still work fine but it won't look as pretty on your Facebook wall. People click more on wall posts with images and your site will have better reader conversion with an image in the content. Fact.
+By popular demand we've added a setting so the Fallback image in settings can be the default sitewide. If you don't check that box, here's now she works.
+The plugin will first look for a featured image. If there isn't one or your theme doesn't have those available, then it will pull the image(s) in the post/page content. If that isn't there either, then it will default to using the image you put into the plugin settings in the admin panel. If THAT isn't there then... well you fail and you won't have an image and we'll put a comment in your source to remind you to add one as Facebook requires one.
+New in 2.0 - We'll pull ALL those images and feed them to Facebook and Google + so you can hit the arrows to select which one you want. It will use the fallback image first IF it's selected as default, then will do featured image next and then any content images.
+Test with the <a href="http://developers.facebook.com/tools/debug">Facebook Debugger</a>.
 
 = Title and Description =
-On your home/index it will display your site name (from wp settings), otherwise will display whatever the page or post title is. Description on single posts will first look for an excerpt and if that's not there it now will auto-generate one from the first 160 characters of the content. On main pages it will use the site description (from wp settings). I've updated it to do so due to popular request.
+New in 2.0+, the plugin will use the title and meta description from ANY SEO plugin or theme, including Genesis and Thesis. Worst case it'll fall back to pulling some of your content as a last-ditch backup. But if you're concerned with what your Open Graph tags look like, then you should probably be running some kind of SEO plugin anyways. AMIRITE?
 
 = Testing Your Site =
 Once you've enabled the plugin head over to Facebook's testing tool and paste in one of your post/page url's or your home page to see what info Facebook is pulling in. This tool is located here: <a href="http://developers.facebook.com/tools/debug">http://developers.facebook.com/tools/debug</a>
 
 = Plugin Roadmap =
-This plugin is fully featured as is right now. Though I'm not going into the details here, but there is MUCH to be desired in current OGP plugins and I just need more time to implement them into this plugin. But they'll make it in. Stay tuned!
+If you have feature requests or bugs? Use the support links on <a href="http://rynoweb.com/wordpress-plugins/" title="rynoweb wordpress plugins">rYnoweb.com/WordPress-Plugins</a> and get in touch.
 
 == Installation ==
 
 1. Upload the `wp-facebook-ogp` folder to the `/wp-content/plugins/` directory
 1. Activate the WP Facebook OGP plugin through the 'Plugins' menu in WordPress
-1. You MUST add your Facebook ID to the Plugin Settings page for the plugin to produce OGP meta data
+1. You MUST add your Facebook ID OR an App ID to the Plugin Settings page for the plugin to produce OGP meta data. This is required by Facebook.
 
 == Frequently Asked Questions ==
 
 = Do I need to create a Facebook Application to use this plugin? =
-
-Short answer is no. Either your Facebook user ID or or an Application ID is a requirement. You don't need to register an app, just use your User ID (plugin admin helps you find that). You can have both App ID and User ID if you'd like. More details on how Facebook verifies admins is located here: http://developers.facebook.com/docs/opengraph/#admin
+No. Either your Facebook User ID or or an Application ID is a requirement. You're not required to register an app, instead just use your User ID (plugin admin settings page helps you find that). You can use both an App ID and User ID if you'd like. More details on how Facebook verifies admins is located here: https://developers.facebook.com/docs/insights/
 
 = Why doesn't this plugin have a Like/Send button? =
-Honestly it's not hard to add one once you have the proper meta content in the header. Look at <a href="http://developers.facebook.com/docs/opengraph/#plugins">how to add a Like button</a> using fb:like. I may consider incorporating a basic layout one if there's enough demand for it. Let me know -> <a href="http://twitter.com/chuckreynolds">@chuckreynolds</a>
+Honestly it's not hard to add one once you have the proper meta content in the header. Look at <a href="https://developers.facebook.com/docs/reference/plugins/like/">how to add a Like button</a> using fb:like. There are a lot of 'like' button plugins but this one focuses on solid and accurate Open Graph meta data. 
 
 == Screenshots ==
 
-1. The FB OGP Admin options panel has all the control laid out in one easy place. The rest is all behind the scenes.
+1. The Open Graph admin options panel has all options laid out in one easy place. The rest is all behind the scenes.
 
 == Upgrade Notice ==
-= 1.5.2 =
-Bug Fix for images created with 1.5 update. Please update so images work okay on facebook.
+= 2.0.7 =
+fixes bug with certain plugins not showing description tags properly
+
+= 2.0.6 =
+preg_replace causing LOTs of issues. rolled back to fix admin issues. more planning needed. big update coming.
+
+= 2.0.5 =
+Fixes issues with dollar signs and special characters in titles and descriptions
+
+= 2.0.3 =
+This update should fix the "Parser Mismatched Metadata" warnings Facebook started throwing.
+
+= 2.0.2 = 
+Fixes bug that caused a PHP warning to display and also fixes bugs with plugins not functioning properly when using content filters.
+
+= 2.0.1 =
+Bug fixes for HTTPS/SSL pages, SEO plugins, force fallback images and more.
+
+= 2.0 =
+BIG Update - now works with ALL SEO plugins for titles and descriptions, adds multiple images and other fixes!
+
+= 1.6.1 =
+Bug fix with 1.6 initial release. Titles broke for some running 'naked sites' w/ no seo plugins. It worked on all testing sites but obviously I need to test a little more. Standby
+
+= 1.6 =
+Because we're getting more accurate titles you may see a change in how they're pulled. If you're using an SEO plugin it should now pull that title
 
 == Changelog ==
+= 2.0.7 =
+* fixes bug with certain plugins not showing description tags properly
+* added back self-close on meta tags to preserve xhtml compatability, html5 is forgiving. core does this.
+
+= 2.0.6 =
+* The changes we made to fix the dollar sign in title problem caused big problems in wp admin. rolling back for now while we plan and recode a lot of the plugin w/ norcross for a bigger update. Just don't use dollar signs for now in titles. sorry. standby.
+
+= 2.0.5 =
+* Short: Dollar signs in titles were screwing things up. Long Story: Fixed a bug where preg_replace() would think a dollar sign in the argument is a backreference, instead of just a dollar sign. Now using preg_quote() to escape all regex variables/symbols in a string. Makes things mo betta!
+
+= 2.0.4 =
+* Image size for OpenGraph now defaults to medium for thumbnail image
+* updated screenshot. it was from v1 so was about time
+* fixed grammar error - props Jeff K.
+
+= 2.0.3 =
+* Should fix the "Parser Mismatched Metadata" warnings Facebook started throwing. Made locale all lowercase.
+
+= 2.0.2 =
+* Fixes bug that would display a PHP warning with debug mode turned on.
+* Removed code that would filter the_content() which caused problems with plugins that also used that same filter.
+
+= 2.0.1 =
+* Fixed bug where og:url was returning a https URL instead of http, causing Facebook Linter to fail. Now using the WordPress function is_ssl() instead of the $_SERVER global variable.
+* Fixed bug with some SEO plugins where the page title and meta description were not being pulled correctly.
+* Changed front pages to have the og:type 'website', not 'article'.
+* Fixed bug where the 'force fallback' checkbox will check itself after initial installation.
+
+= 2.0 =
+* Now works with ALL SEO plugins AND Frameworks like Genesis and Thesis. It now grabs the actual outputted <title> tag and <meta> description after all SEO plugins/themes/etc have done their job.
+* New Open Graph feature allow multiple images therefore we now add all those properly for selection (in Facebook, Google +, and even now Linkedin) if there are more than one in the post/page in addition to any featured image and the fallback image in settings (only if force fallback isn't selected).
+* Removed og:page_id - Facebook depreciated that 1 April 2012.
+* Adds filters to all outputted values.
+* Images in Galleries work too now as we apply filters to the_content() before pulling images.
+* Some house cleaning: old functions removed, code cleaned up, and better follows WordPress coding standards.
+* Modified plugin settings help links - facebook keeps changing things :/
+* Last but certainly not least... Improves performance == WIN
+
+= 1.6.1 =
+* Bug fix with 1.6 initial release. Titles broke for some running 'naked sites' w/ no seo plugins. It worked on all testing sites but obviously I need to test a little more. Standby
+
+= 1.6 =
+* update help info and links as Facebook has changed a lot about their docs including image should be 200px square now
+* use wp_title() to get the title of the current page. SEO plugins filter wp_title so we will get the best title available. This is a baby step towards bigger and better things :)
+* fix bug in scraping content images
+* add settings option to allow fallback image to become site-wide default
+
 = 1.5.2 =
 * bug fix in urlpath again & check for https. Props goes to Seb Francis at burnit.co.uk for better fix.
 
@@ -111,17 +183,12 @@ Bug Fix for images created with 1.5 update. Please update so images work okay on
 * more admin help / reference information linked up. promotional tweet about this plugin added. big help/instruction overhaul coming soon.
 * lots of little changes I forget and some clean up sweeping
 
-= 0.0.1 =
+= 0.0.2 =
 * added meta field if no admin id set as to give instruction to liven up plugin
 * more readme explanation/help
 
 = 0.0.1 =
 * Initial beta release
-
-== Upgrade Notice ==
-
-= 1.3 =
-Added much requested auto-description generation as fallback if single has no excerpt. Enjoy.
 
 == Other Notes ==
 

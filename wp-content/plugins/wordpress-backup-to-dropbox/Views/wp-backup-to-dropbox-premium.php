@@ -2,7 +2,7 @@
 /**
  * This file contains the contents of the Dropbox admin monitor page.
  *
- * @copyright Copyright (C) 2011 Michael De Wildt. All rights reserved.
+ * @copyright Copyright (C) 2011-2013 Michael De Wild. All rights reserved.
  * @author Michael De Wildt (http://www.mikeyd.com.au/)
  * @license This program is free software; you can redistribute it and/or modify
  *          it under the terms of the GNU General Public License as published by
@@ -18,14 +18,14 @@
  *          along with this program; if not, write to the Free Software
  *          Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110, USA.
  */
-$manager = new WP_Backup_Extension_Manager();
+$manager = WP_Backup_Extension_Manager::construct();
 
 $wpb2d = $manager->get_url();
 $key = $manager->get_key();
 $installUrl = $manager->get_install_url();
 $buyUrl = $manager->get_buy_url();
 
-$error = $title = null;
+$extensions = $error = $title = null;
 if (isset($_REQUEST['error']))
 	$error = sprintf(__('There was an error with your payment, please contact %s to resolve.'), '<a href="mailto:michael.dewildt@gmail.com">Mikey</a>');
 
@@ -38,45 +38,13 @@ try {
 		echo '<script>window.location.reload(true);</script>';
 	}
 
-	$installed = array_keys($manager->get_installed());
 	$extensions = $manager->get_extensions();
 } catch (Exception $e) {
 	$error = $e->getMessage();
 }
 
 ?>
-<style>
-th {
-	text-align: left;
-	border-top: 1px solid #DEDEDE;
-}
-
-td, th {
-	border-right: 1px solid #DEDEDE;
-	border-bottom: 1px solid #DEDEDE;
-	padding: 10px;
-}
-
-table {
-	border-left: 1px solid #DEDEDE;
-}
-
-.error {
-	color: red;
-}
-
-.success {
-	color: green;
-}
-.paypal, .instructions {
-	float: left;
-	margin-right: 20px;
-}
-.errors {
-	clear: both;
-}
-</style>
-<div class="wrap">
+<div class="wrap premium">
 	<div class="icon32"><img width="36px" height="36px"
 								 src="<?php echo $uri ?>/Images/WordPressBackupToDropbox_64.png"
 								 alt="WordPress Backup to Dropbox Logo"></div>
@@ -89,8 +57,8 @@ table {
 			<?php _e('Installing a premium extensions is easy:', 'wpbtd'); ?>
 		</p>
 		<ol class="instructions">
-			<li><?php _e('Click Buy Now and pay for your extension using PayPal', 'wpbtd'); ?></li>
-			<li><?php _e('Click Install & Acitvate to download and install the extension', 'wpbtd'); ?></li>
+			<li><?php _e('Click Buy Now and pay using PayPal', 'wpbtd'); ?></li>
+			<li><?php _e('Click Download & Install to download and install the extension', 'wpbtd'); ?></li>
 			<li><?php _e('Thats it, options for your extension will be available in the menu on the left', 'wpbtd'); ?></li>
 		</ol>
 		<a class="paypal" href="#" onclick="javascript:window.open('https://www.paypal.com/au/cgi-bin/webscr?cmd=xpt/Marketing/popup/OLCWhatIsPayPal-outside','olcwhatispaypal','toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, width=400, height=350');">
@@ -107,7 +75,7 @@ table {
 			<p class="error">
 				<?php echo $error ?>
 			</p>
-		<?php elseif ($success): ?>
+		<?php elseif (isset($success)): ?>
 			<p class="success">
 				<?php echo $success ?>
 			</p>
@@ -132,10 +100,10 @@ table {
 					<input type="hidden" value="<?php echo $extension['file'] ?>" name="file" />
 					<input type="hidden" value="<?php echo get_site_url() ?>" name="site" />
 					<input type="hidden" value="<?php echo $key ?>" name="key" />
-					<?php if (in_array($extension['name'], $installed)): ?>
+					<?php if ($manager->is_installed($extension['name'])): ?>
 						<span class="installed">Installed</span>
 					<?php else: ?>
-						<input type="submit" value="<?php echo $extension['purchased'] ? __('Download & Install') : __('Buy Now'); ?>" class="submitBtn" />
+						<input class="button-primary" type="submit" value="<?php echo $extension['purchased'] ? __('Download & Install') : __('Buy Now'); ?>" class="submitBtn" />
 					<?php endif; ?>
 				</form>
 			</td>
@@ -144,6 +112,6 @@ table {
 	</table>
 	<p>
 		<strong><?php _e('Please Note:') ?></strong>&nbsp;
-		<?php echo sprintf(__('Each extension can only be activated on a single website for one year. If you manage multiple websites please %s.'), '<a href="http://wpb2d.com/buy-subscription">' . __('purchase a subscription') . '</a>') ?>
+		<?php echo sprintf(__('Each payment includes updates and support on a single website for one year. If you manage multiple websites please consider purchasing an %s.'), '<a href="http://wpb2d.com/buy-subscription">' . __('unlimited site subscription') . '</a>') ?>
 	</p>
 </div>

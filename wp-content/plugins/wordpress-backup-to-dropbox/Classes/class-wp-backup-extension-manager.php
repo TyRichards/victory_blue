@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright Copyright (C) 2011 Michael De Wildt. All rights reserved.
+ * @copyright Copyright (C) 2011-2013 Michael De Wild. All rights reserved.
  * @author Michael De Wildt (http://www.mikeyd.com.au/)
  * @license This program is free software; you can redistribute it and/or modify
  *          it under the terms of the GNU General Public License as published by
@@ -17,16 +17,19 @@
  *          Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110, USA.
  */
 class WP_Backup_Extension_Manager {
-
-	private $key = 'c7d97d59e0af29b2b2aa3ca17c695f96';
+	private
+		$key = 'c7d97d59e0af29b2b2aa3ca17c695f96',
+		$objectCache,
+		$installed,
+		$db
+		;
 
 	public static function construct() {
 		return new self();
 	}
 
 	public function __construct() {
-		if (!get_option('backup-to-dropbox-premium-extensions'))
-			add_option('backup-to-dropbox-premium-extensions', array(), null, 'no');
+		$this->db = WP_Backup_Registry::db();
 	}
 
 	public function get_key() {
@@ -62,21 +65,40 @@ class WP_Backup_Extension_Manager {
 	}
 
 	public function get_installed() {
-		$extensions = get_option('backup-to-dropbox-premium-extensions');
-		if (!is_array($extensions))
-			return array();
+		if (!$this->installed) {
+			$installed = $this->db->get_results("SELECT * FROM {$this->db->prefix}wpb2d_premium_extensions");
 
-		return $extensions;
+			$this->installed = array();
+
+			if (is_array($installed)) {
+				foreach ($installed as $extension) {
+					if (file_exists(EXTENSIONS_DIR . $extension->file))
+						$this->installed[] = $extension;
+				}
+			}
+		}
+
+		return $this->installed;
+	}
+
+	public function is_installed($name) {
+		foreach ($this->get_installed() as $ext) {
+			if (strtolower($ext->name) == strtolower($name))
+				return true;
+		}
 	}
 
 	public function install($name, $file) {
-		define('FS_METHOD', 'direct');
+		if (!defined('FS_METHOD'))
+			define('FS_METHOD', 'direct');
+
 		WP_Filesystem();
 
 		$params = array(
 			'key' => $this->key,
 			'name' => $name,
 			'site' => get_site_url(),
+			'version' => BACKUP_TO_DROPBOX_VERSION,
 		);
 
 		$download_file = download_url("{$this->get_url()}/download?" . http_build_query($params));
@@ -98,62 +120,76 @@ class WP_Backup_Extension_Manager {
 
 		unlink($download_file);
 
-		$extensions = get_option('backup-to-dropbox-premium-extensions');
-		$extensions[$name] = $file;
-		update_option('backup-to-dropbox-premium-extensions', $extensions);
+		$this->activate($name, $file);
 	}
 
+	public function activate($name, $file) {
+		$exists = $this->db->get_var(
+			$this->db->prepare("SELECT * FROM {$this->db->prefix}wpb2d_premium_extensions WHERE name = %s", $name)
+		);
+
+		if (is_null($exists)) {
+			$this->db->insert("{$this->db->prefix}wpb2d_premium_extensions", array(
+				'name' => $name,
+				'file' => $file,
+			));
+		}
+	}
 
 	public function init() {
 		$installed = $this->get_installed();
 		$active = array();
-		foreach ($installed as $name => $file) {
-			if (file_exists(EXTENSIONS_DIR . $file)) {
-				include_once EXTENSIONS_DIR . $file;
-				$active[$name] = $file;
+		foreach ($installed as $extension) {
+			if (file_exists(EXTENSIONS_DIR . $extension->file)) {
+
+				include_once EXTENSIONS_DIR . $extension->file;
+				$this->activate($extension->name, $extension->file);
 			}
 
 		}
-		update_option('backup-to-dropbox-premium-extensions', $active);
 	}
 
 	public function get_output() {
 		$installed = $this->get_installed();
-		foreach ($installed as $name => $file) {
-			$obj = $this->get_instance($name);
+		foreach ($installed as $extension) {
+			$obj = $this->get_instance($extension->name);
 			if ($obj && $obj->get_type() == WP_Backup_Extension::TYPE_OUTPUT && $obj->is_enabled())
 				return $obj;
 		}
-		return new WP_Backup_Output();
+		return $this->get_instance('WP_Backup_Output');
 	}
 
 	public function add_menu_items() {
+		return $this->call('get_menu', false);
+	}
+
+	public function complete() {
+		$this->call('complete');
+	}
+
+	public function failure() {
+		$this->call('failure');
+	}
+
+	private function call($func, $check_enabled = true) {
 		$installed = $this->get_installed();
-		foreach ($installed as $name => $file)
-			$this->get_instance($name)->get_menu();
-	}
-
-	private function call($func) {
-		$installed = $this->get_installed();
-		foreach ($installed as $name => $file)
-			$this->get_instance($name)->$func();
-	}
-
-	public function on_start() {
-		$this->call('on_start');
-	}
-
-	public function on_complete() {
-		$this->call('on_complete');
-	}
-
-	public function on_failure() {
-		$this->call('on_failure');
+		foreach ($installed as $extension) {
+			$obj = $this->get_instance($extension->name);
+			if ($obj && ($check_enabled == false || $obj->is_enabled()))
+				$obj->$func();
+		}
 	}
 
 	private function get_instance($name) {
 		$class = str_replace(' ', '_', ucwords($name));
-		if (class_exists($class))
-			return new $class();
+
+		if (!isset($this->objectCache[$class])) {
+			if (!class_exists($class))
+				return false;
+
+			$this->objectCache[$class] = new $class();
+		}
+
+		return $this->objectCache[$class];
 	}
 }

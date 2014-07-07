@@ -2,7 +2,7 @@
 /**
  * A class with functions the perform a backup of WordPress
  *
- * @copyright Copyright (C) 2011-2012 Michael De Wildt. All rights reserved.
+ * @copyright Copyright (C) 2011-2013 Michael De Wildt. All rights reserved.
  * @author Michael De Wildt (http://www.mikeyd.com.au/)
  * @license This program is free software; you can redistribute it and/or modify
  *          it under the terms of the GNU General Public License as published by
@@ -18,46 +18,51 @@
  *          along with this program; if not, write to the Free Software
  *          Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110, USA.
  */
-include_once('class-wp-backup.php');
 class File_List {
 
-	private static $ignored_files = array( '.DS_Store', 'Thumbs.db', 'desktop.ini' );
-	private $excluded_files;
-	private $excluded_dirs;
+	private static $ignored_patterns = array(
+		'.DS_Store', 'Thumbs.db', 'desktop.ini',
+		'.git', '.gitignore', '.gitmodules',
+		'.svn', '.dropbox',
+		'.sass-cache',
+	);
+
+	private
+		$excluded_files = array(),
+		$excluded_dirs = array(),
+		$db
+		;
 
 	public static function construct() {
 		return new self();
 	}
 
 	public function __construct() {
-		WP_Backup_Config::construct()->set_memory_limit();
+		$this->db = WP_Backup_Registry::db();
 
-		delete_option('backup-to-dropbox-file-list');
+		$result = $this->db->get_results("SELECT * FROM {$this->db->prefix}wpb2d_excluded_files WHERE isdir = 0");
+		foreach ($result as $value) {
+			$this->excluded_files[] = $value->file;
+		}
 
-		$file_list = get_option('backup-to-dropbox-excluded-files');
-		if ($file_list === false) {
-			$this->excluded_files = array();
-			$this->excluded_dirs = array();
-			add_option('backup-to-dropbox-excluded-files', array($this->excluded_dirs, $this->excluded_files), null, 'no');
-		} else {
-			list($this->excluded_dirs, $this->excluded_files) = $file_list;
+		$result = $this->db->get_results("SELECT * FROM {$this->db->prefix}wpb2d_excluded_files WHERE isdir = 1");
+		foreach ($result as $value) {
+			$this->excluded_dirs[] = $value->file;
 		}
 	}
 
 	public function set_included($path) {
 		if (is_dir($path))
-			$this->include_dir(rtrim($path,'/'));
+			$this->include_dir(rtrim($path, DIRECTORY_SEPARATOR));
 		else
 			$this->include_file($path);
-		$this->save();
 	}
 
 	public function set_excluded($path) {
 		if (is_dir($path))
-			$this->exclude_dir(rtrim($path,'/'));
+			$this->exclude_dir(rtrim($path, DIRECTORY_SEPARATOR));
 		else
 			$this->exclude_file($path);
-		$this->save();
 	}
 
 	public function is_excluded($path) {
@@ -68,22 +73,42 @@ class File_List {
 	}
 
 	private function exclude_file($file) {
-		if (!in_array($file, $this->excluded_files))
+		if (!in_array($file, $this->excluded_files)) {
 			$this->excluded_files[] = $file;
+			$this->db->insert("{$this->db->prefix}wpb2d_excluded_files", array(
+				'file' => $file,
+				'isdir' => false
+			));
+		}
 	}
 
 	private function exclude_dir($dir) {
-		if (!in_array($dir, $this->excluded_dirs))
+		if (!in_array($dir, $this->excluded_dirs)) {
 			$this->excluded_dirs[] = $dir;
+			$this->db->insert("{$this->db->prefix}wpb2d_excluded_files", array(
+				'file' => $dir,
+				'isdir' => true
+			));
+		}
 	}
 
 	private function include_file($file) {
 		$key = array_search($file, $this->excluded_files);
+
+		$this->db->query(
+			$this->db->prepare("DELETE FROM {$this->db->prefix}wpb2d_excluded_files WHERE file =  %s", $file)
+		);
+
 		unset($this->excluded_files[$key]);
 	}
 
 	private function include_dir($dir) {
 		$key = array_search($dir, $this->excluded_dirs);
+
+		$this->db->query(
+			$this->db->prepare("DELETE FROM {$this->db->prefix}wpb2d_excluded_files WHERE file =  %s", $dir)
+		);
+
 		unset($this->excluded_dirs[$key]);
 	}
 
@@ -101,23 +126,26 @@ class File_List {
 		if (in_array($dir, $this->excluded_dirs))
 			return true;
 
-		if ($dir == rtrim(ABSPATH,'/'))
+		if ($dir == get_sanitized_home_path())
 			return false;
 
 		return $this->is_excluded_dir(dirname($dir));
 	}
 
 	private function is_partial_dir($dir) {
-		if (is_dir($dir)) {
+		if (is_dir($dir) && is_readable($dir)) {
 			$files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir), RecursiveIteratorIterator::SELF_FIRST, RecursiveIteratorIterator::CATCH_GET_CHILD);
+			$files->setMaxDepth(10);
 			foreach ($files as $file) {
-				if ($file == $dir)
+				$file_name = $file->getPathname();
+
+				if ($file_name == $dir)
 					continue;
 
-				if (self::in_ignore_list(basename($file)))
+				if (self::in_ignore_list(basename($file_name)))
 					continue;
 
-				if ($this->is_excluded($file))
+				if ($this->is_excluded($file_name))
 					return true;
 			}
 		}
@@ -126,7 +154,7 @@ class File_List {
 
 	public function get_checkbox_class($path) {
 		$class = '';
-		if ($this->is_excluded(rtrim($path, '/')))
+		if ($this->is_excluded($path))
 			$class = 'checked';
 		else if ($this->is_partial_dir($path))
 			$class = 'partial';
@@ -134,11 +162,10 @@ class File_List {
 		return $class;
 	}
 
-	public function save() {
-		update_option('backup-to-dropbox-excluded-files', array($this->excluded_dirs, $this->excluded_files));
-	}
-
 	public static function in_ignore_list($file) {
-		return in_array($file, self::$ignored_files);
+		foreach (self::$ignored_patterns as $pattern) {
+			if (preg_match('/' . preg_quote($pattern) . '/', $file))
+				return true;
+		}
 	}
 }

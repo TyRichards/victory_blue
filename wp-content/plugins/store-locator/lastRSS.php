@@ -152,8 +152,10 @@ class lastRSS {
 			preg_match("'<channel.*?>(.*?)</channel>'si", $rss_content, $out_channel);
 			foreach($this->channeltags as $channeltag)
 			{
-				$temp = $this->my_preg_match("'<$channeltag.*?>(.*?)</$channeltag>'si", $out_channel[1]);
-				if ($temp != '') $result[$channeltag] = $temp; // Set only if not empty
+				if (!empty($out_channel[1])) {
+					$temp = $this->my_preg_match("'<$channeltag.*?>(.*?)</$channeltag>'si", $out_channel[1]);
+					if ($temp != '') $result[$channeltag] = $temp; // Set only if not empty
+				}
 			}
 			// If date_format is specified and lastBuildDate is valid
 			if ($this->date_format != '' && ($timestamp = strtotime($result['lastBuildDate'])) !==-1) {

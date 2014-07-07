@@ -1,3 +1,1 @@
-[01-Mar-2012 00:52:32] PHP Fatal error:  Call to undefined function add_action() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wp-shopping-cart.php on line 24
-[11-Mar-2012 11:35:51] PHP Fatal error:  Call to undefined function add_action() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wp-shopping-cart.php on line 24
-[11-Mar-2012 11:46:57] PHP Fatal error:  Call to undefined function add_action() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wp-shopping-cart.php on line 24
+[12-Oct-2013 07:45:15] PHP Fatal error:  Call to undefined function  add_action() in /home4/ty/public_html/wp-content/plugins/wp-e-commerce/wp-shopping-cart.php on line 30
