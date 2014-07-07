@@ -1,0 +1,13 @@
+[11-Mar-2012 11:44:43] PHP Fatal error:  Call to undefined function add_action() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-includes/cron.php on line 2
+[11-Mar-2012 11:44:48] PHP Fatal error:  Call to undefined function add_action() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-includes/productfeed.php on line 16
+[11-Mar-2012 11:44:49] PHP Fatal error:  Call to undefined function bloginfo() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-includes/rss_template.php on line 4
+[11-Mar-2012 11:44:50] PHP Fatal error:  Call to undefined function add_filter() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-includes/misc.functions.php on line 144
+[11-Mar-2012 11:44:51] PHP Fatal error:  Call to undefined function add_action() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-includes/ajax.functions.php on line 977
+[11-Mar-2012 11:44:52] PHP Fatal error:  Call to undefined function add_filter() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-includes/product-template.php on line 322
+[11-Mar-2012 11:44:53] PHP Fatal error:  Call to undefined function add_action() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-includes/display.functions.php on line 157
+[11-Mar-2012 11:44:53] PHP Fatal error:  Call to undefined function add_action() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-includes/purchaselogs.class.php on line 3
+[11-Mar-2012 11:44:55] PHP Fatal error:  Call to undefined function add_action() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-includes/theme.functions.php on line 61
+[11-Mar-2012 11:44:56] PHP Fatal error:  Call to undefined function add_shortcode() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-includes/shortcode.functions.php on line 45
+[11-Mar-2012 11:44:57] PHP Fatal error:  Call to undefined function add_filter() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-includes/category.functions.php on line 541
+[11-Mar-2012 11:44:57] PHP Fatal error:  Call to undefined function add_filter() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-includes/processing.functions.php on line 366
+[11-Mar-2012 11:44:59] PHP Fatal error:  Call to undefined function language_attributes() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-includes/shopping_cart_container.php on line 2

@@ -1,0 +1,39 @@
+<a href="#" class="loginClose" onclick="jQuery.fancybox.close(); return false;">Close</a>
+<form class="loginForm" id="popupLoginForm" method="post" action="wp-login.php">
+	<div id="loginBg"><div id="loginBgGraphic"></div></div>
+	<div class="loginContainer">
+		<h1>
+			Administrative Portal
+			<span>Sign in to your account</span>
+		</h1>
+		<fieldset>
+			<legend>Account Login</legend>
+			<p>
+				<label for="ModalUsername" class="overlabel">Username</label>
+				<input id="ModalUsername" name="log" type="text" class="loginInput textInput rounded" />
+			</p>
+			<p>
+				<label for="ModalPassword" class="overlabel">Password</label>
+				<input id="ModalPassword" name="pwd" type="password" class="loginInput textInput rounded" />
+			</p>
+		</fieldset>
+	</div>
+	<div class="hr" style="margin-bottom: 3px;"></div>
+	<p class="right noMargin">
+		<button type="submit" class="btn signInButton"><span>Sign in</span></button>
+	</p>
+	<p class="left" style="margin: 14px 0 0 15px">
+		<a href="wp-login.php?action=lostpassword" id="popupLoginForgotPswd">Forgot your password?</a>
+	</p>
+</form>
+<script type="text/javascript">
+	if (typeof Cufon == 'function') {
+		Cufon.replace('.loginContainer h1');
+	}
+	jQuery('#popupLoginForm').attr('action', blogPath + "/wp-login.php");
+	jQuery('#popupLoginForgotPswd').attr('href', blogPath + "/wp-login.php?action=lostpassword");
+	jQuery('#fancybox-outer').addClass('rounded');
+	jQuery("label.overlabel").overlabel();
+	buttonStyles();
+	roundCorners();
+</script>

@@ -1,0 +1,2 @@
+[11-Mar-2012 11:44:59] PHP Fatal error:  Call to undefined function get_option() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-shipping/ups_20.php on line 42
+[11-Mar-2012 11:45:00] PHP Fatal error:  Call to undefined function __() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-shipping/australiapost.php on line 47

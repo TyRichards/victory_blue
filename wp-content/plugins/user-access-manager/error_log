@@ -1,0 +1,1 @@
+[11-Mar-2012 11:35:19] PHP Fatal error:  Call to undefined function load_plugin_textdomain() in /home/victoryb/public_html/wp-content/plugins/user-access-manager/user-access-manager.php on line 24

@@ -1,0 +1,15 @@
+[01-Mar-2012 00:52:47] PHP Fatal error:  Class 'WP_Widget' not found in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-widgets/donations_widget.php on line 10
+[01-Mar-2012 00:52:49] PHP Fatal error:  Class 'WP_Widget' not found in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-widgets/shopping_cart_widget.php on line 10
+[01-Mar-2012 00:52:50] PHP Fatal error:  Class 'WP_Widget' not found in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-widgets/specials_widget.php on line 10
+[11-Mar-2012 11:44:37] PHP Fatal error:  Class 'WP_Widget' not found in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-widgets/category_widget.php on line 9
+[11-Mar-2012 11:44:38] PHP Fatal error:  Class 'WP_Widget' not found in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-widgets/specials_widget.php on line 10
+[11-Mar-2012 11:44:38] PHP Fatal error:  Class 'WP_Widget' not found in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-widgets/donations_widget.php on line 10
+[11-Mar-2012 11:44:40] PHP Fatal error:  Class 'WP_Widget' not found in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-widgets/admin_menu_widget.php on line 10
+[11-Mar-2012 11:44:40] PHP Fatal error:  Class 'WP_Widget' not found in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-widgets/price_range_widget.php on line 10
+[11-Mar-2012 11:44:41] PHP Warning:  include_once(WPSC_FILE_PATH/wpsc-widgets/tagging_functions.php) [<a href='function.include-once'>function.include-once</a>]: failed to open stream: No such file or directory in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-widgets/product_tag_widget.php on line 3
+[11-Mar-2012 11:44:41] PHP Warning:  include_once() [<a href='function.include'>function.include</a>]: Failed opening 'WPSC_FILE_PATH/wpsc-widgets/tagging_functions.php' for inclusion (include_path='.:/usr/lib/php:/usr/local/lib/php') in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-widgets/product_tag_widget.php on line 3
+[11-Mar-2012 11:44:41] PHP Fatal error:  Class 'WP_Widget' not found in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-widgets/product_tag_widget.php on line 10
+[11-Mar-2012 11:44:42] PHP Fatal error:  Class 'WP_Widget' not found in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-widgets/shopping_cart_widget.php on line 10
+[11-Mar-2012 11:44:43] PHP Fatal error:  Class 'WP_Widget' not found in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-widgets/latest_product_widget.php on line 9
+[11-Mar-2012 12:10:16] PHP Fatal error:  Class 'WP_Widget' not found in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-widgets/price_range_widget.php on line 10
+[11-Mar-2012 12:10:36] PHP Fatal error:  Class 'WP_Widget' not found in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-widgets/price_range_widget.php on line 10

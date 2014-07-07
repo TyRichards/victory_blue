@@ -1,0 +1,503 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<head>
+<meta http-equiv="content-type" content="text/html;charset=utf-8">
+<title>Unite by Parallelus - Theme Documentation</title>
+<style type="text/css" media="screen">
+body {
+	font: 13px/1.4 "Trebuchet MS", Arial, Helvetica, sans-serif;
+	color: #333;
+}
+
+h1 { font-size: 2.5em; }
+h2 { font-size: 2em; }
+h3 { font-size: 1.8em; }
+h4 { font-size: 1.3em; }
+h5 { font-size: 1.15em; }
+
+#wrapper {
+	width: 700px;
+	margin: 0 auto;
+}
+p, table, hr, .box {
+	margin-bottom:25px;
+}
+.box p {
+	margin-bottom:10px;
+}
+code {
+	font: 13px/1.3 "Courier New", Courier, monospace;
+	background-color: #eee;
+	border: 1px dotted #aaa;
+	padding: 0px 3px;
+}
+.note {
+	color: #f33;
+	font-weight: bold;
+}
+</style>
+</head>
+<body>
+<div id="wrapper">
+	<h1>Unite - WordPress Theme</h1>
+	<div>
+		<div>
+			<p> <strong> Created: March 4, 2010<br />
+				By: <a href="http://themeforest.net/user/Parallelus" target="_blank">Parallelus</a> (Andy Wilkerson)<br />
+				</strong> </p>
+		</div>
+		<div>
+			<p>Thank you for purchasing my theme. I hope you are happy with my work. I always welcome feedback and suggestions so don't hesitate to leave me comments. If you have  questions  not answered in this document, please  email me using my <a href="http://themeforest.net/user/Parallelus" target="_blank">user page contact form</a>. The files included with this theme have detailed comments throughout the code  to help you update and modify it for your needs. If you are happy with the theme, please take a moment to rate it on the ThemeForest website.</p>
+			<p>Thank you,<br>
+				Andy Wilkerson</p>
+		</div>
+	</div>
+	<hr>
+	<a name="toc" />
+	<h2>Table of Contents</h2>
+	<ol>
+		<li><a href="#about">About The Theme</a></li>
+		<li><a href="#install">Installation</a></li>
+		<li><a href="#config">Configuring the Theme</a></li>
+		<li> <a href="#content">Content Options</a> </li>
+		<li><a href="#structure">Layout and Design Structure</a></li>
+		<li><a href="#css">CSS Files and Structure</a></li>
+		<li><a href="#skin">Skinning the Theme</a></li>
+		<li><a href="#special">Special Features</a></li>
+		<li><a href="#javascript">JavaScript</a></li>
+		<li><a href="#files">PSD Files</a></li>
+		<li><a href="#credits">Sources and Credits</a></li>
+	</ol>
+	<hr>
+	<a name="about"></a>
+	<h3><strong>About The Theme</strong> - <a href="#toc">top</a></h3>
+	<p>This theme is designed for use with WordPress 2.7 or higher. The code was written to be backwards compatible where  possible, however it is recommended you use version 3.0.1 or higher. If you are not using WordPress 3.0.1 or higher and you can upgrade your site, I recommend you do this before installation.
+	<p>The theme is widget ready and you can add and configure your own widgets in the sidebar, header, showcase, home page, blog posts, pages and footer. You will see more information about these areas and how to use them later in this document.</p>
+	<p>There are several pre-made skins installed with the theme. You can activate any of these from the theme options menu, or you can add your own skin using the "Custom" skin option. There is more information about using custom skins with the theme in the &quot;<a href="#skin">Skinning the Theme</a>&quot; section below.</p>
+	<p>Although every effort has been made to ensure the theme is bug free and as easy to use as possible there is always the chance for errors. If you do find a problem please notify us immediately through the <strong><a href="http://themeforest.net/user/Parallelus" target="_blank">ThemeForest account page</a></strong> so we can ensure it gets fixed as quickly as possible.</p>
+	<hr>
+	<a name="install"></a>
+	<h3><strong>Installation</strong> - <a href="#toc">top</a></h3>
+	<p>Installing the theme can be done two ways. You can upload the zipped theme file, "<span class="mono-bold">theme-unite.zip</span>", using the built in WordPress theme upload, or copy the files through an FTP client.</p>
+	<h4>1) Using WordPress Theme Upload</h4>
+	<p>This process varies slightly between different versions of WordPress. The instructions below are based on WordPress 3+. If using an older version the basic steps should be the same, although the button names and placement  may be different.</p>
+	<ol>
+		<li>Login to your WordPress admin.</li>
+		<li>In the <strong>"Appearance &gt; Themes"</strong> menu click the tab at the top labeled <strong>"Install Themes"</strong></li>
+		<li>At the top of the page click, <strong>"Upload"</strong>, then click the file field to select a file.</li>
+		<li>Select the zipped theme file and click <strong>"Install Now"</strong></li>
+		<li>After installation you will receive a success message confirming your new install.<strong></strong></li>
+		<li>Click the link <strong>"Activate"</strong></li>
+	</ol>
+	<h4>2) Uploading by FTP</h4>
+	<ol>
+		<li>Login to your FTP server and navigate to your WordPress themes directory. <br>
+		Normally this would be <strong>"wp-content/themes"</strong></li>
+		<li>Extract the files from the zipped theme.</li>
+		<li>Copy the folder <strong>"parallelus-unite"</strong> to your themes directory.</li>
+		<li>After the files finish uploading, login to your WordPress admin.</li>
+		<li>In the <strong>"Appearance"</strong> menu click <strong>"Themes"</strong></li>
+		<li>Click <strong>"Activate"</strong> for the theme <strong>"Unite"</strong></li>
+	</ol>
+	<h4>Finished with Installation?</h4>
+	<p>Once the theme is installed you can configure it for your content. See the section below on configuring the theme options and you are ready to start adding your own content.</p>
+	<hr>
+	<h3>Image Resizing</h3>
+	<p>After your theme is installed you should ensure that image resizing is working. To perform image resizing your server must be running PHP-5 and have GD-Library installed. If you don't know if your server has these things, don't worry, most do and the resizing will work automatically. If you want to verify that these are on your server contact your host and they will be able to tell you.</p>
+	<blockquote>
+		<h5><strong>Make the Cache Folder Writeable</strong></h5>
+		<p>You must make sure the cache folder "parallelus-unite/cache" is set to write permissions. This is where resized images are saved. The folder needs "777" write permissions. It's likely that this will also work automatically, but if it does not or you have an error message related to your images you should CHMOD the folder to "777". If you need to know how to do this do a web search for "CHMOD folder permissions 777" or check the help file of your FTP program.</p>
+		<h5><strong>Resizing Script</strong></h5>
+		<p>The theme uses a script named "TimThumb" to perform image resizing. If you need detailed information on using this script or want to make customizations in the code check the TimThumb website for the full documentation and example code: <a href="http://www.darrenhoyt.com/2008/04/02/timthumb-php-script-released/" target="_blank">TimThumb PHP Script</a></p>
+	</blockquote>
+	<h4>Common Image Problems</h4>
+	<blockquote>
+		<p class="note"><strong>My images are not showing but I can see the placeholder images.</strong></p>
+		<p>If you have already completed the steps above to verify your server settings and requirements are not a problem, you my have a problem with image locations or the path. If you can see the placeholder images, but not your own images, you probably have the wrong path to your images. Copy the URL you entered for your image and paste it into the browser address bar. If you don't see your image the path is wrong. Check the path and make sure an image exists in that location. Once you find the working image URL update the image path.</p>
+		<p>If the path to the image works when pasted into the browser, try going directly to the TimThumb file without an image. You should get a message that no image was specified. If you don't get this message or you get a 404 error page, the TimThumb file is missing, or does not have permissions to run on the server, or one of the requirements  (PHP-5 and GD-Library) is not working properly. Contact your host to verfiy these items.</p>
+		<p class="note"><strong>Some of my images don't work.</strong></p>
+		<p>If you see some images and not others, the problem is mostlikely the image path. Paste it into your browser to test if the image appears. If not, check the path and update it. If you see the image, it could be a permissions issue. TimThumb cannot resize images from other sites so your images must be hosted on the same domain when using TimThumb.</p>
+	</blockquote>
+	<hr>
+	<a name="config"></a>
+	<h3><strong>Configuring the Theme</strong> - <a href="#toc">top</a></h3>
+	<p>Once  the theme is installed you will see a new menu on the bottom left   of your WordPress admin. The theme menu contains the following areas:<br>
+	</p>
+	<h4>General Options</h4>
+	<blockquote>
+		<p>This area contains settings for choosing your skin, changing your logo, editing your footer text and more. The theme has an option to show place holder images for blog posts and other areas where you may not have associated an image with the content already. You can enable/disable that option from this page.</p>
+	</blockquote>
+	<blockquote>
+		<ul>
+			<li><strong>Skins</strong>
+				<ul>
+					<li>Choose a skin (<a href="#skin">skin information</a>)</li>
+				</ul>
+			</li>
+			<li><strong>Logo</strong>
+				<ul>
+					<li>Main Logo</li>
+				</ul>
+			</li>
+			<li><strong>Blog Post Settings</strong>
+				<ul>
+					<li>Show Post Date</li>
+					<li>Show Author Name</li>
+				</ul>
+			</li>
+			<li><strong>Tool Tips
+				</strong>
+				<ul>
+					<li>Show Tool Tips</li>
+					<li>Tool Tip ALL Links</li>
+				</ul>
+			</li>
+			<li><strong>Other Add-on Functionality
+				</strong>
+				<ul>
+					<li>Ribbon Scroll Effect					</li>
+					<li>Anchor Tag Scrolling<br>
+			</li>
+				</ul>
+			</li>
+			<li><strong>Miscellaneous</strong>
+				<ul>
+					<li>Favorites Icon</li>
+					<li>Append to Browser Title</li>
+					<li>Placeholder Images</li>
+					<li>Font Replacement</li>
+					<li>Show Breadcrumbs</li>
+					<li>Copyright / Legal</li>
+					<li>404 Error</li>
+					<li> Google Analytic</li>
+				</ul>
+			</li>
+		</ul>
+	</blockquote>
+	<a name="homepage"></a>
+	<h4>Home Page</h4>
+	<blockquote>
+		<p>The  home page section allows you to configure the number of featured posts, blog posts and other content on the home page. </p>
+		<h5><strong>Showcase</strong></h5>
+		<p>The top section directly below the slide show is referred to as the &quot;Showcase&quot;. This area is populated using widgets. You can decide if you want to have a 1, 2 or 3 column layout for the showcase area, and the appropriate number of widgets will be created for you. To populate this section go to the &quot;Widgets&quot; page under &quot;Appearances&quot; in your WordPress admin.</p>
+		<h5><strong>Introduction Text</strong></h5>
+		<p>The &quot;welcome&quot; headline text can be added in this section. You can also add extra  content directly below the welcome headline if you choose.</p>
+		<h5><strong>Featured Content</strong></h5>
+		<p>This is the content section on the home page under the heading &quot;Featured Content&quot;. This section can be enabled or disabled if you choose and the title can be changed to whatever you like. To add posts to this area, mark them as &quot;sticky&quot; in the post &quot;visibility&quot; settings. If no posts are marked as sticky it will display standard posts. Only blog posts can be added to this area, page content will not be displayed here. For more information on sticky posts try a web search for &quot;WordPress sticky posts&quot;. This section will also exclude any posts in categories you have excluded from your categories menu under your sidebar settings for the theme options.</p>
+		<h5><strong>Home Page Posts</strong></h5>
+		<p>This is the content section on the home page after the &quot;Featured Content&quot; section. This section can be enabled or disabled and you can set the number of posts to include. Because the &quot;Featured Content&quot; section shows &quot;sticky&quot; posts, this area will only show blog posts NOT marked &quot;sticky&quot; (this is a normal post and requires no special action). This section will also exclude any posts in categories you have excluded from your categories menu under your sidebar settings for the theme options.</p>
+		<p><span class="note">NOTE:</span> The home page content will only display as intended if you have your WordPress &quot;<strong>Reading Settings</strong>&quot; configured for &quot;<strong>Front page displays: <em>Your latest posts</em></strong>&quot;. If you setup the front page to use &quot;<strong>a static page</strong>&quot;, which you can do, it will remove all home page elements and you must create all the content yourself. This includes the slide show, welcome message, featured content and blog posts.'</p>
+		<h5>Home Page Sidebar</h5>
+		<p>The home page has a pre-set sidebar that already exists in the Widgets area, "Homepage Sidebar". This is the area where you should add widgets for the home page.</p>
+		<p align="center"><img src="http://para.llel.us/themes/unite-wp/wp-content/themes/parallelus-unite/theme_admin/images/documentation/Home-Screen-Shot.jpg" width="600" height="1176" alt="Home Screen Shot"></p>
+	</blockquote>
+	<a name="mainmenu"></a>
+	<h4>Main Menu</h4>
+	<blockquote>
+		<p class="note">THIS THEME OPTION WILL ONLY EXIST FOR WORDPRESS 2.9 AND EARLIER. FOR INSTALLS USING WORDPRESS 3.0 OR LATER YOU WILL CONTROL THE MAIN MENU FROM THE DEFAULT WORDPRESS  ADMIN:  &quot;APPEARANCE &gt; MENUS&quot;. VERSION EXCEPTIONS TO THE CONTENT BELOW HAVE BEEN NOTED WHERE NECESSARY.</p>
+		<p>This is where you will configure what does and does not appear in your main drop down menu. The items in the menu can be dragged into the position you want them to appear. To start, click the &quot;Add new menu item&quot; and it will create the item on the page. To make a sub-menu item, drag it beneath another menu item and slightly inset, visual layout will change on the page and you will immediately see the item nested below it's parent. (WP 2.9 installs only: You can also create separator items to add visual indicators on the menu for separation of links.)</p>
+		<p><span class="note">NOTE: </span>Be sure to always save your changes. Dragging items and deleting them will not take effect unless you click the save button after making the changes.</p>
+		<p><strong>Specialty Links:</strong></p>
+		<p>You can add several special types of links to tap into built in functionality of the theme.</p>
+		<p><strong>Image icons for menu links</strong> - To add an icon to a menu item, you must do two things. First you need to have the image defined in your style sheet. For an example of this open the default style sheet &quot;style-default.css&quot; and find this section (line 377):</p>
+		<pre>/* icons for menu items */
+
+.mmLogin	{ background: url(...bullet-lock.png)...
+.mmFeeds	{ background: url(...bullet-feed.png)...
+.mmRSS		{ background: url(...icons/feed.png)...
+.mmFacebook	{ background: url(...icons/facebook.png)...
+.mmTwitter	{ background: url(.../icons/twitter2.png)...</pre>
+		<p>Create your own entry by copying an existing one and giving it a custom class name. After you have this entry, add the new image you entered the path for to the location you specified. Next, from the menu manager, add a &lt;span&gt; tag around your menu item title resembling the following:</p>
+		<p><code>&lt;span class=&quot;mmFeeds&quot;&gt;Feeds&lt;/span&gt;</code></p>
+
+		<p>Where the &quot;Feeds&quot; text	is your menu item text and &quot;mmFeeds&quot; class is the class of your custom menu icon class created in the style sheet.</p>
+		<h5><strong>Login pages, top slide and pop-ups</strong></h5>
+		<p>You can  add links that activate the custom login pop-up or the slide open top area. Include the path to the page you want to open and append one of the following to choose the function.</p>
+		<p><strong>Pop-up Login (#login):</strong> To create a link that opens the login pop-up, select the link option for &quot;URL&quot; and enter the custom URL path as &quot;<strong>/wp-content/themes/parallelus-unite/login.html#login</strong>&quot;. This path should be the path to your theme folder if the above is not correct.</p>
+		<p><strong>Slide Open Top (#topReveal):</strong> To create a link that opens the slide top, select the link option for &quot;URL&quot; and enter the custom URL path as &quot;<strong>#topReveal</strong>&quot;.</p>
+		<p><strong>Any content as pop-up (#popup):</strong> You can optionally enter any URL for a link into a WordPress text editor or the menu and and append &quot;#popup&quot; to the link and it will open in a pop-up. This can be an internal or external path, for example &quot;<strong>http://www.google.com#popup</strong>&quot; will load Google in a popup window inside your page. This can be great for linking to maps or other informational content.</p>
+	</blockquote>
+	<a name="slideshow"></a>
+	<h4>Slide show</h4>
+	<blockquote>
+		<p>The  slide show menu allows you to add slides, sort the order they display and the transition effect used for each image. If images don't display you should check the paths, if they seem correct, try using a full path with your entire URL including the &quot;http://domain.com&quot; in the path. If you can enter that path into your browser and see the image it should also display in the slide show area. </p>
+		<p>Slide show links can be added so clicking a slide will direct the visitor to a page or website. This feature only works with the default &quot;Cycle&quot; slide show and not the &quot;Gallery View&quot;. Links URL's are ignored if you choose &quot;Gallery View&quot; as your slide show.</p>
+		<p><span class="note">NOTE: </span>Be sure to always save  changes. Dragging items and deleting slides will not take effect unless you click the save button after making the changes.</p>
+	</blockquote>
+	<a name="sidebar"></a>
+	<h4>Sidebar</h4>
+	<blockquote>
+		<p>Create custom sidebars. Click "<strong>Add New Sidebar</strong>", enter a unique name and save. Each sidebar will be shown in the Widget area of your admin to add widgets and content to the sidebar.</p>
+		<p>To assign a sidebar to a page or post, in the edit view of your content, select the sidebar from the drop down menu in the custom theme options beneath the default content editor and save. You can assign a sidebar to multiple pages and posts to share a single custom sidebar or use a custom sidebar for each.</p>
+		<p>The home page has a pre-set sidebar that already exists in the Widgets area, "Homepage Sidebar". This is the area where you should add widgets for the home page.</p>
+	</blockquote>
+	<a name="blog" id="blog"></a>
+	<h4>Blog Pages</h4>
+	<blockquote>
+		<p>Adding blog pages allows you to select any page on your site to display a blog. You can have an unlimited number of blogs. Click the "<strong>Add New Blog</strong>" button to create a new blog. Select the page it should use to display your blog posts on. Select the categories to pull posts from. If you have content on the page selected to host your blog posts, the content will be displayed before the posts at the very top of the page.</p>
+	</blockquote>
+	<a name="portfolio"></a>
+	<h4>Portfolio  Pages</h4>
+	<blockquote>
+		<p>Adding portfolio pages allows you to select any page on your site  to display a portfolio from. You can have an unlimited number of portfolios. Click the &quot;Add New Portfolio Page&quot; button to create one. Select the page it should use from the public side to display portfolio items on and the categories to pull the items from. If you have content on the page it will also be displayed using a floating content block. The demo site uses the following HTML in the page content for the portfolio:</p>
+		<p><code style="display:block;">&lt;h1 class=&quot;headline center&quot; style=&quot;margin-bottom: 0;&quot;&gt;Providing client services in &lt;strong&gt;web&lt;/strong&gt;, &lt;strong&gt;print&lt;/strong&gt; and &lt;strong&gt;multimedia&lt;/strong&gt; design.&lt;/h1&gt;</code></p>
+		<p align="center"><img src="http://para.llel.us/themes/unite-wp/wp-content/themes/parallelus-unite/theme_admin/images/documentation/Portfolio-Screen-Shot.jpg" width="600" height="870" alt="Portfolio Screen Shot"></p>
+	</blockquote>
+	<a name="contact"></a>
+	<h4>Contact Page</h4>
+	<blockquote>
+		<p>This is where you set the options for the "to" address, "subject" and "thank you" message shown after sending the email. Entering information on this page only sets the default values. You can still customize these options for each instance fo the contact form.</p>
+		<p>To add the contact form to a page, past the shortcode "[contact_form]" on a page and it will generate a form with the default values.</p>
+		<p>To customize the options use the long format of the shortcode (all options are options):</p>
+		<p>[contact_form to="me@email.com" subject="Subject" thankyou="Thanks."]</p>
+		<ul>
+			<li><strong>to</strong> : Your email address to deliver the message</li>
+			<li><strong>subject</strong> : The message subject</li>
+			<li><strong>thankyou</strong> : A thank you message displayed after the form is sent</li>
+		</ul>
+		<p>There is a built-in button on the WordPress text editor that includes a form to create this shorcode and insert it into your page for you. Click the button with the two forward slashes "//" on the editor and select the "Contact Form" tab.</p>
+		<p>Only one form can be added per page. The form will produce errors if multilple instances are added to the same page or post.</p>
+		</blockquote>
+	<hr>
+	<a name="content"></a>
+	<h3><strong>Content Options</strong> - <a href="#toc">top</a></h3>
+	<p>The theme includes custom content settings for pages, posts, widgets and shortcodes that can be used to produce custom formatting and special functionality on your pages.</p>
+	<p><a name="content-page"></a></p>
+	<h4>Page Options</h4>
+	<blockquote>
+		<p>When creating a new page or editing an existing one you will have a series of custom theme options beneath the default WordPress editor. Those settings enable custom page content and styles to be easily set on a per page basis.</p>
+		<ul>
+			<li><strong>Custom Sidebar</strong><br>
+				Select the custom sidebar that you'd like to be displayed on this post. <br>
+				<span class="note">Note: </span>you will need to first create a custom sidebar in your themes option panel before it will show up here.<br>
+				<br>
+			</li>
+			<li><strong>Disable Breadcrumbs</strong><br>
+				You can disable breadcrumbs for individual posts and pages or turn them off globally by disabling the setting in the theme's "General Options" menu.<br>
+				<br>
+			</li>
+			<li><strong>Custom Sub-Title</strong><br>
+				Add a custom sub-title and it will override the default provided by a post category or other settings.</li>
+		</ul>
+	</blockquote>
+	<p><a name="content-post" id="content-post"></a></p>
+	<h4>Post Options</h4>
+	<blockquote>
+		<p>When creating a new post or editing an existing one you will have a series of custom theme options beneath the default WordPress editor. Those settings enable custom content and styles to be easily set on a per post basis. The posts have the same options as the pages with the addition of the following options as well:</p>
+		<h5><strong>Post Images</strong></h5>
+		<ul>
+			<li><strong>Main Image or Video</strong><br>
+				The default image or video associated with your post (full size image). From your portfolio pages this is the image or video shown in the lightbox window.<br>
+				<br>
+			</li>
+			<li><strong>Medium Image</strong><br>
+				This is the medium size image used for portfolio item previews. If you have added a "Main Image" this field is optional. Images only. Recommended size: 261px * 174px.<br>
+				<br>
+			</li>
+			<li><strong>Small Image</strong><br>
+				This image is used on the home page for "Featured Posts". If you have added a "Main Image" or "Medium Size Image" this field is optional. Images only. Recommended size: 148px * 78px.<br>
+				<br>
+			</li>
+			<li><strong>Blog Header Image</strong><br>
+				This is the image shown in category lists blog posts. If you have added a "Main Image" this field is optional. Images only. Recommended size: 556px * 133px.</li>
+		</ul>
+	</blockquote>
+	<p><a name="content-widgets" id="content-post2"></a></p>
+	<h4>Widgets</h4>
+	<blockquote>
+		<p>A set of custom widgets have been created to accompany the theme. These can be setup with your information and added to any sidebar of your choosing. To access these widgets go to the "<strong>Appearance &gt; Widgets</strong>" menu.</p>
+		<h5><strong>Sub Navigation</strong></h5>
+		<blockquote>
+			<p>Displays a menu of sub-pages to the current page.</p>
+		</blockquote>
+		<h5><strong>Categories</strong></h5>
+		<blockquote>
+			<p>Displays a theme styled list of categories.</p>
+		</blockquote>
+		<h5><strong>Archives</strong></h5>
+		<blockquote>
+			<p>Displays a theme styled list of archives..	</p>
+		</blockquote>
+		<h5><strong>Quote</strong></h5>
+		<blockquote>
+			<p> Theme styled quote or testimonial. </p>
+		</blockquote>
+		<h5><strong>Recent Posts</strong></h5>
+		<blockquote>
+			<p>Theme styled recent posts with optional preview image.</p>
+		</blockquote>
+		<h5><strong>Popular Posts</strong></h5>
+		<blockquote>
+			<p>Theme styled popular posts with optional preview image.</p>
+		</blockquote>
+		<h5><strong>Twitter</strong></h5>
+		<blockquote>
+			<p>Show recent tweets from a Twitter account.</p>
+		</blockquote>
+		<h5><strong>Flickr</strong></h5>
+		<blockquote>
+			<p>Show images from a Flickr account.</p>
+		</blockquote>
+	</blockquote>
+	<h4>Shortcodes</h4>
+	<blockquote>
+		<p>A collection of shortcodes has been added to the theme for quick content formatting and theme specific functionality with little configuration. You can quickly insert shortcodes using the custom editor button on the WordPress editor represented by to forward slashes "//".</p>
+	</blockquote>
+	<hr>
+	<a name="structure"></a>
+	<h3><strong>Layout and Design Structure</strong> - <a href="#toc">top</a></h3>
+	<p>Included with the theme is a copy of the HTML only version. This is provided to make it easier to build custom additions or modify the theme as you choose. It's easier to see the structure of the site in the original HTML files than from piecing together WordPress pages. Within the HTML pages  is additional documentation about the theme. Below are links and references to these pages where you can learn more about the layout structures, text formatting and other features. If you want to access these files directly they are located in the &quot;theme_admin/HTML-Version&quot; folder.</p>
+	<blockquote>
+		<h4>Layouts - <a href="HTML-Version/sample-layout.html">sample-layout.html</a></h4>
+		<p>You will find examples of the different layouts and content configurations on this sample page. </p>
+		<p><span class="note">NOTE:</span> For samples of shortcode layouts and usage please refer to the WordPress demo site: <br>
+		<a href="http://para.llel.us/themes/unite-wp">http://para.llel.us/themes/unite-wp</a></p>
+		<h4>Text - <a href="HTML-Version/sample-text.html">sample-text.html</a></h4>
+		<p>This contains example code and sample outputs of all the common HTML tags used for content editing. Most of the text styling is already handled by WordPress, but in situations where you want to add a headline in the middle of a page, or create a sub-title, this information can be very useful.</p>
+		<h4>Cufon - font replacement</h4>
+		<p>This theme takes advantage of <a href="http://wiki.github.com/sorccu/cufon/">cufon font replacement</a> for headings and other title elements. The font used for these elements is called &quot;Liberation Sans&quot;. It is a free font and is available online. </p>
+		<p><a href="http://www.dafont.com/font.php?file=liberation_sans&page=1&nb_ppp_old=50&text=&nb_ppp=10&psize=m&classt=alpha">Download "Liberation Sans"</a></p>
+		<p> <span class="note">NOTE:</span> If you are experiencing problems or want to disable Cufon, you can do this from the theme options<strong>"General Options</strong> &gt; <strong>Miscellaneous</strong> &gt; <strong>Font Replacement</strong>" menu. </p>
+		<h4>Logo Fonts</h4>
+		<p>The logos in the included skins use &quot;Liberation Sans&quot; as the font. This is a free font available online. The dark theme uses an alternate logo font, &quot;Harabara&quot;, also a free font available online.</p>
+		<p><a href="http://www.dafont.com/font.php?file=liberation_sans&page=1&nb_ppp_old=50&text=&nb_ppp=10&psize=m&classt=alpha">Download "Liberation Sans"</a><br>
+			<a href="http://www.dafont.com/harabara.font?nb_ppp=50&af=on&l[]=10&l[]=1&text=unite">Download "Harabara"</a></p>
+		<h4>Category Titles</h4>
+		<p>When you create a post category you can optionally add a description. If the category has a description it will be displayed after the title in the format: </p>
+		<h5><strong>Category Title &nbsp;//&nbsp; Your category description...</strong></h5>
+		<h4>Skins and Design</h4>
+		<p>There are several pre-made skins included with the theme. For detailed information on creating custom skins or using a single skin please refer to the "<a href="#skin"><strong>Skinning the Theme</strong></a>" section of this document.</p>
+		<p><span class="note">Note: </span>Although every effort has been made to ensure the theme is bug free and easy to use, if you encounter a problem please notify me immediately through my <strong><a href="http://themeforest.net/user/Parallelus" target="_blank">ThemeForest account page</a></strong> so I can ensure it gets fixed as quickly as possible.</p>
+	</blockquote>
+	<hr>
+	<a name="css" /><h3><a name="css">CSS Files and Structure - </a><a href="#toc">top</a></h3>
+	<p>There are several CSS files included with this theme, but only a few will be necessary for customization. The CSS files are all located in the root theme folder. The only exception to this is plugin specific style sheets which are located in a sub-folder named "css". Within that folder there are two sub-folders, "source" and "skins-originals".</p>
+	<p>The first folder, <strong>"css/source</strong>", contains the original CSS files with formatted code and comments. Only a few files are in this folder. These files might include the original CSS files for add-on scripts used in the design. If you find a CSS file that is uncommented and you need the original, check this folder.</p>
+	<p>The second folder, "<strong>css/skins-originals</strong>", contains a backup copy of the CSS skin files.</p>
+	<h4>Primary CSS Files</h4>
+	<blockquote>
+		<h5><strong>style-default.css</strong> (required)</h5>
+		<p>This file provides the foundation for the site design and all skins. It controls the layout and design structure of the theme. Making modifications to this file will usually effect all skins unless it is a color or image related change. The skin files act as an extension of "<strong>style-default.css</strong>" to apply custom colors and graphics. Before you edit this file you should consider making a custom skin style sheet or editing the one you are already using for your design.</p>
+		<h5><strong>style-skin-#.css</strong></h5>
+		<p>These are the skin specific style sheets. These files are named numerically in a format such as, "<strong>skin-#.css</strong>". To change the skin, use the menu option under "<strong>General Settings</strong> &gt;<strong>Choose a skin</strong>". This will switch between any of the 5 existing skins included with the theme. If you have created a custom skin, you can select the "Custom" option from this menu. In the text box that appears, type the name of your custom skin CSS file (omitting the "<strong>.css</strong>" file extension). For example, if you create a skin CSS file named "<strong>my-skin.css</strong>" you would save it in the theme folder and type "<strong>my-skin</strong>" in the custom name field.</p>
+	</blockquote>
+	<hr>
+	<a name="skin"></a>
+	<h3>Skinning the Theme - <a href="#toc">top</a></h3>
+	<p>Each color style, "skin", is controlled by a custom CSS file. These are located in the theme folder "<strong>parallelus-unite</strong>". The images for each skin are saved in a folder under <strong>"images/skins/skin-123/</strong>" where "<strong>skin-123</strong>" is the name of your CSS file. To create a custom skin, duplicate an existing skin CSS files and edit it as desired. You can easily output the custom graphics for you skin using one of the "<strong>Theme Graphics - for skinning.PSD</strong>" files located in the "<strong>Design\Files for skinning</strong>" folded included with the theme.</p>
+	<p>After creating the skin CSS file and a matching images folder, save your images to this new folder. Use the "<strong>Save for web...</strong>" feature of Photoshop and select "<strong>All user slices</strong>" to get the desired graphics. You can create a custom skin in a few minutes by modifying the background colors of the main layers in this file. If you want to get more detailed and tweak the output you can edit the individual colors, highlights, borders and shadows of the layers above the background. Taking some time to play with the different layers to see what effect they have can be very helpful in the beginning. This file was designed to allow easy and fast skinning but also alows you to control the detials of each graphic element output for the design.</p>
+	<p>IMPORTANT: If you are going to create a custom skin or do any advanced code editing, you may need to edit the JavaScript loading file, "<strong>js/onLoad.js</strong>". This file controls loading and executing of many dynamic JavaScript functions used in the theme. To edit the file, you should use the source located in "<strong>js/source/onLoad.js</strong>"</p>
+	<h4>To create a single skin for your site</h4>
+	<p>The best way to go about creating your own skin, is by starting from one of the pre-made styles that come with the theme. An easy way to do this would be as follows:</p>
+	<ol>
+		<li>First, create a copy of an existing style sheet from the theme folder "<strong>style-skin-#.css</strong>", and increment the # to the next unused value.</li>
+		<li>Create a duplicate of the same skin's images folder located in "<strong>images/skins/skin-#</strong>"</li>
+		<li>Give your new images folder the same name as the CSS file by incrementing the number to match.</li>
+		<li>Open the "<strong>Theme Graphics - for skinning.psd</strong>" file in the "<strong>Design/Files for skinning</strong>" folder and modify the colors to create your desired graphics.</li>
+		<li>Output the graphics using "<strong>Save for web...</strong>" to the new skin's images folder. Choose "<strong>All user created slices</strong>" as the option for output method when asked.</li>
+		<li>Open the new CSS file for your skin. Do a find and replace for the path to your images folder, this would be something like, Find: "<strong>skin-8</strong>", Replace with: "<strong>skin-9</strong>", to update all occurrences of the image folder path in the file. Save when finished.</li>
+		<li>Upload your new skin CSS file and images folder to the theme folder for "<strong>parallelus-unite</strong>" on your server.</li>
+		<li>Change the skin setting in the Theme Options to "<strong>Custom</strong>" and type the name of your skin file, "<strong>my-skin</strong>", omitting the ".css" file extension.</li>
+		<li>Save your settings and preview the new skin.</li>
+		<li>In the WordPress "<strong>Appearance &gt; Editor</strong>" panel, open your new skin CSS file and begin editing the individual style properties to match the graphics you have created for your new skin.</li>
+		<li>Save and enjoy!</li>
+	</ol>
+	<hr>
+	<a name="special"></a>
+	<h3>Special Features - <a href="#toc">top</a><br></h3>
+	<h4>Button Style Disabling</h4>
+	<p>The custom button styles will automatically apply to any &lt;button&gt; or &lt;input type=&quot;[submit or button]&quot;&gt; on your page. In some situations you may need a button not to have these styles to preserve special functionality. You can add the class &quot;noStyle&quot; to any button and it will be ignored by the button styling function.</p>
+		<blockquote>
+			<p><code>&lt;button class=&quot;noStyle&quot;&gt;Do Not Style This Button&lt;/button&gt;</code></p>
+		</blockquote>		<h4>Specialty Links</h4>
+		<p>You can add several special types of links to tap into built in functionality of the theme.</p>
+	<blockquote>
+	<h5><strong>Content Pop-ups</strong></h5>
+		<p>You can  add links that activate the custom pop-up modal window. Include the path to the page you want to open and append the following:</p>
+		<p><strong>Any content as pop-up (class=&quot;zoom iframe&quot;):</strong> You can  enter any URL and add the class &quot;zoom&quot; and &quot;iframe&quot;  and it will open in a pop-up. This can be an internal or external path, for example:</p>
+		<blockquote>
+			<p><code>&lt;a href=&quot;http://www.google.com&quot; class=&quot;zoom iframe&quot;&gt;Google&lt;/a&gt;</code></p>
+		</blockquote>
+		<p>For  image pop-up only the class	&quot;zoom&quot; should be applied. </p>
+		<h5>Pop-up shortcut (#popup)</h5>
+		<p>You can  add the same pop-up functionality to a link by appending &quot;#popup&quot; to the url, for example:</p>
+		<blockquote><code>&lt;a href=&quot;http://www.google.com#popup&quot;&gt;Google&lt;/a&gt;</code></blockquote>
+		<p> This can be useful for linking to maps or other informational content.</p>
+		<h5> <strong>Slide Open Top (#topReveal)</strong> </h5>
+		<p>To create a link that reveals the slide open top area, enter the URL path as "#topReveal". For example:</p>
+		<blockquote><code>&lt;a href=&quot;#topReveal&quot;&gt;Slide Open Top&lt;/a&gt;</code></blockquote>
+		<h5><strong>Image Pop-ups</strong></h5>
+		<p>You can open any image in a pop-up by including the URL for the image in a links HREF attribute and giving it the class &quot;zoom&quot; as demonstrated below:</p>
+		<code>&lt;a href=&quot;http://mysite.com/myImage.jpg&quot; class=&quot;zoom&quot;&gt;View Image&lt;/a&gt;</code>
+		<h5><strong>Video Pop-ups</strong></h5>
+		<p>You can open  many web videos in a pop-up by including the URL for the video in a links HREF attribute and giving it the class &quot;zoom&quot; as demonstrated below:</p>
+<pre>
+&lt;a href=&quot;http://www.youtube.com/watch?v=8iGRpC8U3x8&quot; class=&quot;zoom&quot;&gt;
+	Open Video Pop-up
+&lt;/a&gt; </pre>
+	</blockquote>
+	<hr>
+	<a name="javascript" />
+	<h3><strong>JavaScript</strong> - <a href="#toc">top</a></h3>
+	<p>This theme imports several Javascript files. All located in the "js" folder.</p>
+	<ol>
+		<li><a href="http://users.tpg.com.au/j_birch/plugins/superfish/">Superfish</a> - main menu </li>
+		<li><a href="http://malsup.com/jquery/cycle/">jQuery Cycle Plugin</a> - slide show (default)</li>
+		<li><a href="http://spaceforaname.com/galleryview">GalleryView</a> - Optional alternate slide show</li>
+		<li><a href="http://flesler.blogspot.com/2007/10/jqueryscrollto.html">jQuery.ScrollTo</a> - Scrolling effect for anchor tags </li>
+		<li><a href="http://allinthehead.com/retro/338/supersleight-jquery-plugin">SuperSleight</a> (PNG fix)</li>
+		<li><a href="http://fancybox.net/">FancyBox</a> - lightbox effect for portfolio and login form</li>
+		<li><a href="http://bassistance.de/jquery-plugins/jquery-plugin-validation/">jQuery Validation</a> - form validation for contact page</li>
+		<li><a href="http://wiki.github.com/sorccu/cufon/">cufon Font Replacement</a> - for custom font replacement</li>
+		<li><a href="http://plugins.learningjquery.com/cluetip/">clueTips</a> - Mouse over tool tips</li>
+		<li><a href="http://scott.sauyet.com/thoughts/archives/2007/03/31/overlabel-with-jquery/">Overlabel</a> - form input labels</li>
+	</ol>
+	<hr>
+	<a name="files" />
+	<h3><strong>PSD Files</strong> - <a href="#toc">top</a></h3>
+	<p>Several design files are included with this theme:</p>
+	<ol>
+		<li>Additional graphics - miscellaneous graphics used in design</li>
+		<li>Dialogs
+			<ol>
+				<li>Login.psd - Login pop-up window</li>
+				<li>Modal.psd - Modal for images and portfolio</li>
+			</ol>
+		</li>
+		<li>Files for skinning
+			<ol>
+				<li>&quot;Theme Graphics - default.psd&quot; - used to create default skin, not optimized</li>
+				<li>&quot;Theme Graphics - for skinning (dark).psd&quot; - used to skin dark theme</li>
+				<li>&quot;<strong>Theme Graphics - for skinning.psd</strong>&quot; - used for most skinning, start here.</li>
+				<li>&quot;Tooltip.psd&quot; - Tool tips skinning.</li>
+			</ol>
+		</li>
+		<li>Slideshow - custom files for creating graphics sized for slide show</li>
+		<li>Theme.psd - The main design (useful for mockups, but not sliced for output)</li>
+	</ol>
+	<hr>
+	<a name="credits" />
+	<h3><strong>Sources and Credits</strong> - <a href="#toc">top</a></h3>
+	<p>The following images, icons or other files have been used in this theme.
+	<ul>
+		<li><a href="http://narjisnaqvi.deviantart.com/art/Web-social-icons-117562335">Web social icons by ~NarjisNaqvi</a></li>
+		<li>Monitor, slide projector and lock icons from <a href="http://www.iconfinder.net/">Icon Finder</a></li>
+		<li><a href="http://users.tpg.com.au/j_birch/plugins/superfish/">Superfish</a></li>
+		<li><a href="http://malsup.com/jquery/cycle/">jQuery Cycle Plugin</a></li>
+		<li><a href="http://spaceforaname.com/galleryview">GalleryView</a></li>
+		<li><a href="http://flesler.blogspot.com/2007/10/jqueryscrollto.html">jQuery.ScrollTo</a></li>
+		<li><a href="http://allinthehead.com/retro/338/supersleight-jquery-plugin">SuperSleight</a> (PNG fix)</li>
+		<li><a href="http://fancybox.net/">FancyBox</a></li>
+		<li><a href="http://bassistance.de/jquery-plugins/jquery-plugin-validation/">jQuery Validation</a></li>
+		<li><a href="http://cufon.shoqolate.com/generate/">cufón</a></li>
+		<li><a href="http://plugins.learningjquery.com/cluetip/">clueTips</a></li>
+		<li><a href="http://scott.sauyet.com/thoughts/archives/2007/03/31/overlabel-with-jquery/">Overlabel</a></li>
+	</ul>
+	<hr>
+	<p>Once again, thank you so much for purchasing this theme. As I said at the beginning, I'd be glad to help if you have any questions or need assistance.</p>
+	<p>Thanks,<br>
+			<strong>Parallelus (Andy Wilkerson)</strong></p>
+	<br>
+<hr class="space">
+</div>
+</body>
+</html>

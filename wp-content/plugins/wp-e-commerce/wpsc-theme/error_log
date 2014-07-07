@@ -1,0 +1,12 @@
+[11-Mar-2012 11:35:52] PHP Fatal error:  Call to undefined function wpsc_cart_item_count() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-theme/wpsc-cart_widget.php on line 7
+[11-Mar-2012 11:35:52] PHP Fatal error:  Call to undefined function wpsc_start_category_query() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-theme/wpsc-category-list.php on line 9
+[11-Mar-2012 11:35:52] PHP Fatal error:  Call to undefined function is_user_logged_in() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-theme/wpsc-user-log.php on line 15
+[11-Mar-2012 11:35:52] PHP Fatal error:  Call to undefined function get_term() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-theme/wpsc-category_widget.php on line 2
+[11-Mar-2012 11:35:53] PHP Fatal error:  Call to undefined function get_option() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-theme/wpsc-products_page.php on line 3
+[11-Mar-2012 11:35:53] PHP Fatal error:  Call to undefined function wpsc_output_breadcrumbs() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-theme/wpsc-list_view.php on line 6
+[11-Mar-2012 11:35:53] PHP Fatal error:  Call to undefined function get_option() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-theme/wpsc-single_product.php on line 8
+[11-Mar-2012 11:35:54] PHP Fatal error:  Call to undefined function get_option() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-theme/wpsc-grid_view.php on line 3
+[11-Mar-2012 11:35:54] PHP Warning:  Invalid argument supplied for foreach() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-theme/wpsc-featured_product.php on line 2
+[11-Mar-2012 11:35:54] PHP Fatal error:  Class 'wpsc_checkout' not found in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-theme/wpsc-shopping_cart_page.php on line 3
+[11-Mar-2012 11:35:54] PHP Fatal error:  Call to undefined function wpsc_transaction_theme() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-theme/wpsc-transaction_results.php on line 16
+[11-Mar-2012 11:47:06] PHP Fatal error:  Call to undefined function is_user_logged_in() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-theme/wpsc-user-log.php on line 15

@@ -1,0 +1,77 @@
+.isSortable .sortItem, .portfolio-item, .li-item { 
+	background: #e0e0e0;
+	border: 1px solid #d0d0d0;
+	-moz-border-radius: 8px;
+	-webkit-border-radius: 8px;
+	border-radius: 8px;
+	margin: 0 0 3px;
+	clear: both;}
+
+ul .isSortable .sortItem, ul .portfolio-item, ul .li-item {	/* top level items */
+	background: #DFDFDF url("../../../../../wp-admin/images/gray-grad.png") repeat-x left top;
+	border-color: #d0d0d0;}
+
+ul li ul .isSortable .sortItem {	/* nested items  */
+	background: #f2f2f3;
+	border-color: #e2e2e3;}
+
+.handle,
+.menu-item .sortItem .handle,
+.slide-item .sortItem .handle {
+	width: 24px;
+	cursor: move;
+	vertical-align: top;}
+	
+.handle div,
+.menu-item .sortItem .handle div,
+.slide-item .sortItem .handle div {
+	float: left;
+	width: 24px;
+	height: 24px;
+	background: transparent url("../images/menu-move.png") no-repeat 0 0;
+	margin: 0 0 0 0.25em;}
+
+
+.helper {
+	border: 2px dotted #B0D0F7;
+	background: #EAF2FA;}
+	
+.themeTableWrapper td .menu-item table td,
+.themeTableWrapper td .slide-item table td {padding: 2px; vertical-align: middle; border: 0;}
+	
+.themeTableWrapper td .menu-separator table td,
+.themeTableWrapper td .menu-row-break table td {padding: 0; vertical-align: middle; border: 0;}
+
+.sortItem label { line-height:2.3em; color: #222; }
+.sortItem label.checked { line-height:2.3em; color: #21759B; }
+
+.sortItem .mm-Title, .sortItem .mm-Description { width: 170px;}
+.sortItem .ss-Image { width: 250px; }
+
+.sortItem .mm-Link,
+.sortItem .ss-Link { 
+	display:none; 
+	width:170px; }
+
+.sortItem .delete-item { text-align: center; width: 60px; margin: 0 5px 0 0; }
+
+div ul#MainMenu li.menu-separator .sortItem {	/* separator */
+	background: #ccc;
+	border-color: #bbb;}
+div ul#MainMenu li.menu-row-break .sortItem {	/* Row Break */
+	background: #999;
+	border-color: #888;
+	color: #fff; }
+.menu-separator .handle,
+.menu-row-break .handle,
+div ul#MainMenu li.menu-separator .sortItem .handle,
+div ul#MainMenu li.menu-row-break .sortItem .handle {
+	width: auto;
+	text-align:center;
+	cursor: move;}
+
+	
+/* extra slideshow menu styles */
+.sortItem .ss-Desc, .sortItem .ss-Title {
+	width:250px;
+}

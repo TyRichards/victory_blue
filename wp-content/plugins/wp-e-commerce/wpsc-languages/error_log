@@ -1,0 +1,1 @@
+[11-Mar-2012 11:45:05] PHP Fatal error:  Call to undefined function get_option() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-languages/EN_en.php on line 570

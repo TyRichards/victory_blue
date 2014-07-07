@@ -1,0 +1,1 @@
+[11-Mar-2012 11:51:51] PHP Fatal error:  Call to undefined function add_filter() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-admin/includes/products.php on line 44

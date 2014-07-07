@@ -1,0 +1,2 @@
+[11-Mar-2012 11:45:04] PHP Fatal error:  Call to undefined function get_option() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-theme/functions/wpsc-user_log_functions.php on line 13
+[11-Mar-2012 11:47:46] PHP Fatal error:  Call to undefined function get_option() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-theme/functions/wpsc-user_log_functions.php on line 13

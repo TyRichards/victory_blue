@@ -1,0 +1,1 @@
+[31-May-2013 01:28:04] PHP Fatal error:  Call to undefined function  add_action() in /home/ty/public_html/wp-content/plugins/hello.php on line 60

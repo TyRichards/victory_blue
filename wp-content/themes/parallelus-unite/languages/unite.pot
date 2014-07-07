@@ -1,0 +1,234 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: Andy Wilkerson\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# Translation of the WordPress theme Unite by the Parallelus.
+#: 404.php:
+#: lines (26 36)
+msgid "Error 404"
+msgstr ""
+
+msgid "Page could not be found."
+msgstr ""
+
+msgid "Sorry, the page you are looking for wasn't found."
+msgstr ""
+
+#: header.php, search.php
+#: header.php lines (11 298 299 301 308 312 316 320 324 351)
+#: search.php lines (13)
+msgid "Search Results"
+msgstr ""
+
+msgid "Not a member yet?"
+msgstr ""
+
+msgid "Register now and get started."
+msgstr ""
+
+msgid "Register for an account"
+msgstr ""
+
+msgid "Sign in"
+msgstr ""
+
+msgid "Sign in to your account."
+msgstr ""
+
+msgid "Username"
+msgstr ""
+
+msgid "Password"
+msgstr ""
+
+msgid "Forgot your password?"
+msgstr ""
+
+msgid "Home"
+msgstr ""
+
+#: archive.php, blog.php, comments.php, contact.php, index.php, page-default.php, page_fullwidth.php, portfolio.php, search.php, sidebar.php, single.php
+#: archive.php lines (23 27 31 35 39 44 47 81 83 96 108)
+#: blog.php lines (89 107 116 54)
+#: comments.php lines (15)
+#: contact.php lines (92 107)
+#: index.php lines (279 266 263 158)
+#: page-default.php lines (38)
+#: page_fullwidth.php lines (56)
+#: portfolio.php lines (161 244)
+#: search.php lines (66 83)
+#: sidebar.php (96)
+#: single.php (58 73)
+msgid "Browsing posts in "
+msgstr ""
+
+msgid "Posts tagged as "
+msgstr ""
+
+msgid "Posts published on "
+msgstr ""
+
+msgid "Posts published in "
+msgstr ""
+
+msgid "Posts published by "
+msgstr ""
+
+msgid "Archives "
+msgstr ""
+
+msgid "Posted by "
+msgstr ""
+
+msgid " in "
+msgstr ""
+
+msgid "Comments"
+msgstr ""
+
+msgid "1 comment"
+msgstr ""
+
+msgid "% comments"
+msgstr ""
+
+msgid "Read more"
+msgstr ""
+
+msgid "There is nothing here (yet)."
+msgstr ""
+
+msgid "More Information"
+msgstr ""
+
+#: comments.php, contact.php
+#: comments.php lines (7 37 48 55 62 67 72 77 85)
+#: contact.php lines (84 80)
+msgid "This content is restricted. Please sign in to view this entry."
+msgstr ""
+
+msgid "Comments are closed."
+msgstr ""
+
+msgid "Leave a comment"
+msgstr ""
+
+msgid "Leave a comment for %s"
+msgstr ""
+
+msgid "Please"
+msgstr ""
+
+msgid "sign in"
+msgstr ""
+
+msgid "to leave a comment."
+msgstr ""
+
+msgid "Comment"
+msgstr ""
+
+msgid "Website"
+msgstr ""
+
+msgid "E-mail"
+msgstr ""
+
+msgid "not published"
+msgstr ""
+
+msgid "required"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "Log out"
+msgstr ""
+
+msgid "Log out of this account"
+msgstr ""
+
+msgid "Logged in as"
+msgstr ""
+
+#: contact-send.php
+#: lines (27 32 35 38 48)
+msgid "Please enter your name."
+msgstr ""
+
+msgid "Please enter an e-mail address."
+msgstr ""
+
+msgid "Please enter a valid e-mail address."
+msgstr ""
+
+msgid "Please enter your full phone number."
+msgstr ""
+
+msgid "Please enter your message. It should have at least 5 characters."
+msgstr ""
+
+#: contact.php
+#: lines (96)
+msgid "Send"
+msgstr ""
+
+msgid "Your message has been sent. Thank you!"
+msgstr ""
+
+msgid "Phone"
+msgstr ""
+
+#: index.php
+#: lines (166 27 36 45)
+msgid "There are no featured posts selected to display in this area (yet)."
+msgstr ""
+
+msgid "Populate this area from the &quot;Appearance &raquo; Widgets&quot; section of your admin."
+msgstr ""
+
+msgid "Right Showcase"
+msgstr ""
+
+msgid "Middle Showcase"
+msgstr ""
+
+msgid "Left Showcase"
+msgstr ""
+
+msgid "Featured Content"
+msgstr ""
+
+#: search.php
+#: lines (95)
+msgid "No results found for"
+msgstr ""
+
+#: sidebar.php
+#: lines (27 66 124 128 131 160)
+msgid "Sub Navigation"
+msgstr ""
+
+msgid "Categories"
+msgstr ""
+
+msgid "Blogs Sidebar"
+msgstr ""
+
+msgid "Pages Sidebar"
+msgstr ""
+
+msgid "Default Sidebar"
+msgstr ""
+
+msgid "Recent Posts"
+msgstr ""
+

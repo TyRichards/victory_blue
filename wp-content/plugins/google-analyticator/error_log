@@ -1,0 +1,4 @@
+[11-Mar-2012 11:37:19] PHP Fatal error:  Call to undefined function add_option() in /home/victoryb/public_html/wp-content/plugins/google-analyticator/google-analyticator.php on line 52
+[11-Mar-2012 11:37:19] PHP Fatal error:  Class 'WP_Widget' not found in /home/victoryb/public_html/wp-content/plugins/google-analyticator/google-analytics-stats-widget.php on line 9
+[11-Mar-2012 11:37:20] PHP Warning:  require_once(ABSPATHWPINC/class-feed.php) [<a href='function.require-once'>function.require-once</a>]: failed to open stream: No such file or directory in /home/victoryb/public_html/wp-content/plugins/google-analyticator/class.analytics.stats.php on line 5
+[11-Mar-2012 11:37:20] PHP Fatal error:  require_once() [<a href='function.require'>function.require</a>]: Failed opening required 'ABSPATHWPINC/class-feed.php' (include_path='.:/usr/lib/php:/usr/local/lib/php') in /home/victoryb/public_html/wp-content/plugins/google-analyticator/class.analytics.stats.php on line 5

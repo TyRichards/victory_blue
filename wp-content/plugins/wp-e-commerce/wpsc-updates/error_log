@@ -1,0 +1,4 @@
+[01-Mar-2012 00:52:36] PHP Fatal error:  Call to undefined function get_option() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-updates/updating_tasks.php on line 3
+[01-Mar-2012 00:52:37] PHP Fatal error:  Call to undefined function __() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-updates/currency_list.php on line 2
+[11-Mar-2012 11:51:30] PHP Fatal error:  Call to undefined function __() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-updates/currency_list.php on line 2
+[11-Mar-2012 11:51:35] PHP Fatal error:  Call to undefined function get_option() in /home/victoryb/public_html/wp-content/plugins/wp-e-commerce/wpsc-updates/updating_tasks.php on line 3

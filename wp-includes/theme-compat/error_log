@@ -1,0 +1,5 @@
+[11-Mar-2012 11:44:09] PHP Fatal error:  Call to undefined function _deprecated_file() in /home/victoryb/public_html/wp-includes/theme-compat/footer.php on line 10
+[11-Mar-2012 11:44:09] PHP Fatal error:  Call to undefined function _deprecated_file() in /home/victoryb/public_html/wp-includes/theme-compat/comments.php on line 10
+[11-Mar-2012 11:44:10] PHP Fatal error:  Call to undefined function _deprecated_file() in /home/victoryb/public_html/wp-includes/theme-compat/sidebar.php on line 10
+[11-Mar-2012 11:44:10] PHP Fatal error:  Call to undefined function _deprecated_file() in /home/victoryb/public_html/wp-includes/theme-compat/comments-popup.php on line 10
+[11-Mar-2012 11:44:16] PHP Fatal error:  Call to undefined function _deprecated_file() in /home/victoryb/public_html/wp-includes/theme-compat/header.php on line 10
