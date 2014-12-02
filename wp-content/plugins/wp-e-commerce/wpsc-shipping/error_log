@@ -1,9 +1,0 @@
-[12-Sep-2013 15:11:51] PHP Fatal error:  Call to undefined function  _x() in /home4/ty/public_html/wp-content/plugins/wp-e-commerce/wpsc-shipping/ups_20.php on line 17
-[14-Sep-2013 05:58:52] PHP Fatal error:  Call to undefined function  __() in /home4/ty/public_html/wp-content/plugins/wp-e-commerce/wpsc-shipping/flatrate.php on line 19
-[14-Sep-2013 06:13:53] PHP Fatal error:  Call to undefined function  __() in /home4/ty/public_html/wp-content/plugins/wp-e-commerce/wpsc-shipping/tablerate.php on line 20
-[14-Sep-2013 06:43:53] PHP Fatal error:  Call to undefined function  __() in /home4/ty/public_html/wp-content/plugins/wp-e-commerce/wpsc-shipping/usps_20.php on line 129
-[15-Sep-2013 09:08:43] PHP Fatal error:  Call to undefined function  __() in /home4/ty/public_html/wp-content/plugins/wp-e-commerce/wpsc-shipping/weightrate.php on line 19
-[15-Sep-2013 09:23:44] PHP Warning:  require_once(WPSC_FILE_PATH/wpsc-shipping/library/shipwire_functions.php) [<a href='function.require-once'>function.require-once</a>]: failed to open stream: No such file or directory in /home4/ty/public_html/wp-content/plugins/wp-e-commerce/wpsc-shipping/shipwire.php on line 3
-[15-Sep-2013 09:23:44] PHP Fatal error:  require_once() [<a href='function.require'>function.require</a>]: Failed opening required 'WPSC_FILE_PATH/wpsc-shipping/library/shipwire_functions.php' (include_path='.:/usr/lib/php:/usr/local/lib/php') in /home4/ty/public_html/wp-content/plugins/wp-e-commerce/wpsc-shipping/shipwire.php on line 3
-[06-Feb-2014 03:30:18] PHP Fatal error:  Call to undefined function  __() in /home4/ty/public_html/wp-content/plugins/wp-e-commerce/wpsc-shipping/australiapost.php on line 31
-[20-Feb-2014 03:52:01] PHP Fatal error:  Call to undefined function  __() in /home4/ty/public_html/wp-content/plugins/wp-e-commerce/wpsc-shipping/australiapost.php on line 31

@@ -1,1 +1,0 @@
-[12-Oct-2013 07:45:15] PHP Fatal error:  Call to undefined function  add_action() in /home4/ty/public_html/wp-content/plugins/wp-e-commerce/wp-shopping-cart.php on line 30

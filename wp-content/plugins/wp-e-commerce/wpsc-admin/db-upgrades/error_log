@@ -1,1 +1,0 @@
-[03-Oct-2013 06:42:13] PHP Fatal error:  Call to undefined function  add_action() in /home4/ty/public_html/wp-content/plugins/wp-e-commerce/wpsc-admin/db-upgrades/upgrade.php on line 79

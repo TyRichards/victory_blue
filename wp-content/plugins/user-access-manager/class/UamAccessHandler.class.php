@@ -45,15 +45,18 @@ class UamAccessHandler
         'page',
         'attachment',
     );
+    protected $_aPostableTypesMap = array();
     protected $_aAllObjectTypes = null;
+    protected $_aAllObjectTypesMap = null;
     protected $_aSqlResults = array();
+    protected $_aValidObjectTypes = array();
     
     /**
      * The constructor
      * 
      * @param UserAccessManager $oUserAccessManager The user access manager object.
      */
-    public function __construct(UserAccessManager $oUserAccessManager)
+    public function __construct(UserAccessManager &$oUserAccessManager)
     {
         $this->_oUserAccessManager = $oUserAccessManager;
         
@@ -64,8 +67,22 @@ class UamAccessHandler
                 $this->_aPostableTypes[] = $oPostType->name;
             }
         }
+
+        $this->_aPostableTypesMap = array_flip($this->_aPostableTypes);
         
         $this->_aObjectTypes = array_merge($this->_aPostableTypes, $this->_aObjectTypes);
+    }
+
+    /**
+     * Checks if type is postable.
+     *
+     * @param string $sType
+     *
+     * @return bool
+     */
+    public function isPostableType($sType)
+    {
+        return isset($this->_aPostableTypesMap[$sType]);
     }
     
     /**
@@ -99,24 +116,36 @@ class UamAccessHandler
     }
     
     /**
-     * Returns all _aObjects types.
+     * Returns all objects types.
      * 
      * @return array
      */
     public function getAllObjectTypes()
     {
-        if (isset($this->_aAllObjectTypes)) {
-            return $this->_aAllObjectTypes;
+        if ($this->_aAllObjectTypes === null) {
+            $aPlObjects = $this->getPlObjects();
+
+            $this->_aAllObjectTypes = array_merge(
+                $this->_aObjectTypes,
+                array_keys($aPlObjects)
+            );
         }
         
-        $aPlObjects = $this->getPlObjects();
-
-        $this->_aAllObjectTypes = array_merge(
-            $this->_aObjectTypes,
-            array_keys($aPlObjects)
-        );
-        
         return $this->_aAllObjectTypes;
+    }
+
+    /**
+     * Returns all objects types as map.
+     *
+     * @return array
+     */
+    public function getAllObjectTypesMap()
+    {
+        if ($this->_aAllObjectTypesMap === null) {
+            $this->_aAllObjectTypesMap = array_flip($this->getAllObjectTypes());
+        }
+
+        return $this->_aAllObjectTypesMap;
     }
     
     /**
@@ -181,12 +210,34 @@ class UamAccessHandler
         
         return $aUserGroups;
     }
+
+    /**
+     * Checks if the object type is a valid one.
+     *
+     * @param string $sObjectType The object type to check.
+     *
+     * @return boolean
+     */
+    public function isValidObjectType($sObjectType)
+    {
+        if (!isset($this->_aValidObjectTypes[$sObjectType])) {
+            $aObjectTypesMap = $this->getAllObjectTypesMap();
+
+            if (isset($aObjectTypesMap[$sObjectType])) {
+                $this->_aValidObjectTypes[$sObjectType] = true;
+            } else {
+                $this->_aValidObjectTypes[$sObjectType] = false;
+            }
+        }
+
+        return $this->_aValidObjectTypes[$sObjectType];
+    }
     
     /**
-     * Returns all user groups or one requested by the user group _iId.
+     * Returns all user groups or one requested by the user group id.
      * 
-     * @param integer $iUserGroupId The _iId of the single user group which should be returned.
-     * @param boolean $blFilter      Filter the groups.
+     * @param integer $iUserGroupId The id of the single user group which should be returned.
+     * @param boolean $blFilter     Filter the groups.
      * 
      * @return UamUserGroup[]|UamUserGroup
      */
@@ -237,13 +288,17 @@ class UamAccessHandler
         }
         
         if ($iUserGroupId == null) {
-            return $this->_aUserGroups[$sFilterAttr];
+            if (isset($this->_aUserGroups[$sFilterAttr])) {
+                return $this->_aUserGroups[$sFilterAttr];
+            }
+
+            return array();
         } else {
             if (isset($this->_aUserGroups[$sFilterAttr][$iUserGroupId])) {
                 return $this->_aUserGroups[$sFilterAttr][$iUserGroupId];
-            } else {
-                return null;
             }
+
+            return null;
         }
     }
     
@@ -288,7 +343,7 @@ class UamAccessHandler
      */
     public function getUserGroupsForObject($sObjectType, $iObjectId, $blFilter = true)
     {
-        if (!in_array($sObjectType, $this->getAllObjectTypes())) {
+        if (!$this->isValidObjectType($sObjectType)) {
             return array();
         }
         
@@ -301,45 +356,47 @@ class UamAccessHandler
         } else {
             $sFilterAttr = 'noneFiltered';
         }
-        
+
         if (isset($this->_aObjectUserGroups[$sObjectType][$sFilterAttr][$iObjectId])) {
             return $this->_aObjectUserGroups[$sObjectType][$sFilterAttr][$iObjectId];
         }
-        
-        $aObjectUserGroups = array();
-        $aUserGroups = $this->getUserGroups(null, $blFilter);
-        
-        /*$blPlObject = false;
-        $aPostableTypes = $this->getPostableTypes();
 
-        if (!in_array($sObjectType, $aPostableTypes)) {
-            $blPlObject = true;
-        }*/
-       
-        $aCurIp = explode(".", $_SERVER['REMOTE_ADDR']);
-        
-        if (isset($aUserGroups)) {
-            foreach ($aUserGroups as $oUserGroup) {
-                $mObjectMembership = $oUserGroup->objectIsMember($sObjectType, $iObjectId, true);
+        $sCacheKey = 'getUserGroupsForObject|'.$sObjectType.'|'.$sFilterAttr.'|'.$iObjectId;
+        $oUserAccessManager = $this->getUserAccessManager();
+        $aObjectUserGroups = $oUserAccessManager->getFromCache($sCacheKey);
 
-                if ($mObjectMembership !== false
-                    || $sObjectType == 'user'
-                    && $this->checkUserIp($aCurIp, $oUserGroup->getIpRange())
-                ) {
-                    if (is_array($mObjectMembership)) {
-                        $oUserGroup->aSetRecursive[$sObjectType][$iObjectId] = $mObjectMembership;
+        if ($aObjectUserGroups !== null) {
+            $this->_aObjectUserGroups[$sObjectType][$sFilterAttr][$iObjectId] = $aObjectUserGroups;
+        } else {
+            $aObjectUserGroups = array();
+            $aUserGroups = $this->getUserGroups(null, $blFilter);
+
+            $aCurIp = explode(".", $_SERVER['REMOTE_ADDR']);
+
+            if (isset($aUserGroups)) {
+                foreach ($aUserGroups as $oUserGroup) {
+                    $mObjectMembership = $oUserGroup->objectIsMember($sObjectType, $iObjectId, true);
+
+                    if ($mObjectMembership !== false
+                        || $sObjectType == 'user' && $this->checkUserIp($aCurIp, $oUserGroup->getIpRange())
+                    ) {
+                        if (is_array($mObjectMembership)) {
+                            $oUserGroup->setRecursiveMembership($sObjectType, $iObjectId, $mObjectMembership);
+                        }
+
+                        $aObjectUserGroups[$oUserGroup->getId()] = $oUserGroup;
                     }
-
-                    $aObjectUserGroups[$oUserGroup->getId()] = $oUserGroup;
                 }
             }
+
+            //Filter the user groups
+            if ($blFilter) {
+                $aObjectUserGroups = $this->_filterUserGroups($aObjectUserGroups);
+            }
+
+            $oUserAccessManager->addToCache($sCacheKey, $aObjectUserGroups);
         }
-        
-        //Filter the user groups
-        if ($blFilter) {
-            $aObjectUserGroups = $this->_filterUserGroups($aObjectUserGroups);
-        }
-        
+
         $this->_aObjectUserGroups[$sObjectType][$sFilterAttr][$iObjectId] = $aObjectUserGroups;
         return $this->_aObjectUserGroups[$sObjectType][$sFilterAttr][$iObjectId];
     }
@@ -364,7 +421,7 @@ class UamAccessHandler
      */
     public function checkObjectAccess($sObjectType, $iObjectId)
     {
-        if (!in_array($sObjectType, $this->getAllObjectTypes())) {
+        if (!$this->isValidObjectType($sObjectType)) {
             return true;
         }
         
@@ -373,10 +430,9 @@ class UamAccessHandler
         }
 
         $oCurrentUser = $this->getUserAccessManager()->getCurrentUser();
-        $aPostableTypes = $this->getPostableTypes();
 
-        if (in_array($sObjectType, $aPostableTypes)) {
-            $oPost = get_post($iObjectId);
+        if ($this->isPostableType($sObjectType)) {
+            $oPost = $this->getUserAccessManager()->getPost($iObjectId);
             $sAuthorId = $oPost->post_author;
         } else {
             $sAuthorId = -1;
@@ -400,7 +456,6 @@ class UamAccessHandler
                 || $oUserGroup->objectIsMember('user', $oCurrentUser->ID)
             ) {
                 return $this->_aObjectAccess[$sObjectType][$iObjectId] = true;
-                break;
             }
             
             if ($this->getUserAccessManager()->atAdminPanel() && $oUserGroup->getWriteAccess() == 'all'
@@ -674,11 +729,11 @@ class UamAccessHandler
     /**
      * Checks the user access by user level.
      *
-     * @param boolean $blAllowedCapability If true check also for the capability.
+     * @param bool|string $sAllowedCapability If true check also for the capability.
      *
      * @return boolean
      */
-    public function checkUserAccess($blAllowedCapability = false)
+    public function checkUserAccess($sAllowedCapability = false)
     {
         $oCurrentUser = $this->getUserAccessManager()->getCurrentUser();
         $aUamOptions = $this->getUserAccessManager()->getAdminOptions();
@@ -689,7 +744,7 @@ class UamAccessHandler
         if (isset($aOrderedRoles[$sRole])
             && $aOrderedRoles[$sRole] >= $aOrderedRoles[$aUamOptions['full_access_role']]
             || $sRole == 'administrator' || is_super_admin($oCurrentUser->ID)
-            || ($blAllowedCapability && $oCurrentUser->has_cap($blAllowedCapability))
+            || ($sAllowedCapability && $oCurrentUser->has_cap($sAllowedCapability))
         ) {
             return true;
         }
@@ -753,7 +808,7 @@ class UamAccessHandler
     }
     
     /**
-     * Returns all registered pluggable _aObjects.
+     * Returns all registered pluggable objects.
      * 
      * @return array
      */

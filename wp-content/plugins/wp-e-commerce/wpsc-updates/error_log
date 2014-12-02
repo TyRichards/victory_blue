@@ -1,2 +1,0 @@
-[14-Sep-2013 07:43:52] PHP Fatal error:  Call to undefined function  __() in /home4/ty/public_html/wp-content/plugins/wp-e-commerce/wpsc-updates/currency_list.php on line 2
-[15-Sep-2013 08:38:45] PHP Fatal error:  Call to undefined function  get_option() in /home4/ty/public_html/wp-content/plugins/wp-e-commerce/wpsc-updates/updating_tasks.php on line 3

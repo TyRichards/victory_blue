@@ -7,60 +7,9 @@ class s2class {
 	function load_translations() {
 		load_plugin_textdomain('subscribe2', false, S2DIR);
 		load_plugin_textdomain('subscribe2', false, S2DIR . "languages/");
-		load_plugin_textdomain('subscribe2', false, WP_LANG_DIR . "/");
+		$mofile = WP_LANG_DIR . '/subscribe2-' . apply_filters('plugin_locale', get_locale(), 'subscribe2') . '.mo';
+		load_textdomain('subscribe2', $mofile);
 	} // end load_translations()
-
-	/**
-	Load all our strings
-	*/
-	function load_strings() {
-		// adjust the output of Subscribe2 here
-
-		$this->please_log_in = "<p class=\"s2_message\">" . __('To manage your subscription options please', 'subscribe2') . " <a href=\"" . get_option('siteurl') . "/wp-login.php\">" . __('login', 'subscribe2') . "</a>.</p>";
-
-		$this->profile = "<p class=\"s2_message\">" . __('You may manage your subscription options from your', 'subscribe2') . " <a href=\"" . get_option('siteurl') . "/wp-admin/admin.php?page=s2\">" . __('profile', 'subscribe2') . "</a>.</p>";
-		if ( $this->s2_mu === true ) {
-			global $blog_id;
-			$user_ID = get_current_user_id();
-			if ( !is_user_member_of_blog($user_ID, $blog_id) ) {
-				// if we are on multisite and the user is not a member of this blog change the link
-				$this->profile = "<p class=\"s2_message\"><a href=\"" . get_option('siteurl') . "/wp-admin/?s2mu_subscribe=" . $blog_id . "\">" . __('Subscribe', 'subscribe2') . "</a> " . __('to email notifications when this blog posts new content', 'subscribe2') . ".</p>";
-			}
-		}
-
-		$this->confirmation_sent = "<p class=\"s2_message\">" . __('A confirmation message is on its way!', 'subscribe2') . "</p>";
-
-		$this->already_subscribed = "<p class=\"s2_error\">" . __('That email address is already subscribed.', 'subscribe2') . "</p>";
-
-		$this->not_subscribed = "<p class=\"s2_error\">" . __('That email address is not subscribed.', 'subscribe2') . "</p>";
-
-		$this->not_an_email = "<p class=\"s2_error\">" . __('Sorry, but that does not look like an email address to me.', 'subscribe2') . "</p>";
-
-		$this->barred_domain = "<p class=\"s2_error\">" . __('Sorry, email addresses at that domain are currently barred due to spam, please use an alternative email address.', 'subscribe2') . "</p>";
-
-		$this->error = "<p class=\"s2_error\">" . __('Sorry, there seems to be an error on the server. Please try again later.', 'subscribe2') . "</p>";
-
-		$this->no_page = __('You must to create a WordPress page for this plugin to work correctly.', 'subscribe2');
-
-		$this->mail_sent = "<p class=\"s2_message\">" . __('Message sent!', 'subscribe2') . "</p>";
-
-		$this->mail_failed = "<p class=\"s2_error\">" . __('Message failed! Check your settings and check with your hosting provider', 'subscribe2') . "</p>";
-
-		// confirmation messages
-		$this->no_such_email = "<p class=\"s2_error\">" . __('No such email address is registered.', 'subscribe2') . "</p>";
-
-		$this->added = "<p class=\"s2_message\">" . __('You have successfully subscribed!', 'subscribe2') . "</p>";
-
-		$this->deleted = "<p class=\"s2_message\">" . __('You have successfully unsubscribed.', 'subscribe2') . "</p>";
-
-		$this->subscribe = __('subscribe', 'subscribe2'); //ACTION replacement in subscribing confirmation email
-
-		$this->unsubscribe = __('unsubscribe', 'subscribe2'); //ACTION replacement in unsubscribing in confirmation email
-
-		// menu strings
-		$this->options_saved = __('Options saved!', 'subscribe2');
-		$this->options_reset = __('Options reset!', 'subscribe2');
-	} // end load_strings()
 
 /* ===== Install, upgrade, reset ===== */
 	/**
@@ -101,6 +50,9 @@ class s2class {
 				}
 			}
 		}
+
+		// option to store ReadyGraph API Key
+		add_option('readygraph_api', "include your api_key");
 
 		// safety check if options exist and if not create them
 		if ( !is_array($this->subscribe2_options) ) {
@@ -173,6 +125,10 @@ class s2class {
 			$this->subscribe2_options['version'] = '8.8';
 			update_option('subscribe2_options', $this->subscribe2_options);
 		}
+		if ( version_compare($this->subscribe2_options['version'], '9.5', '<') ) {
+			$s2_upgrade->upgrade95();
+			$this->subscribe2_options['version'] = '9.5';
+		}
 
 		$this->subscribe2_options['version'] = S2VERSION;
 		update_option('subscribe2_options', $this->subscribe2_options);
@@ -226,13 +182,13 @@ class s2class {
 		$string = str_replace("{TAGS}", $this->post_tag_names, $string);
 		$string = str_replace("{COUNT}", $this->post_count, $string);
 
-		return $string;
+		return apply_filters('s2_custom_keywords', $string);
 	} // end substitute()
 
 	/**
 	Delivers email to recipients in HTML or plaintext
 	*/
-	function mail($recipients = array(), $subject = '', $message = '', $type = 'text') {
+	function mail($recipients = array(), $subject = '', $message = '', $type = 'text', $attachments = array()) {
 		if ( empty($recipients) || '' == $message ) { return; }
 
 		// Replace any escaped html symbols in subject then apply filter
@@ -240,16 +196,15 @@ class s2class {
 		$subject = apply_filters('s2_email_subject', $subject);
 
 		if ( 'html' == $type ) {
-			$headers = $this->headers('html');
+			$headers = $this->headers('html', $attachments);
 			if ( 'yes' == $this->subscribe2_options['stylesheet'] ) {
 				$mailtext = apply_filters('s2_html_email', "<html><head><title>" . $subject . "</title><link rel=\"stylesheet\" href=\"" . get_stylesheet_uri() . "\" type=\"text/css\" media=\"screen\" /></head><body>" . $message . "</body></html>", $subject, $message);
 			} else {
 				$mailtext = apply_filters('s2_html_email', "<html><head><title>" . $subject . "</title></head><body>" . $message . "</body></html>", $subject, $message);
 			}
 		} else {
-			$headers = $this->headers();
-			$message = preg_replace('|&[^a][^m][^p].{0,3};|', '', $message);
-			$message = preg_replace('|&amp;|', '&', $message);
+			$headers = $this->headers('text', $attachments);
+			$message = html_entity_decode($message, ENT_NOQUOTES, 'UTF-8');
 			$message = wordwrap(strip_tags($message), $this->word_wrap, "\n");
 			$mailtext = apply_filters('s2_plain_email', $message);
 		}
@@ -265,9 +220,9 @@ class s2class {
 				if ( !is_email($recipient) || empty($recipient) ) { continue; }
 				// Use the mail queue provided we are not sending a preview
 				if ( function_exists('wpmq_mail') && !$this->preview_email ) {
-					@wp_mail($recipient, $subject, $mailtext, $headers, '', 0);
+					@wp_mail($recipient, $subject, $mailtext, $headers, $attachments, 0);
 				} else {
-					@wp_mail($recipient, $subject, $mailtext, $headers);
+					@wp_mail($recipient, $subject, $mailtext, $headers, $attachments);
 				}
 			}
 			return true;
@@ -316,10 +271,10 @@ class s2class {
 		if ( isset($batch) && !empty($batch) ) {
 			foreach ( $batch as $bcc ) {
 					$newheaders = $headers . "$bcc\n";
-					$status = @wp_mail($this->myemail, $subject, $mailtext, $newheaders);
+					$status = @wp_mail($this->myemail, $subject, $mailtext, $newheaders, $attachments);
 			}
 		} else {
-			$status = @wp_mail($this->myemail, $subject, $mailtext, $headers);
+			$status = @wp_mail($this->myemail, $subject, $mailtext, $headers, $attachments);
 		}
 		return $status;
 	} // end mail()
@@ -327,7 +282,7 @@ class s2class {
 	/**
 	Construct standard set of email headers
 	*/
-	function headers($type = 'text') {
+	function headers($type = 'text', $attachments = array()) {
 		if ( empty($this->myname) || empty($this->myemail) ) {
 			if ( $this->subscribe2_options['sender'] == 'blogname' ) {
 				$this->myname = html_entity_decode(get_option('blogname'), ENT_QUOTES);
@@ -351,20 +306,21 @@ class s2class {
 			}
 		}
 
+		$char_set = get_option('blog_charset');
 		if ( function_exists('mb_encode_mimeheader') ) {
-			$header['From'] = mb_encode_mimeheader($this->myname, 'UTF-8', 'Q') . " <" . $this->myemail . ">";
-			$header['Reply-To'] = mb_encode_mimeheader($this->myname, 'UTF-8', 'Q') . " <" . $this->myemail . ">";
+			$header['From'] = mb_encode_mimeheader($this->myname, $char_set, 'Q') . " <" . $this->myemail . ">";
+			$header['Reply-To'] = mb_encode_mimeheader($this->myname, $char_set, 'Q') . " <" . $this->myemail . ">";
 		} else {
 			$header['From'] = $this->myname. " <" . $this->myemail . ">";
 			$header['Reply-To'] = $this->myname . " <" . $this->myemail . ">";
 		}
 		$header['Return-path'] = "<" . $this->myemail . ">";
 		$header['Precedence'] = "list\nList-Id: " . html_entity_decode(get_option('blogname'), ENT_QUOTES) . "";
-		if ( $type == 'html' ) {
+		if ( empty($attachments) && $type == 'html' ) {
 			// To send HTML mail, the Content-Type header must be set
-			$header['Content-Type'] = get_option('html_type') . "; charset=\"". get_option('blog_charset') . "\"";
-		} else {
-			$header['Content-Type'] = "text/plain; charset=\"". get_option('blog_charset') . "\"";
+			$header['Content-Type'] = get_option('html_type') . "; charset=\"". $char_set . "\"";
+		} elseif ( empty($attachments) && $type == 'text' ) {
+			$header['Content-Type'] = "text/plain; charset=\"". $char_set . "\"";
 		}
 
 		// apply header filter to allow on-the-fly amendments
@@ -533,12 +489,33 @@ class s2class {
 		$mailtext = stripslashes($this->substitute($mailtext));
 
 		$plaintext = $post->post_content;
-		if ( function_exists('strip_shortcodes') ) {
-			$plaintext = strip_shortcodes($plaintext);
-		}
+		$plaintext = strip_shortcodes($plaintext);
+
 		$plaintext = preg_replace('|<s[^>]*>(.*)<\/s>|Ui','', $plaintext);
 		$plaintext = preg_replace('|<strike[^>]*>(.*)<\/strike>|Ui','', $plaintext);
 		$plaintext = preg_replace('|<del[^>]*>(.*)<\/del>|Ui','', $plaintext);
+		$excerpttext = $plaintext;
+
+		if ( strstr($mailtext, "{REFERENCELINKS}") ) {
+			$mailtext = str_replace("{REFERENCELINKS}", '', $mailtext);
+			$plaintext_links = '';
+			$i = 0;
+			while ( preg_match('|<a([^>]*)>(.*)<\/a>|Ui', $plaintext, $matches) ) {
+				if ( preg_match('|href="([^"]*)"|', $matches[1], $link_matches) ){
+					$plaintext_links .= sprintf( "[%d] %s\r\n", ++$i, $link_matches[1] );
+					$link_replacement = sprintf( "%s [%d]", $matches[2], $i );
+				} else {
+					$link_replacement = $matches[2];
+				}
+				$plaintext = preg_replace('|<a[^>]*>(.*)<\/a>|Ui', $link_replacement, $plaintext, 1);
+			}
+		}
+
+ 		$plaintext = trim(strip_tags($plaintext));
+
+		if ( strstr($mailtext, "{REFERENCELINKS}") && $plaintext_links != '' ) {
+			$plaintext .= "\r\n\r\n" . trim($plaintext_links);
+		}
 
 		$gallid = '[gallery id="' . $post->ID . '"';
 		$content = str_replace('[gallery', $gallid, $post->post_content);
@@ -555,17 +532,16 @@ class s2class {
 		$content = apply_filters('the_content', $content);
 		$content = str_replace("]]>", "]]&gt", $content);
 
-		$excerpt = $post->post_excerpt;
+		$excerpt = trim($post->post_excerpt);
 		if ( '' == $excerpt ) {
 			// no excerpt, is there a <!--more--> ?
-			if ( false !== strpos($plaintext, '<!--more-->') ) {
-				list($excerpt, $more) = explode('<!--more-->', $plaintext, 2);
-				// strip leading and trailing whitespace
-				$excerpt = strip_tags($excerpt);
-				$excerpt = trim($excerpt);
+			if ( false !== strpos($excerpttext, '<!--more-->') ) {
+				list($excerpt, $more) = explode('<!--more-->', $excerpttext, 2);
+				// strip tags and trailing whitespace
+				$excerpt = trim(strip_tags($excerpt));
 			} else {
 				// no <!--more-->, so grab the first 55 words
-				$excerpt = strip_tags($plaintext);
+				$excerpt = trim(strip_tags($excerpttext));
 				$words = explode(' ', $excerpt, $this->excerpt_length + 1);
 				if (count($words) > $this->excerpt_length) {
 					array_pop($words);
@@ -574,7 +550,7 @@ class s2class {
 				}
 			}
 		}
-		$html_excerpt = $post->post_excerpt;
+		$html_excerpt = trim($post->post_excerpt);
 		if ( '' == $html_excerpt ) {
 			// no excerpt, is there a <!--more--> ?
 			if ( false !== strpos($content, '<!--more-->') ) {
@@ -596,13 +572,21 @@ class s2class {
 			}
 		}
 
+		// maybe add social media sharing buttons
+		$social = apply_filters('s2_social_links', array('facebook', 'twitter'));
+		if ( !empty($social) ) {
+			$social_buttons = $this->social_buttons($social);
+			$content .= $social_buttons;
+			$html_excerpt .= $social_buttons;
+		}
+
 		// remove excess white space from with $excerpt and $plaintext
 		$excerpt = preg_replace('|[ ]+|', ' ', $excerpt);
 		$plaintext = preg_replace('|[ ]+|', ' ', $plaintext);
 
 		// prepare mail body texts
-		$excerpt_body = str_replace("{POST}", $excerpt, $mailtext);
-		$full_body = str_replace("{POST}", strip_tags($plaintext), $mailtext);
+		$plain_excerpt_body = str_replace("{POST}", $excerpt, $mailtext);
+		$plain_body = str_replace("{POST}", $plaintext, $mailtext);
 		$html_body = str_replace("\r\n", "<br />\r\n", $mailtext);
 		$html_body = str_replace("{POST}", $content, $html_body);
 		$html_excerpt_body = str_replace("\r\n", "<br />\r\n", $mailtext);
@@ -611,42 +595,57 @@ class s2class {
 		if ( $preview != '' ) {
 			$this->myemail = $preview;
 			$this->myname = __('Plain Text Excerpt Preview', 'subscribe2');
-			$this->mail(array($preview), $subject, $excerpt_body);
+			$this->mail(array($preview), $subject, $plain_excerpt_body);
 			$this->myname = __('Plain Text Full Preview', 'subscribe2');
-			$this->mail(array($preview), $subject, $full_body);
+			$this->mail(array($preview), $subject, $plain_body);
 			$this->myname = __('HTML Excerpt Preview', 'subscribe2');
 			$this->mail(array($preview), $subject, $html_excerpt_body, 'html');
 			$this->myname = __('HTML Full Preview', 'subscribe2');
 			$this->mail(array($preview), $subject, $html_body, 'html');
 		} else {
+			// Registered Subscribers first
 			// first we send plaintext summary emails
-			$registered = $this->get_registered("cats=$post_cats_string&format=excerpt&author=$post->post_author");
-			if ( empty($registered) ) {
-				$recipients = (array)$public;
-			} elseif ( empty($public) ) {
-				$recipients = (array)$registered;
-			} else {
-				$recipients = array_merge((array)$public, (array)$registered);
-			}
-			$recipients = apply_filters('s2_send_plain_excerpt_suscribers', $recipients, $post->ID);
-			$this->mail($recipients, $subject, $excerpt_body);
+			$recipients = $this->get_registered("cats=$post_cats_string&format=excerpt&author=$post->post_author");
+			$recipients = apply_filters('s2_send_plain_excerpt_subscribers', $recipients, $post->ID);
+			$this->mail($recipients, $subject, $plain_excerpt_body);
 
 			// next we send plaintext full content emails
 			$recipients = $this->get_registered("cats=$post_cats_string&format=post&author=$post->post_author");
-			$recipients = apply_filters('s2_send_plain_fullcontent_suscribers', $recipients, $post->ID);
-			$this->mail($recipients, $subject, $full_body);
+			$recipients = apply_filters('s2_send_plain_fullcontent_subscribers', $recipients, $post->ID);
+			$this->mail($recipients, $subject, $plain_body);
 
 			// next we send html excerpt content emails
 			$recipients = $this->get_registered("cats=$post_cats_string&format=html_excerpt&author=$post->post_author");
-			$recipients = apply_filters('s2_send_html_excerpt_suscribers', $recipients, $post->ID);
+			$recipients = apply_filters('s2_send_html_excerpt_subscribers', $recipients, $post->ID);
 			$this->mail($recipients, $subject, $html_excerpt_body, 'html');
 
-			// finally we send html full content emails
+			// next we send html full content emails
 			$recipients = $this->get_registered("cats=$post_cats_string&format=html&author=$post->post_author");
-			$recipients = apply_filters('s2_send_html_fullcontent_suscribers', $recipients, $post->ID);
+			$recipients = apply_filters('s2_send_html_fullcontent_subscribers', $recipients, $post->ID);
 			$this->mail($recipients, $subject, $html_body, 'html');
+
+			// and finally we send to Public Subscribers
+			$recipients = apply_filters('s2_send_public_subscribers', $public, $post->ID);
+			$this->mail($recipients, $subject, $plain_excerpt_body, 'text');
 		}
 	} // end publish()
+
+	/**
+	Function to create social network sharing buttons
+	*/
+	function social_buttons($social) {
+		$social_buttons = '';
+		if ( in_array('facebook', $social) ) {
+			$social_buttons .= '<a href="http://api.addthis.com/oexchange/0.8/forward/facebook/offer?url=' . urlencode($this->permalink) . '" target="_blank" ><img src="http://cache.addthiscdn.com/icons/v1/thumbs/facebook.gif" border="0" style="margin: 1px;" alt="' . __('Like', 'subscribe2') . '" /></a>';
+		}
+		if ( in_array('twitter', $social) ) {
+			$social_buttons .= '<a href="http://api.addthis.com/oexchange/0.8/forward/twitter/offer?url=' . urlencode($this->permalink) . '&amp;title=' . urlencode(strip_tags($this->post_title)) . '" target="_blank" ><img src="http://cache.addthiscdn.com/icons/v1/thumbs/twitter.gif" border="0" style="margin: 1px;" alt="' . __('Tweet', 'subscribe2') . '" /></a>';
+		}
+		if ( in_array('google', $social) ) {
+			$social_buttons .= '<a href="http://api.addthis.com/oexchange/0.8/forward/google_plusone_share/offer?url=' . urlencode($this->permalink) . '&amp;title=' . urlencode(strip_tags($this->post_title)) . '" target="_blank" ><img src="http://cache.addthiscdn.com/icons/v1/thumbs/google_plusone.gif" border="0" style="margin: 1px;" alt="' . __('Google+', 'subscribe2') . '" /></a>';
+		}
+		return apply_filters('s2_social_buttons', $social_buttons);
+	} // end social_buttons()
 
 	/**
 	Send confirmation email to a public subscriber
@@ -664,7 +663,7 @@ class s2class {
 		// HASH = wp_hash of email address
 		// ID = user's ID in the subscribe2 table
 		// use home instead of siteurl incase index.php is not in core wordpress directory
-		$link = get_option('home') . "/?s2=";
+		$link = apply_filters('s2_confirm_link', get_option('home')) . "/?s2=";
 
 		if ( 'add' == $what ) {
 			$link .= '1';
@@ -681,7 +680,8 @@ class s2class {
 			$body = $this->substitute(stripslashes($this->subscribe2_options['remind_email']));
 			$subject = $this->substitute(stripslashes($this->subscribe2_options['remind_subject']));
 		} else {
-			$body = $this->substitute(stripslashes($this->subscribe2_options['confirm_email']));
+			$body = apply_filters('s2_confirm_email', stripslashes($this->subscribe2_options['confirm_email']), $what);
+			$body = $this->substitute($body);
 			if ( 'add' == $what ) {
 				$body = str_replace("{ACTION}", $this->subscribe, $body);
 				$subject = str_replace("{ACTION}", $this->subscribe, $this->subscribe2_options['confirm_subject']);
@@ -818,21 +818,6 @@ class s2class {
 	} //end remind()
 
 	/**
-	Check email is not from a barred domain
-	*/
-	function is_barred($email = '') {
-		$barred_option = $this->subscribe2_options['barred'];
-		list($user, $domain) = explode('@', $email, 2);
-		$bar_check = stristr($barred_option, $domain);
-
-		if ( !empty($bar_check) ) {
-			return true;
-		} else {
-			return false;
-		}
-	} // end is_barred()
-
-	/**
 	Is the supplied email address a public subscriber?
 	*/
 	function is_public($email = '') {
@@ -848,42 +833,6 @@ class s2class {
 			return false;
 		}
 	} // end is_public()
-
-	/**
-	Collects the signup date for all public subscribers
-	*/
-	function signup_date($email = '') {
-		if ( '' == $email ) { return false; }
-
-		global $wpdb;
-		if ( !empty($this->signup_dates) ) {
-			return $this->signup_dates[$email];
-		} else {
-			$results = $wpdb->get_results("SELECT email, date FROM $this->public", ARRAY_N);
-			foreach ( $results as $result ) {
-				$this->signup_dates[$result[0]] = $result[1];
-			}
-			return $this->signup_dates[$email];
-		}
-	} // end signup_date()
-
-	/**
-	Collects the ip address for all public subscribers
-	*/
-	function signup_ip($email = '') {
-		if ( '' == $email ) {return false; }
-
-		global $wpdb;
-		if ( !empty($this->signup_ips) ) {
-			return $this->signup_ips[$email];
-		} else {
-			$results = $wpdb->get_results("SELECT email, ip FROM $this->public", ARRAY_N);
-			foreach ( $results as $result ) {
-				$this->signup_ips[$result[0]] = $result[1];
-			}
-			return $this->signup_ips[$email];
-		}
-	} // end signup_ip()
 
 /* ===== Registered User and Subscriber functions ===== */
 	/**
@@ -1004,9 +953,9 @@ class s2class {
 		}
 
 		if ( $this->s2_mu ) {
-			$sql = "SELECT a.user_id FROM $wpdb->usermeta AS a " . $JOIN . "WHERE a.meta_key='" . $wpdb->prefix . "capabilities'" . $AND;
+			$sql = $wpdb->prepare("SELECT a.user_id FROM $wpdb->usermeta AS a INNER JOIN $wpdb->usermeta AS e ON a.user_id = e.user_id " . $JOIN . "WHERE a.meta_key='" . $wpdb->prefix . "capabilities' AND e.meta_key=%s AND e.meta_value <> ''" . $AND, $this->get_usermeta_keyname('s2_subscribed'));
 		} else {
-			$sql = $wpdb->prepare("SELECT a.user_id FROM $wpdb->usermeta AS a " . $JOIN . "WHERE a.meta_key=%s" . $AND, $this->get_usermeta_keyname('s2_subscribed'));
+			$sql = $wpdb->prepare("SELECT a.user_id FROM $wpdb->usermeta AS a " . $JOIN . "WHERE a.meta_key=%s AND a.meta_value <> ''" . $AND, $this->get_usermeta_keyname('s2_subscribed'));
 		}
 		$result = $wpdb->get_col($sql);
 		if ( $result ) {
@@ -1080,7 +1029,7 @@ class s2class {
 			}
 			update_user_meta($user_ID, $this->get_usermeta_keyname('s2_autosub'), $this->subscribe2_options['autosub_def']);
 			// if the are no existing subscriptions, create them if we have consent
-			if (  true === $consent ) {
+			if ( true === $consent ) {
 				update_user_meta($user_ID, $this->get_usermeta_keyname('s2_subscribed'), $cats);
 				foreach ( explode(',', $cats) as $cat ) {
 					update_user_meta($user_ID, $this->get_usermeta_keyname('s2_cat') . $cat, $cat);
@@ -1155,7 +1104,7 @@ class s2class {
 		$all_cats = array();
 		$s2_taxonomies = apply_filters('s2_taxonomies', array('category'));
 
-		foreach( $s2_taxonomies as $taxonomy ) {
+		foreach ( $s2_taxonomies as $taxonomy ) {
 			if ( taxonomy_exists($taxonomy) ) {
 				$all_cats = array_merge($all_cats, get_categories(array('hide_empty' => false, 'orderby' => $orderby, 'taxonomy' => $taxonomy)));
 			}
@@ -1185,53 +1134,6 @@ class s2class {
 		global $wpdb;
 		return $wpdb->prepare('%s', $data);
 	} // end prepare_in_data()
-
-	/**
-	Export subscriber emails and other details to CSV
-	*/
-	function prepare_export( $subscribers ) {
-		$subscribers = explode(",\r\n", $subscribers);
-		natcasesort($subscribers);
-
-		$exportcsv = "User Email,User Type,User Name";
-		$all_cats = $this->all_cats(false, 'ID');
-
-		foreach ($all_cats as $cat) {
-			$exportcsv .= "," . $cat->cat_name;
-			$cat_ids[] = $cat->term_id;
-		}
-		$exportcsv .= "\r\n";
-
-		if ( !function_exists('get_userdata') ) {
-			require_once(ABSPATH . WPINC . '/pluggable.php');
-		}
-
-		foreach ( $subscribers as $subscriber ) {
-			if ( $this->is_registered($subscriber) ) {
-				$user_ID = $this->get_user_id( $subscriber );
-				$user_info = get_userdata( $user_ID );
-
-				$cats = explode(',', get_user_meta($user_ID, $this->get_usermeta_keyname('s2_subscribed'), true));
-				$subscribed_cats = '';
-				foreach ( $cat_ids as $cat ) {
-					(in_array($cat, $cats)) ? $subscribed_cats .= ",Yes" : $subscribed_cats .= ",No";
-				}
-
-				$exportcsv .= $subscriber . ',';
-				$exportcsv .= __('Registered User', 'subscribe2');
-				$exportcsv .= ',' . $user_info->display_name;
-				$exportcsv .= $subscribed_cats . "\r\n";
-			} else {
-				if ( $this->is_public($subscriber) === '1' ) {
-					$exportcsv .= $subscriber . ',' . __('Confirmed Public Subscriber', 'subscribe2') . "\r\n";
-				} elseif ( $this->is_public($subscriber) === '0' ) {
-					$exportcsv .= $subscriber . ',' . __('Unconfirmed Public Subscriber', 'subscribe2') . "\r\n";
-				}
-			}
-		}
-
-		return $exportcsv;
-	} // end prepare_export()
 
 	/**
 	Filter for usermeta table key names to adjust them if needed for WPMU blogs
@@ -1279,7 +1181,7 @@ class s2class {
 	function register_post($user_ID = 0) {
 		global $_POST;
 		if ( 0 == $user_ID ) { return; }
-		if ( 'yes' == $this->subscribe2_options['autosub'] || ( 'on' == $_POST['reg_subscribe'] && 'wpreg' == $this->subscribe2_options['autosub'] ) ) {
+		if ( 'yes' == $this->subscribe2_options['autosub'] || ( isset($_POST['reg_subscribe']) && 'on' == $_POST['reg_subscribe'] && 'wpreg' == $this->subscribe2_options['autosub'] ) ) {
 			$this->register($user_ID, true);
 		} else {
 			$this->register($user_ID, false);
@@ -1294,7 +1196,7 @@ class s2class {
 		if ( is_user_logged_in() ) {
 			echo $this->profile;
 		} else {
-			echo "<p style=\"width: auto;\"><label><input type=\"checkbox\" name=\"s2_comment_request\" value=\"1\" " . checked($this->subscribe2_options['comment_def'], 'yes', false) . "/>" . __('Check here to Subscribe to notifications for new posts', 'subscribe2') . "</label></p>";
+			echo "<p style=\"width: auto;\"><label><input type=\"checkbox\" name=\"s2_comment_request\" value=\"1\" " . checked($this->subscribe2_options['comment_def'], 'yes', false) . "/> " . __('Check here to Subscribe to notifications for new posts', 'subscribe2') . "</label></p>";
 		}
 	} // end s2_comment_meta_form()
 
@@ -1310,6 +1212,7 @@ class s2class {
 					break;
 				case '1':
 					// Approved so add
+					$comment = get_comment($comment_ID);
 					$is_public = $this->is_public($comment->comment_author_email);
 					if ( $is_public == 0 ) {
 						$this->toggle($comment->comment_author_email);
@@ -1383,10 +1286,37 @@ class s2class {
 	/**
 	Add a weekly event to cron
 	*/
-	function add_weekly_sched($sched) {
-		$sched['weekly'] = array('interval' => 604800, 'display' => __('Weekly', 'subscribe2'));
-		return $sched;
+	function add_weekly_sched($scheds) {
+		$exists = false;
+		foreach ( $scheds as $sched ) {
+			if ( array_search(604800, $sched) ) {
+				$exists = true;
+			}
+		}
+
+		if ( !$exists ) {
+			$scheds['weekly'] = array('interval' => 604800, 'display' => __('Weekly', 'subscribe2'));
+		}
+
+		return $scheds;
 	} // end add_weekly_sched()
+
+	/**
+	Handle post transitions for the digest email
+	*/
+	function digest_post_transitions($new_status, $old_status, $post) {
+		if ( $new_status === $old_status ) { return; }
+
+		if ( $this->subscribe2_options['pages'] == 'yes' ) {
+			$s2_post_types = array('page', 'post');
+		} else {
+			$s2_post_types = array('post');
+		}
+		$s2_post_types = apply_filters('s2_post_types', $s2_post_types);
+		if ( !in_array($post->post_type, $s2_post_types) ) { return; }
+
+		update_post_meta( $post->ID, '_s2_digest_post_status', ( 'publish' === $new_status ) ? 'pending' : 'draft' );
+	} // end digest_post_transitions()
 
 	/**
 	Send a daily digest of today's new posts
@@ -1397,17 +1327,6 @@ class s2class {
 		global $wpdb, $post;
 
 		if ( '' == $preview ) {
-			// update last_s2cron execution time before completing or bailing
-			$now = current_time('mysql');
-			$prev = $this->subscribe2_options['last_s2cron'];
-			$last = $this->subscribe2_options['previous_s2cron'];
-			$this->subscribe2_options['last_s2cron'] = $now;
-			$this->subscribe2_options['previous_s2cron'] = $prev;
-			if ( '' == $resend ) {
-				// update sending times provided this is not a resend
-				update_option('subscribe2_options', $this->subscribe2_options);
-			}
-
 			// set up SQL query based on options
 			if ( $this->subscribe2_options['private'] == 'yes' ) {
 				$status	= "'publish', 'private'";
@@ -1423,23 +1342,26 @@ class s2class {
 				$s2_post_types = array('post');
 			}
 			$s2_post_types = apply_filters('s2_post_types', $s2_post_types);
-			foreach( $s2_post_types as $post_type ) {
-				('' == $type) ? $type = $wpdb->prepare("%s", $post_type) : $type .= $wpdb->prepare(", %s", $post_type);
+			foreach ( $s2_post_types as $post_type ) {
+				if ( !isset($type) ) {
+					$type = $wpdb->prepare("%s", $post_type);
+				} else {
+					$type .= $wpdb->prepare(", %s", $post_type);
+				}
 			}
 
 			// collect posts
 			if ( $resend == 'resend' ) {
-				if ( $this->subscribe2_options['cron_order'] == 'desc' ) {
-					$posts = $wpdb->get_results($wpdb->prepare("SELECT ID, post_title, post_excerpt, post_content, post_type, post_password, post_date, post_author FROM $wpdb->posts WHERE post_date >= %s AND post_date < %s AND post_status IN ($status) AND post_type IN ($type) ORDER BY post_date DESC", $last, $prev));
-				} else {
-					$posts = $wpdb->get_results($wpdb->prepare("SELECT ID, post_title, post_excerpt, post_content, post_type, post_password, post_date, post_author FROM $wpdb->posts WHERE post_date >= %s AND post_date < %s AND post_status IN ($status) AND post_type IN ($type) ORDER BY post_date ASC", $last, $prev));
-				}
+				$query = new WP_Query( array(
+					'post__in' => explode(',', $this->subscribe2_options['last_s2cron']),
+					'ignore_sticky_posts' => 1,
+					'order' => ($this->subscribe2_options['cron_order'] === 'desc') ? "DESC" : "ASC"
+					) );
+				$posts = $query->posts;
 			} else {
-				if ( $this->subscribe2_options['cron_order'] == 'desc' ) {
-					$posts = $wpdb->get_results($wpdb->prepare("SELECT ID, post_title, post_excerpt, post_content, post_type, post_password, post_date, post_author FROM $wpdb->posts WHERE post_date >= %s AND post_date < %s AND post_status IN ($status) AND post_type IN ($type) ORDER BY post_date DESC", $prev, $now));
-				} else {
-					$posts = $wpdb->get_results($wpdb->prepare("SELECT ID, post_title, post_excerpt, post_content, post_type, post_password, post_date, post_author FROM $wpdb->posts WHERE post_date >= %s AND post_date < %s AND post_status IN ($status) AND post_type IN ($type) ORDER BY post_date ASC", $prev, $now));
-				}
+				$sql = "SELECT ID, post_title, post_excerpt, post_content, post_type, post_password, post_date, post_author FROM $wpdb->posts AS a INNER JOIN $wpdb->postmeta AS b ON b.post_id = a.ID";
+				$sql .= " AND b.meta_key = '_s2_digest_post_status' AND b.meta_value = 'pending' WHERE post_status IN ($status) AND post_type IN ($type) ORDER BY post_date " . (($this->subscribe2_options['cron_order'] === 'desc') ? 'DESC' : 'ASC');
+				$posts = $wpdb->get_results($sql);
 			}
 		} else {
 			// we are sending a preview
@@ -1447,31 +1369,36 @@ class s2class {
 		}
 
 		// Collect sticky posts if desired
+		$sticky_ids = array();
 		if ( $this->subscribe2_options['stickies'] == 'yes' ) {
-			$stickies = get_posts(array('post__in' => get_option('sticky_posts')));
-			if ( !empty($stickies) ) {
-				$posts = array_merge((array)$stickies, (array)$posts);
+			$sticky_ids = get_option('sticky_posts');
+			if ( !empty($sticky_ids) ) {
+				$sticky_posts = get_posts( array('post__in' => $sticky_ids) );
+				$posts = array_merge((array)$sticky_posts, (array)$posts);
 			}
 		}
 
 		// do we have any posts?
 		if ( empty($posts) && !has_filter('s2_digest_email') ) { return false; }
-		$this->post_count = count($posts);
 
 		// if we have posts, let's prepare the digest
+		// define some variables needed for the digest
 		$datetime = get_option('date_format') . ' @ ' . get_option('time_format');
 		$all_post_cats = array();
 		$ids = array();
+		$digest_post_ids = array();
 		$mailtext = apply_filters('s2_email_template', $this->subscribe2_options['mailtext']);
 		$table = '';
 		$tablelinks = '';
 		$message_post= '';
 		$message_posttime = '';
+		$this->post_count = count($posts);
+		$s2_taxonomies = apply_filters('s2_taxonomies', array('category'));
+
 		foreach ( $posts as $post ) {
 			// keep an array of post ids and skip if we've already done it once
 			if ( in_array($post->ID, $ids) ) { continue; }
 			$ids[] = $post->ID;
-			$s2_taxonomies = apply_filters('s2_taxonomies', array('category'));
 			$post_cats = wp_get_object_terms($post->ID, $s2_taxonomies, array('fields' => 'ids'));
 			$post_cats_string = implode(',', $post_cats);
 			$all_post_cats = array_unique(array_merge($all_post_cats, $post_cats));
@@ -1510,6 +1437,9 @@ class s2class {
 			if ( $check ) {
 				continue;
 			}
+
+			$digest_post_ids[] = $post->ID;
+
 			$post_title = html_entity_decode($post->post_title, ENT_QUOTES);
 			('' == $table) ? $table .= "* " . $post_title : $table .= "\r\n* " . $post_title;
 			('' == $tablelinks) ? $tablelinks .= "* " . $post_title : $tablelinks .= "\r\n* " . $post_title;
@@ -1556,20 +1486,16 @@ class s2class {
 			$message_post .= "\r\n";
 			$message_posttime .= "\r\n";
 
-			( !empty($post->post_excerpt) ) ? $excerpt = $post->post_excerpt : $excerpt = '';
+			( !empty($post->post_excerpt) ) ? $excerpt = trim($post->post_excerpt) : $excerpt = '';
 			if ( '' == $excerpt ) {
 				// no excerpt, is there a <!--more--> ?
 				if ( false !== strpos($post->post_content, '<!--more-->') ) {
 					list($excerpt, $more) = explode('<!--more-->', $post->post_content, 2);
 					$excerpt = strip_tags($excerpt);
-					if ( function_exists('strip_shortcodes') ) {
-						$excerpt = strip_shortcodes($excerpt);
-					}
+					$excerpt = strip_shortcodes($excerpt);
 				} else {
 					$excerpt = strip_tags($post->post_content);
-					if ( function_exists('strip_shortcodes') ) {
-						$excerpt = strip_shortcodes($excerpt);
-					}
+					$excerpt = strip_shortcodes($excerpt);
 					$words = explode(' ', $excerpt, $this->excerpt_length + 1);
 					if ( count($words) > $this->excerpt_length ) {
 						array_pop($words);
@@ -1584,6 +1510,17 @@ class s2class {
 			$message_posttime .= $excerpt . "\r\n\r\n";
 		}
 
+		// update post_meta data for sent ids but not sticky posts
+		foreach ( $ids as $id ) {
+			if ( !empty($sticky_ids) && !in_array($id, $sticky_ids) ) {
+				update_post_meta($id, '_s2_digest_post_status', 'done');
+			} else {
+				update_post_meta($id, '_s2_digest_post_status', 'done');
+			}
+		}
+		$this->subscribe2_options['last_s2cron'] = implode(',', $digest_post_ids);
+		update_option('subscribe2_options', $this->subscribe2_options);
+
 		// we add a blank line after each post excerpt now trim white space that occurs for the last post
 		$message_post = trim($message_post);
 		$message_posttime = trim($message_posttime);
@@ -1594,8 +1531,8 @@ class s2class {
 		$message_posttime = preg_replace("|[\r\n]{3,}|", "\r\n\r\n", $message_posttime);
 
 		// apply filter to allow external content to be inserted or content manipulated
-		$message_post = apply_filters('s2_digest_email', $message_post, $now, $prev, $last, $this->subscribe2_options['cron_order']);
-		$message_posttime = apply_filters('s2_digest_email', $message_posttime, $now, $prev, $last, $this->subscribe2_options['cron_order']);
+		$message_post = apply_filters('s2_digest_email', $message_post);
+		$message_posttime = apply_filters('s2_digest_email', $message_posttime);
 
 		//sanity check - don't send a mail if the content is empty
 		if ( !$message_post && !$message_posttime && !$table && !$tablelinks ) {
@@ -1621,6 +1558,9 @@ class s2class {
 		$mailtext = str_replace("{TABLE}", $table, $mailtext);
 		$mailtext = str_replace("{POSTTIME}", $message_posttime, $mailtext);
 		$mailtext = str_replace("{POST}", $message_post, $mailtext);
+
+		// apply filter to allow custom keywords
+		$mailtext = apply_filters('s2_custom_keywords', $mailtext, $digest_post_ids);
 		$mailtext = stripslashes($this->substitute($mailtext));
 
 		// prepare recipients
@@ -1636,6 +1576,30 @@ class s2class {
 			$this->mail($recipients, $subject, $mailtext);
 		}
 	} // end subscribe2_cron()
+
+	function s2cleaner_task() {
+		$unconfirmed = $this->get_public('0');
+		if ( empty($unconfirmed) ) { return; }
+		global $wpdb;
+		$sql = "SELECT email FROM $this->public WHERE active='0' AND date < DATE_SUB(CURDATE(), INTERVAL " . $this->clean_interval . " DAY)";
+		$old_unconfirmed = $wpdb->get_col( $sql );
+		if ( empty($old_unconfirmed) ) {
+			return;
+		} else {
+			foreach ( $old_unconfirmed as $email ) {
+				$this->delete($email);
+			}
+		}
+		return;
+	} // end s2cleaner_task()
+
+	/**
+	Jetpack comments doesn't play nice, this function kills that module
+	*/
+	function s2_hide_jetpack_comments($modules) {
+		unset($modules['comments']);
+		return $modules;
+	} // end s2_kill_jetpack_comments()
 
 /* ===== Our constructor ===== */
 	/**
@@ -1670,9 +1634,8 @@ class s2class {
 			}
 		}
 
-		// load our translations and strings
-		add_action('init', array(&$this, 'load_translations'), 5);
-		add_action('init', array(&$this, 'load_strings'));
+		// load our translations
+		add_action('plugins_loaded', array(&$this, 'load_translations'));
 
 		// do we need to install anything?
 		$this->public = $wpdb->prefix . "subscribe2";
@@ -1683,33 +1646,35 @@ class s2class {
 		}
 
 		// add core actions
-		add_filter('cron_schedules', array(&$this, 'add_weekly_sched'));
+		add_filter('cron_schedules', array(&$this, 'add_weekly_sched'), 20);
 		// add actions for automatic subscription based on option settings
-		add_action('register_form', array(&$this, 'register_form'));
-		add_action('user_register', array(&$this, 'register_post'));
 		if ( $this->s2_mu ) {
+			add_action('wpmu_activate_user', array(&$s2class_multisite, 'wpmu_add_user'));
 			add_action('add_user_to_blog', array(&$s2class_multisite, 'wpmu_add_user'), 10);
 			add_action('remove_user_from_blog', array(&$s2class_multisite, 'wpmu_remove_user'), 10);
+		} else {
+			add_action('register_form', array(&$this, 'register_form'));
+			add_action('user_register', array(&$this, 'register_post'));
 		}
 		// add actions for processing posts based on per-post or cron email settings
 		if ( $this->subscribe2_options['email_freq'] != 'never' ) {
 			add_action('s2_digest_cron', array(&$this, 'subscribe2_cron'));
+			add_action('transition_post_status', array(&$this, 'digest_post_transitions'), 10, 3);
 		} else {
-			add_action('new_to_publish', array(&$this, 'publish'));
-			add_action('draft_to_publish', array(&$this, 'publish'));
-			add_action('auto-draft_to_publish', array(&$this, 'publish'));
-			add_action('pending_to_publish', array(&$this, 'publish'));
-			add_action('private_to_publish', array(&$this, 'publish'));
-			add_action('future_to_publish', array(&$this, 'publish'));
+			$statuses = apply_filters('s2_post_statuses', array('new', 'draft', 'auto-draft', 'pending'));
 			if ( $this->subscribe2_options['private'] == 'yes' ) {
-				add_action('new_to_private', array(&$this, 'publish'));
-				add_action('draft_to_private', array(&$this, 'publish'));
-				add_action('auto-draft_to_private', array(&$this, 'publish'));
-				add_action('pending_to_private', array(&$this, 'publish'));
+				foreach ( $statuses as $status ) {
+					add_action("{$status}_to_private", array(&$this, 'publish'));
+				}
+			}
+			array_push($statuses, 'private', 'future');
+			foreach ( $statuses as $status ) {
+				add_action("{$status}_to_publish", array(&$this, 'publish'));
 			}
 		}
 		// add actions for comment subscribers
-		if ( 'no' != $this->subscribe2_options['comment_subs'] ) {
+		if ( 'no' !== $this->subscribe2_options['comment_subs'] ) {
+			add_filter('jetpack_get_available_modules', array(&$this, 's2_hide_jetpack_comments'));
 			if ( 'before' == $this->subscribe2_options['comment_subs'] ) {
 				add_action('comment_form_after_fields', array(&$this, 's2_comment_meta_form'));
 			} else {
@@ -1727,6 +1692,11 @@ class s2class {
 			add_action('widgets_init', array(&$this, 'counter_widget'));
 		}
 
+		// add action to 'clean' unconfirmed Public Subscribers
+		if ( $this->clean_interval > 0 ) {
+			add_action('wp_scheduled_delete', array(&$this, 's2cleaner_task'));
+		}
+//		add_action('admin_init', array(&$this, 'on_plugin_activated_redirect'));
 		// Add actions specific to admin or frontend
 		if ( is_admin() ) {
 			//add menu, authoring and category admin actions
@@ -1774,11 +1744,14 @@ class s2class {
 				exit(0);
 			}
 		} else {
+			// load strings later on frontend for polylang plugin compatibility
+			add_action('wp', array(&$this, 'load_strings'));
+
 			if ( isset($_GET['s2']) ) {
 				// someone is confirming a request
 				if ( defined('DOING_S2_CONFIRM') && DOING_S2_CONFIRM ) { return; }
 				define( 'DOING_S2_CONFIRM', true );
-				add_filter('query_string', array(&$this, 'query_filter'));
+				add_filter('request', array(&$this, 'query_filter'));
 				add_filter('the_title', array(&$this, 'title_filter'));
 				add_filter('the_content', array(&$this, 'confirm'));
 			}
@@ -1801,14 +1774,6 @@ class s2class {
 	} // end s2init()
 
 	/**
-	PHP4 Constructor
-	Can be erased when support for WordPress 3.1 is dropped
-	*/
-	function s2class() {
-		$this->__construct();
-	} // end s2class()
-
-	/**
 	PHP5 Constructor
 	Allows dynamic variable setting
 	*/
@@ -1816,6 +1781,8 @@ class s2class {
 		$this->word_wrap = apply_filters('s2_word_wrap', 80);
 		$this->excerpt_length = apply_filters('s2_excerpt_length', 55);
 		$this->site_switching = apply_filters('s2_allow_site_switching', false);
+		$this->clean_interval = apply_filters('s2_clean_interval', 28);
+		$this->lockout = apply_filters('s2_lockout', 0);
 	} // end __construct()
 
 /* ===== our variables ===== */
@@ -1849,6 +1816,7 @@ class s2class {
 	var $word_wrap;
 	var $excerpt_length;
 	var $site_switching;
+	var $clean_interval;
 
 	// some messages
 	var $please_log_in = '';
@@ -1868,7 +1836,5 @@ class s2class {
 	var $subscribe = '';
 	var $unsubscribe = '';
 	var $confirm_subject = '';
-	var $options_saved = '';
-	var $options_reset = '';
 } // end class subscribe2
 ?>

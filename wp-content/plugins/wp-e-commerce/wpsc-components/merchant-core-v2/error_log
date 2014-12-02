@@ -1,1 +1,0 @@
-[01-Oct-2013 05:19:25] PHP Fatal error:  Call to undefined function  add_action() in /home4/ty/public_html/wp-content/plugins/wp-e-commerce/wpsc-components/merchant-core-v2/merchant-core-v2.php on line 5

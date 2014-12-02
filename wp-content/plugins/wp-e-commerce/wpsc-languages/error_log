@@ -1,2 +1,0 @@
-[12-Sep-2013 07:26:08] PHP Fatal error:  Call to undefined function  admin_url() in /home4/ty/public_html/wp-content/plugins/wp-e-commerce/wpsc-languages/EN_en.php on line 570
-[05-Jun-2014 05:52:54 America/Chicago] PHP Fatal error:  Call to undefined function admin_url() in /home4/ty/public_html/wp-content/plugins/wp-e-commerce/wpsc-languages/EN_en.php on line 570

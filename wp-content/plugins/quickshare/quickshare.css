@@ -10,6 +10,7 @@ Contents:
 4 Share Types (mapping icons/glyphs to each share option)
 5 Styling for Share Text
 6 Special Effects
+7 Media Queries
 
 */
 
@@ -44,6 +45,10 @@ Contents:
 	float: left;
 	margin: 3px 5px !important;
 	padding: 0 !important;
+}
+/* Odds are, there's no reason you should want QuickShare to show up in a widget. Quickfix for Twenty Fourteen theme's Ephemera Widget. */
+.widget-area .quickshare-container {
+	display: none;
 }
 
 /* 2 Icon Types */
@@ -101,6 +106,7 @@ Contents:
 	opacity: .7;
 	transition: .2s all cubic-bezier(0.636,0.197,0.0202,0.352);
 }
+.quickshare-genericons.monochrome span,
 .quickshare-genericons span:hover {
 	opacity: 1;
 }
@@ -116,7 +122,7 @@ Contents:
 	float: left;
 	display: block;
 	width: auto;
-	padding: 0 5px;
+	padding: 5px 10px;
 	margin: 0;
 	vertical-align: middle;
 	border: 0;
@@ -128,6 +134,7 @@ Contents:
 	text-decoration: none;
 	transition: .2s all cubic-bezier(0.636,0.197,0.0202,0.352);
 	cursor: pointer;
+	position: relative;
 }
 .quickshare-text span:hover {
 	box-shadow: 1px 1px 1px rgba(0,0,0,.4);
@@ -139,6 +146,9 @@ Contents:
 .quickshare-text span:before {
 	font-size: 0;
 }
+.quickshare-text.qs-genericons span {
+	padding: 4px 8px 4px 28px;
+}
 .quickshare-text.qs-genericons span:before {
 	font-family: Genericons;
 	-webkit-font-smoothing: antialiased;
@@ -147,7 +157,11 @@ Contents:
 	font-weight: normal;
 	font-style: normal;
 	width: 16px;
-	margin-right: 3px;
+	height: 16px;
+	position: absolute;
+	left: 8px;
+	top: 50%;
+	margin-top: -12px;
 	transition: .2s all cubic-bezier(0.636,0.197,0.0202,0.352);
 }
 
@@ -253,8 +267,9 @@ Contents:
 .quickshare-reddit {
 	background-image: url('icons/reddit.png');
 }
-.quickshare-genericons .quickshare-reddit {
-	display: none;
+.quickshare-reddit:before {
+	content: '\f222';
+	color: #222;
 }
 .quickshare-tumblr {
 	background-image: url('icons/tumblr.png');
@@ -269,8 +284,9 @@ Contents:
 .quickshare-stumbleupon {
 	background-image: url('icons/stumbleupon.png');
 }
-.quickshare-genericons .quickshare-stumbleupon {
-	display: none;
+.quickshare-stumbleupon:before {
+	content: '\f223';
+	color: #cf4c33;
 }
 
 /* 5 Share Text Styles: must be after other styles to override */
@@ -284,6 +300,16 @@ li.quickshare-share {
 	cursor: default;
 	opacity: .7;
 }
+.quickshare-genericons li.quickshare-share:before,
+.quickshare-text.qs-genericons li.quickshare-share:before {
+	font-family: Genericons;
+	font-size: 16px;
+	-webkit-font-smoothing: antialiased;
+	content: "\f415";
+	height: 16px;
+	width: 16px;
+	margin-right: 3px;
+}
 
 /* 6 Special Effects */
 .quickshare-share {
@@ -295,6 +321,12 @@ li.quickshare-share {
 	-webkit-transform: rotate(360deg);
 	-moz-transform: rotate(360deg);
 	transform: rotate(360deg);
+}
+.quickshare-text.quickshare-effect-spin span:hover {
+	/* Skew instead of spinning */	
+	-webkit-transform: skew(-10deg,-2deg);
+	-moz-transform: skew(-10deg,-2deg);
+	transform: skew(-10deg,-2deg);
 }
 .quickshare-effect-round span:hover {
 	border-radius: 32px;
@@ -322,4 +354,21 @@ li.quickshare-share {
 	-webkit-transform: rotate(360deg) scale(1.12);
 	-moz-transform: rotate(360deg) scale(1.12);
 	transform: rotate(360deg) scale(1.12);
+}
+.quickshare-text.quickshare-effect-spin.quickshare-effect-contract span:hover {
+	-webkit-transform: skew(-10deg,-2deg) scale(.86);
+	-moz-transform: skew(-10deg,-2deg) scale(.86);
+	transform: skew(-10deg,-2deg) scale(.86);
+}
+.quickshare-text.quickshare-effect-spin.quickshare-effect-expand span:hover {
+	-webkit-transform: skew(-10deg,-2deg) scale(1.12);
+	-moz-transform: skew(-10deg,-2deg) scale(1.12);
+	transform: skew(-10deg,-2deg) scale(1.12);
+}
+
+/* 7 Media Queries */
+@media print {
+	.quickshare-container {
+		display: none;
+	}
 }

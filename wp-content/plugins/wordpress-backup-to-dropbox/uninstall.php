@@ -2,7 +2,7 @@
 /**
  * Functionality to remove Dropbox backup from your WordPress installation
  *
- * @copyright Copyright (C) 2011-2013 Michael De Wildt. All rights reserved.
+ * @copyright Copyright (C) 2011-2014 Awesoft Pty. Ltd. All rights reserved.
  * @author Michael De Wildt (http://www.mikeyd.com.au/)
  * @license This program is free software; you can redistribute it and/or modify
  *          it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
  *          Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110, USA.
  */
 if (!defined('ABSPATH') && !defined('WP_UNINSTALL_PLUGIN')) {
-	exit();
+    exit();
 }
 
 delete_option('backup-to-dropbox-tokens');

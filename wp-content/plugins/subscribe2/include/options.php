@@ -15,7 +15,7 @@ if (!isset($this->subscribe2_options['wpregdef'])) {
 } // option to check registration form box by default
 
 if (!isset($this->subscribe2_options['autoformat'])) {
-	$this->subscribe2_options['autoformat'] = "text";
+	$this->subscribe2_options['autoformat'] = "post";
 } // option for default auto-subscription email format
 
 if (!isset($this->subscribe2_options['show_autosub'])) {
@@ -111,7 +111,7 @@ if (!isset($this->subscribe2_options['ajax'])) {
 } // option to enable an AJAX style form
 
 if (!isset($this->subscribe2_options['widget'])) {
-	$this->subscribe2_options['widget'] = "0";
+	$this->subscribe2_options['widget'] = "1";
 } // option to enable Subscribe2 Widget
 
 if (!isset($this->subscribe2_options['counterwidget'])) {
@@ -139,7 +139,7 @@ if (!isset($this->subscribe2_options['mailtext'])) {
 } // Default notification email text
 
 if (!isset($this->subscribe2_options['notification_subject'])) {
-	$this->subscribe2_options['notification_subject'] = "[{BLOGNAME}] TITLE";
+	$this->subscribe2_options['notification_subject'] = "[{BLOGNAME}] {TITLE}";
 } // Default notification email subject
 
 if (!isset($this->subscribe2_options['confirm_email'])) {

@@ -3,7 +3,7 @@
 Plugin Name: Greg's High Performance SEO
 Plugin URI: http://gregsplugins.com/lib/plugin-details/gregs-high-performance-seo/
 Description: Configure over 100 separate on-page SEO characteristics. Fewer than 700 lines of code per page view. No junk: just high performance SEO at its best.
-Version: 1.5.4
+Version: 1.6
 Author: Greg Mulhauser
 Author URI: http://gregsplugins.com/
 */
@@ -30,11 +30,6 @@ class gregsHighPerformanceSEO {
 
 	var $plugin_prefix;        // prefix for option names and post meta tables
 	var $consolidate;          // whether we'll be consolidating our options into single array, or keeping discrete
-
-	function gregsHighPerformanceSEO($plugin_prefix='',$option_style='') {
-		$this->__construct($plugin_prefix,$option_style);
-		return;
-	} 
 
 	function __construct($plugin_prefix='',$option_style='') {
 		$this->plugin_prefix = $plugin_prefix . '_';
@@ -268,12 +263,15 @@ class gregsHighPerformanceSEO {
 					$desc = $this->select_desc_comments();
 				else {
 					$tocheck = $this->id_to_check($key);
-					$desc = $this->get_meta_clean($tocheck, 'secondary_desc', true);
-					if (($desc == '') && has_excerpt())
-						$desc = get_the_excerpt();
-					if (($desc == '') || ($this->opt('secondary_desc_override_excerpt')))
+					$desc = trim($this->get_meta_clean($tocheck, 'secondary_desc', true));
+					if (($desc == '') && has_excerpt()) {
+						if ($this->opt('secondary_desc_override_excerpt'))
+							$desc = $default;
+						else $desc = get_the_excerpt();
+					}
+					if (($desc == '') && !has_excerpt())
 						$desc = $default;
-					if (($desc == '') && !($this->opt('secondary_desc_use_blank')))
+					if (($desc == '') && !$this->opt('secondary_desc_use_blank'))
 						$desc = get_the_excerpt();
 				} // end handling single posts and pages not comments
 			} // end handling single posts and pages
@@ -329,8 +327,10 @@ class gregsHighPerformanceSEO {
 			if ('' != $secondary) return $this->prepout($secondary);
 			elseif ($this->opt('enable_secondary_titles_legacy') && !$this->opt('legacy_title_invert')) $secondary = $this->get_legacy_title();
 			if ('' != $secondary) return $this->prepout(stripslashes(wp_specialchars_decode($secondary, ENT_QUOTES)));
+			if (!$secondary) $secondary = get_the_title($this->id_to_check());
 		} // end of secondary titles enabled
 		$secondary = ltrim(wp_title('',false));
+		if (!$secondary) $secondary = get_the_title($this->id_to_check());
 		return $secondary;
 	} // end getting secondary title
 
@@ -633,11 +633,16 @@ class gregsHighPerformanceSEO {
 		} // end loop over types to check
 		if ($exclude) {
 			$index = 'noindex';
-			if ($this->opt('index_nofollow')) $index .= ',nofollow';
+			if ($this->opt('index_nofollow'))
+				$index .= ',nofollow';
 		} // end case for excluding
 		else $index = 'index,follow';
-		if ($this->opt('index_noodp')) $index .= ',noodp,noydir';
-		if (is_ssl() && $this->opt('index_no_ssl')) $index = str_replace(array('index','follow'), array('noindex','nofollow'), $index);
+		if ($this->opt('index_noodp'))
+			$index .= ',noodp,noydir';
+		if (is_ssl() && $this->opt('index_no_ssl') && !$exclude)
+			$index = str_replace(array('index','follow'), array('noindex','nofollow'), $index);
+		elseif (!is_ssl() && $this->opt('index_always_ssl') && !$exclude)
+			$index = str_replace(array('index','follow'), array('noindex','nofollow'), $index);
 		$output = "<meta name=\"robots\" content=\"{$index}\" />\n";
 		if ($this->opt('obnoxious_mode')) return $output;
 		else echo $output;
@@ -670,8 +675,12 @@ class gregsHighPerformanceSEO {
 		if ($this->get_comment_page()) return;
 		if (!$this->opt('canonical_enable')) return;
 		$link = $this->get_current_paged_link($this->this_page()); // handles permalink + paged links
-		if (is_ssl() && $this->opt('canonical_no_ssl')) $link = str_replace('https://', 'http://', $link);
-		if ($this->opt('enable_modifications')) $link = apply_filters('ghpseo_canonical_url',$link);
+		if (is_ssl() && $this->opt('canonical_no_ssl'))
+			$link = str_replace('https://', 'http://', $link);
+		elseif (!is_ssl() && $this->opt('canonical_always_ssl'))
+			$link = str_replace('http://', 'https://', $link);
+		if ($this->opt('enable_modifications'))
+			$link = apply_filters('ghpseo_canonical_url',$link);
 		$output = "<link rel=\"canonical\" href=\"{$link}\" />\n";
 		if ($this->opt('obnoxious_mode')) return $output;
 		else echo $output;

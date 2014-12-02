@@ -1,5 +1,0 @@
-[06-Oct-2013 08:01:24] PHP Fatal error:  Call to undefined function  esc_html_e() in /home4/ty/public_html/wp-content/plugins/wp-e-commerce/wpsc-admin/includes/purchase-logs-page/item-details.php on line 4
-[06-Oct-2013 08:44:44] PHP Fatal error:  Call to undefined function  esc_html_e() in /home4/ty/public_html/wp-content/plugins/wp-e-commerce/wpsc-admin/includes/purchase-logs-page/upgrade.php on line 3
-[06-Oct-2013 23:02:12] PHP Fatal error:  Call to undefined function  esc_html_e() in /home4/ty/public_html/wp-content/plugins/wp-e-commerce/wpsc-admin/includes/purchase-logs-page/bulk-delete-confirm.php on line 2
-[07-Oct-2013 02:23:04] PHP Fatal error:  Call to undefined function  esc_html_e() in /home4/ty/public_html/wp-content/plugins/wp-e-commerce/wpsc-admin/includes/purchase-logs-page/list-table.php on line 4
-[09-Oct-2013 03:17:22] PHP Fatal error:  Call to undefined function  esc_html__() in /home4/ty/public_html/wp-content/plugins/wp-e-commerce/wpsc-admin/includes/purchase-logs-page/packing-slip.php on line 4

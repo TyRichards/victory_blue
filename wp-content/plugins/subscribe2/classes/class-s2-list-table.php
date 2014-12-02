@@ -33,14 +33,14 @@ class Subscribe2_List_Table extends WP_List_Table {
 	function column_email($item) {
 		global $current_tab;
 		if ( $current_tab == 'registered' ) {
-			$actions = array('edit' => sprintf('<a href="?page=%s&amp;email=%s">%s</a>', 's2', $item['email'], __('Edit', 'subscribe2')));
+			$actions = array('edit' => sprintf('<a href="?page=%s&amp;email=%s">%s</a>', 's2', urlencode($item['email']), __('Edit', 'subscribe2')));
 			return sprintf('%1$s %2$s', $item['email'], $this->row_actions($actions));
 		} else {
 			global $mysubscribe2;
 			if ( '0' === $mysubscribe2->is_public($item['email']) ) {
-				return sprintf('<span style="color:#FF0000">%1$s</span>', $item['email']);
+				return sprintf('<span style="color:#FF0000"><abbr title="' . htmlentities($mysubscribe2->signup_ip($item['email'])) . '">%1$s</abbr></span>', $item['email']);
 			} else {
-				return sprintf('%1$s', $item['email']);
+				return sprintf('<abbr title="' . $mysubscribe2->signup_ip($item['email']) . '">%1$s</abbr>', $item['email']);
 			}
 		}
 	}
@@ -52,7 +52,16 @@ class Subscribe2_List_Table extends WP_List_Table {
 	function get_columns() {
 		global $current_tab;
 		if ( $current_tab == 'registered' ) {
-			$columns = array('email' => _x('Email', 'column name', 'subscribe2'));
+			if (is_multisite()) {
+				$columns = array(
+					'email' => _x('Email', 'column name', 'subscribe2')
+				);
+			} else {
+				$columns = array(
+					'cb'		=> '<input type="checkbox" />',
+					'email' => _x('Email', 'column name', 'subscribe2')
+				);
+			}
 		} else {
 			$columns = array(
 				'cb'	=> '<input type="checkbox" />',
@@ -79,7 +88,13 @@ class Subscribe2_List_Table extends WP_List_Table {
 	function get_bulk_actions() {
 		global $current_tab;
 		if ( $current_tab == 'registered' ) {
-			return array();
+			if (is_multisite()) {
+				return array();
+			} else {
+				return array(
+					'delete'	=> __('Delete', 'subscribe2')
+				);
+			}
 		} else {
 			$actions = array(
 				'delete'	=> __('Delete', 'subscribe2'),
@@ -90,10 +105,16 @@ class Subscribe2_List_Table extends WP_List_Table {
 	}
 
 	function pagination( $which ) {
-		if ( empty( $this->_pagination_args ) )
+		if ( empty( $this->_pagination_args ) ) {
 			return;
+		}
 
-		extract( $this->_pagination_args, EXTR_SKIP );
+		$total_items = $this->_pagination_args['total_items'];
+		$total_pages = $this->_pagination_args['total_pages'];
+		$infinite_scroll = false;
+		if ( isset( $this->_pagination_args['infinite_scroll'] ) ) {
+			$infinite_scroll = $this->_pagination_args['infinite_scroll'];
+		}
 
 		$output = '<span class="displaying-num">' . sprintf( _n( '1 item', '%s items', $total_items, 'subscribe2' ), number_format_i18n( $total_items ) ) . '</span>';
 
@@ -117,13 +138,19 @@ class Subscribe2_List_Table extends WP_List_Table {
 			$current_url = add_query_arg( array('what' => $_REQUEST['what']), $current_url );
 		}
 
+		if ( isset($_POST['s']) ) {
+			$current_url = add_query_arg( array('s' => $_POST['s']), $current_url );
+		}
+
 		$page_links = array();
 
 		$disable_first = $disable_last = '';
-		if ( $current == 1 )
+		if ( $current == 1 ) {
 			$disable_first = ' disabled';
-		if ( $current == $total_pages )
+		}
+		if ( $current == $total_pages ) {
 			$disable_last = ' disabled';
+		}
 
 		$page_links[] = sprintf( "<a class='%s' title='%s' href='%s'>%s</a>",
 			'first-page' . $disable_first,
@@ -139,14 +166,15 @@ class Subscribe2_List_Table extends WP_List_Table {
 			'&lsaquo;'
 		);
 
-		if ( 'bottom' == $which )
+		if ( 'bottom' == $which ) {
 			$html_current_page = $current;
-		else
+		} else {
 			$html_current_page = sprintf( "<input class='current-page' title='%s' type='text' name='paged' value='%s' size='%d' />",
 				esc_attr__('Current page', 'subscribe2'),
 				$current,
 				strlen( $total_pages )
 			);
+		}
 
 		$html_total_pages = sprintf( "<span class='total-pages'>%s</span>", number_format_i18n( $total_pages ) );
 		$page_links[] = '<span class="paging-input">' . sprintf( _x('%1$s of %2$s', 'paging', 'subscribe2'), $html_current_page, $html_total_pages ) . '</span>';
@@ -166,14 +194,16 @@ class Subscribe2_List_Table extends WP_List_Table {
 		);
 
 		$pagination_links_class = 'pagination-links';
-		if ( ! empty( $infinite_scroll ) )
+		if ( ! empty( $infinite_scroll ) ) {
 			$pagination_links_class = ' hide-if-js';
+		}
 		$output .= "\n<span class='$pagination_links_class'>" . join( "\n", $page_links ) . '</span>';
 
-		if ( $total_pages )
+		if ( $total_pages ) {
 			$page_class = $total_pages < 2 ? ' one-page' : '';
-		else
+		} else {
 			$page_class = ' no-pages';
+		}
 
 		$this->_pagination = "<div class='tablenav-pages{$page_class}'>$output</div>";
 

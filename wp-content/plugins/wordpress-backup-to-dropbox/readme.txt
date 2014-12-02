@@ -3,10 +3,10 @@ Contributors: michael.dewildt
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=38SEXDYP28CFA
 Tags: backup, dropbox
 Requires at least: 3.0
-Tested up to: 3.5.2
+Tested up to: 4.0
 Stable tag: trunk
 
-Keep your valuable WordPress website, its media and database backed up to Dropbox in minutes with this sleek, easy to use plugin.
+Keep your valuable WordPress website, its media and database backed up to Dropbox in minutes with this sleek, easy to use plugin. Need help? Please email support@wpb2d.com
 
 == Description ==
 
@@ -66,25 +66,27 @@ Premium extensions can be purchased securely using [PayPal](http://www.paypal.co
 
 For news and updates please visit my blog - http://www.mikeyd.com.au/category/wordpress-backup-to-dropbox/
 
-= Translators =
+= Available in these languages =
 
-* Arabic (ar) - [Saif Maki](www.saif.cz.cc)
-* Brazilian Portuguese (pt_BR) - [Techload Informatica](http://www.techload.com.br)
-* Galician (gl_ES), Spanish (es_ES), Portuguese (pt_PT) - [WordPress Galego](http://gl.wordpress.org/)
-* Indonesian (id_ID) - [Bejana](http://www.bejana.com/)
-* German (de_DE) - [Bernhard Kau](http://kau-boys.de)
-* Chinese (zh_CN) - [HostUCan CN](http://www.hostucan.cn/)
-* Taiwanese (zh_TN) - [HostUCan](http://www.hostucan.com/)
-* French (fr_FR) - [Yassine HANINI](http://www.yassine-hanini.info/)
-* Persian (fa_IR) - [Reza-sh](http://www.rezaonline.net/blog)
-* Dutch (nl_NL) - [Rinze Hiddink](http://www.rinzehiddink.nl)
-* Hebrew (he_HE) - [Menachem](http://luckyboost.com)
-* Italian (it_IT) - [René Querin](http://q-design.it)
-* Hungarian (hu_HU) - [Lazarevics](http://hardverborze.tk)
-* Russian (ru_RU) - [Evgeny Vlasov](http://verha.net)
-* Sweedish (sv_SE) - [Webbyrå](http://webbyra.se)
-
-Help keep WPB2D's language files up ot date on [HunStart](https://code.google.com/p/wpbtd)
+* Arabic (ar)
+* Brazilian Portuguese (pt_BR)
+* Galician (gl_ES)
+* Spanish (es_ES)
+* Portuguese (pt_PT)
+* Indonesian (id_ID)
+* German (de_DE)
+* Chinese (zh_CN)
+* Taiwanese (zh_TN)
+* French (fr_FR)
+* Persian (fa_IR)
+* Dutch (nl_NL)
+* Hebrew (he_HE)
+* Italian (it_IT)
+* Hungarian (hu_HU)
+* Russian (ru_RU)
+* Sweedish (sv_SE)
+* Finland (fi_FI)
+* Danish (da_DK)
 
 == Installation ==
 
@@ -94,15 +96,19 @@ Help keep WPB2D's language files up ot date on [HunStart](https://code.google.co
 
 == Frequently Asked Questions ==
 
+= I am getting this error: `Error message: Error Processing Request: error:0D0890A1:asn1 encoding routines:ASN1_verify:unknown message digest algorithm` =
+
+This is due to the recent [Heartbleed vulnerability](http://heartbleed.com/) and indicates that your server has an outdated version of OpenSSL that is no longer compatible with Dropbox and must be updated in order to continue using the plugin.
+
+Please contact your host to get it updated.
+
 = Why won’t my backup start? =
 
 To diagnose issues with your plugin please refer to this [sticky topic](http://wordpress.org/support/topic/why-won%E2%80%99t-my-backup-start).
 
 = How do I restore my website? =
 
-Simply download [WPB2D Simple Restore](http://wpb2d.com/simple-restore) and upload it to an empty host. Once uploaded you will be guided through a wizard of 5 easy steps and have your blog restored in no time.
-
-You don’t even have to install WordPress!
+Restoring can be a complicated process because every host is different. You can try and follow the steps in this [blog post](http://www.mikeyd.com.au/2011/10/26/restoring-wordpress-from-a-backup-to-dropbox-using-cpanel-and-phpmyadmin), if that does not work I would consult your web developer for help.
 
 = Why does my keep going away and resuming? =
 
@@ -114,11 +120,13 @@ However, the plugin has been designed to get around these limitations by using a
 
 In short, this is a feature! :-)
 
+= Does the plugin backup the WordPress databse? =
+
+It sure does. Your database tables will be dumped to a SQL file that can be used to import into a database when you need to restore or move your website.
+
 = Where are my database backup files located? =
 
-The database is backed up into two files named '[database name]-backup-core.sql' and '[database name]-backup-plugins.sql'. These files will be will be found at the path 'wp-content/backups' within the App folder of your Dropbox.
-
-The first file contains all the core WordPress tables and data and the second contains tables and data related to your plugins. Sometimes your second file will not have any data in it because most plugins will store their data in the wp_options table.
+The database is backed up into a file named '[database name]-backup.sql' and can be found at the path 'wp-content/backups' within the App folder of your Dropbox.
 
 = Wow! My second backup was heaps faster. Why is that? =
 
@@ -137,6 +145,54 @@ You can also install the zip [premium extension](http://wpb2d.com/premium) that 
 3. Premium Extensions: Add extra functionality with ease and a 60 day money back guarantee.
 
 == Changelog ==
+
+= 4.0 =
+* Versioning will now match that of WordPress
+* Tested to work with WordPres 4.0
+
+= 1.9 =
+* Tested to work with WordPress 3.9.
+* Fixed bug in SQL dump where NULL was outputting as '' and 0 as '0'; thanks for the heads up Tervor!
+* Add Danish Translations; thanks Henrik!
+* Add constant to configure the restart time; NO_ACTIVITY_WAIT_TIME defaults to 5 mins.
+* Add Danish translation thanks Michael!
+
+= 1.8.1 =
+* Fix some spelling mistakes
+* Fix bug where chunked upload temp memory cant be read that leads to a zero byte upload
+
+= 1.8 =
+* Compatible with WP 3.8
+* Fixed menu ordering to better avoid clashes with other plugins
+* Fixed PHP notice in Dropbox Facade
+* Updated FAQ
+* Namespace CSS so it's less likely to clash with other plugins
+* Fix a potential issue where some tables and be missed in backup on resume
+
+= 1.7 =
+* Code is now conforms to most of the PSR standards that are much better then the WP ones
+* Database dumps are now tracked so they can be resumed
+* Improved error handling around extension installs
+* Updated tests for better code coverage that revealed a few small bugs
+* Implemented a factory for better dependency injection and performance
+* Updated the Email Extension to use wp_mail so it will use setting set by other plugins like WP SMTP
+* Added a time stamp to Zips generated with the Zip Extension
+* Improved logging and estimation of percent complete
+* Add 'Settings saved' message and use default WP errors
+* Fix invalid UTF-8 sequence in argument error
+
+= 1.6.1 =
+* Added [Extendy](http://extendy.com) and improved extension installation user interface that fixes a few bugs and adds the ability to renew and buy bundles.
+* Use ABSPATH for WP root if get_home_path returns '/' that can cause the plugin the attemt to backup root.
+* Improved security of DB dumps, Zip archives and the backup log. A better sha1 secret is now appended to them all and removed before upload to Dropbox.
+* Updated cURL CA Certs to the latest version from Mozilla
+* Updated dutch translations
+
+= 1.6 =
+* Added Finnish translations
+* WordPress 3.6 compatiblity release
+* Fixed some issues where temporary files where not being cleaned up as expected
+* Removed upgrade migration code for performance reasons. So, if you are upagading form <1.5 you will need to re-authorize and re-configure the plugin.
 
 = 1.5.5 =
 * Updated Arabic translations

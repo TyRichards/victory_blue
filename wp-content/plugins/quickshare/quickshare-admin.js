@@ -1,3 +1,6 @@
+var mouseOffX = 0;
+var mouseOffY = 0;
+
 jQuery(document).ready(function(){
 	// prepare the color pickers
 	// plugin does not support WP<3.5
@@ -7,7 +10,7 @@ jQuery(document).ready(function(){
 	// File uploader
 	var file_frame;
 	var formfield;
-	jQuery('.img_upload_button').live('click', function( event ){
+	jQuery('.img_upload_button').on('click', function( event ){
 		formfield = jQuery(this).prev().attr('id');
 	
 		event.preventDefault();
@@ -53,6 +56,22 @@ jQuery(document).ready(function(){
 	
 	jQuery('#nav-design').click(function(){switchTabs('design')});
 	jQuery('#nav-config').click(function(){switchTabs('config')});
+	
+	
+	// make the admin preview position draggable
+	jQuery('#quickshare-preview').mousedown(function(e){
+		boxOff = jQuery('#quickshare-preview').offset();
+		mouseOffX = e.pageX - boxOff.left;
+		mouseOffY = e.pageY - boxOff.top;
+		jQuery(document).mousemove(function(e){
+			qs_track(e);
+		});
+	});
+
+	jQuery(document).mouseup(function(){
+		jQuery(document).unbind('mousemove'); 
+	});
+	
 });
 function toType( type ){
 	jQuery('#settingsform').removeClass('icons genericons text');
@@ -196,4 +215,8 @@ function checkInputs(st,ht){
 			jQuery('#bgcolor').show(st);
 		}
 	}
+}
+
+function qs_track(e){
+	jQuery('#quickshare-preview').css({'left': e.pageX-mouseOffX, 'top': e.pageY-mouseOffY});
 }

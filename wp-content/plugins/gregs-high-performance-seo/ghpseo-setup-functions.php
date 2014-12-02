@@ -29,11 +29,6 @@ class ghpseoSetupHandler {
 	var $options_page_details = array();      // setting up our options page
 	var $consolidate;                         // whether to consolidate options into arrays, or keep discrete
 
-	function ghpseoSetupHandler ($args,$options_page_details) {
-		$this->__construct($args,$options_page_details);
-		return;
-	} 
-
 	function __construct($args,$options_page_details) {
 		extract($args);
 		$this->plugin_prefix = $prefix;
@@ -170,8 +165,10 @@ class ghpseoSetupHandler {
 				array("depth_attachment_exclude", "", 'intval'),
 				array("index_nofollow", "0", 'intval'),
 				array("index_no_ssl", "0", 'intval'),
+				array("index_always_ssl", "0", 'intval'),
 				array("canonical_enable", "1", 'intval'),
 				array("canonical_no_ssl", "0", 'intval'),
+				array("canonical_always_ssl", "0", 'intval'),
 				array("canonical_disable_builtin", "1", 'intval'),
 				),
 			'maintitles' => array(

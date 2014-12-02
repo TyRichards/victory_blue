@@ -1,36 +1,36 @@
 <?php 
 /*
-Plugin Name: WP Facebook Open Graph protocol
-Plugin URI: http://wordpress.org/extend/plugins/wp-facebook-open-graph-protocol/
-Description: Adds proper Facebook Open Graph Meta tags and values to your site so when links are shared it looks awesome! Works on Google + and Linkedin too!
-Version: 2.0.7
-Author: Chuck Reynolds
-Author URI: http://chuckreynolds.us
-License: GPL2
-*/
-/*
-	Copyright 2011 WordPress Facebook Open Graph protocol plugin (email: chuck@rynoweb.com)
-	
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License, version 2, as 
-	published by the Free Software Foundation.
-	
-	This program is distributed in the hope that it will be useful, 
-	but WITHOUT ANY WARRANTY; without even the implied warranty of 
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
-	GNU General Public License for more details.
-	
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+Plugin Name:    WP Facebook Open Graph protocol
+Plugin URI:     http://wordpress.org/plugins/wp-facebook-open-graph-protocol/
+Description:    Adds proper Facebook Open Graph Meta tags and values to your site so when links are shared it looks awesome! Works on Google + and Linkedin too!
+Version: 		2.0.11
+Author: 		Chuck Reynolds
+Author URI: 	http://chuckreynolds.us
+License:		GPLv2 or later
+License URI: 	http://www.gnu.org/licenses/gpl-2.0.html
+
+Copyright 2014 Chuck Reynolds (email : chuck@rynoweb.com)
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License, version 2, as
+published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-define('WPFBOGP_VERSION', '2.0.7');
+define('WPFBOGP_VERSION', '2.0.11');
 wpfbogp_admin_warnings();
 
 // add OGP namespace per ogp.me schema
 function wpfbogp_namespace($output) {
-	return $output.' xmlns:og="http://ogp.me/ns#"';
+	return $output.' prefix="og: http://ogp.me/ns#"';
 }
 add_filter('language_attributes','wpfbogp_namespace');
 
@@ -62,7 +62,9 @@ function wpfbogp_find_images() {
 
 function wpfbogp_start_ob() {
 	// Start the buffer before any output
-	ob_start( 'wpfbogp_callback' );
+	if ( ! is_feed() ) {
+		ob_start( 'wpfbogp_callback' );
+	}
 }
 
 function wpfbogp_callback( $content ) {
@@ -83,7 +85,9 @@ function wpfbogp_callback( $content ) {
 }
 
 function wpfbogp_flush_ob() {
-	ob_end_flush();
+	if ( ! is_feed() ) {
+		ob_end_flush();
+	}
 }
 
 add_action( 'init', 'wpfbogp_start_ob', 0 );
@@ -129,7 +133,7 @@ function wpfbogp_build_head() {
 		// do descriptions
 		if ( is_singular() ) {
 			if ( has_excerpt( $post->ID ) ) {
-				$wpfbogp_description = strip_tags( get_the_excerpt( $post->ID ) );
+				$wpfbogp_description = strip_tags( get_the_excerpt() );
 			} else {
 				$wpfbogp_description = str_replace( "\r\n", ' ' , substr( strip_tags( strip_shortcodes( $post->post_content ) ), 0, 160 ) );
 			}
@@ -153,8 +157,13 @@ function wpfbogp_build_head() {
 		if ( ! is_home() && $options['wpfbogp_force_fallback'] != 1 ) {
 			// Find featured thumbnail of the current post/page
 			if ( function_exists( 'has_post_thumbnail' ) && has_post_thumbnail( $post->ID ) ) {
-				$thumbnail_src = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID ), 'medium' );
-				$wpfbogp_images[] = $thumbnail_src[0]; // Add to images array
+				$thumbnail_src = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID ), 'large' );
+				$link = $thumbnail_src[0];
+ 				if ( ! preg_match( '/^https?:\/\//', $link ) ) {
+ 					// Remove any starting slash with ltrim() and add one to the end of site_url()
+					$link = site_url( '/' ) . ltrim( $link, '/' );
+				}
+				$wpfbogp_images[] = $link; // Add to images array
 			}
 			
 			if ( wpfbogp_find_images() !== false && is_singular() ) { // Use our function to find post/page images
@@ -164,7 +173,14 @@ function wpfbogp_build_head() {
 		
 		// Add the fallback image to the images array (which is empty if it's being forced)
 		if ( isset( $options['wpfbogp_fallback_img'] ) && $options['wpfbogp_fallback_img'] != '') {
-			$wpfbogp_images[] = $options['wpfbogp_fallback_img']; // Add to images array
+			if ( is_array( $wpfbogp_images ) )
+			{
+				$wpfbogp_images[] = $options['wpfbogp_fallback_img']; // Add to images array
+				$wpfbogp_images = array_reverse($wpfbogp_images);
+			}
+			else {
+				$wpfbogp_images = array( $options['wpfbogp_fallback_img'] ); // Create image array with default image as index 0
+			}
 		}
 		
 		// Make sure there were images passed as an array and loop through/output each
@@ -263,7 +279,7 @@ function wpfbogp_buildpage() {
 				<th scope="row"><?php _e('Default Image URL to use:') ?></th>
 				<td><input type="text" name="wpfbogp[wpfbogp_fallback_img]" value="<?php echo $options['wpfbogp_fallback_img']; ?>" class="large-text" /><br />
 					<?php _e('Full URL including http:// to the default image to use if your posts/pages don\'t have a featured image or an image in the content. <strong>The image is recommended to be 200px by 200px</strong>.<br />
-					You can use the WordPress <a href="upload.php">media uploader</a> if you wish, just copy the location of the image and put it here.') ?></td>
+					You can use the WordPress <a href="media-new.php">media uploader</a> if you wish, just copy the location of the image and put it here.') ?></td>
 			</tr>
 			<tr valign="top">
 				<th scope="row"><?php _e('Force Fallback Image as Default') ?></th>

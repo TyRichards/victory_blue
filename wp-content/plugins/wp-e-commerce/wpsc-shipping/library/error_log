@@ -1,1 +1,0 @@
-[23-Sep-2013 19:34:48] PHP Fatal error:  Call to undefined function  add_action() in /home4/ty/public_html/wp-content/plugins/wp-e-commerce/wpsc-shipping/library/shipwire_functions.php on line 832

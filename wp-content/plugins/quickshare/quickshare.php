@@ -1,9 +1,9 @@
 <?php
 /**
  * Plugin Name: QuickShare
- * Plugin URI: http://wordpress.org/plugins/quickshare/
+ * Plugin URI: http://celloexpressions.com/plugins/quickshare/
  * Description: Add quick social sharing functions to your content. Challenge social sharing norms with a flexible design and fast performance.
- * Version: 1.2
+ * Version: 1.5
  * Author: Nick Halsey
  * Author URI: http://celloexpressions.com/
  * Tags: Social, Share, Sharing, Social Sharing, Social Media, Quick, Easy, Lightweight, No JS, Flexible, Customizable, Responsive, Facebook, Twitter, Pinterest, Linkedin, Google+, Tumblr, Email, Reddit, StumbleUpon
@@ -58,9 +58,9 @@ function cxnh_quickshare_add_defaults() {
 		delete_option('cxnh_quickshare_options'); 
 		$arr = array(
 			//general
-			'plugin_version' => '1.2', // currently tracks initially installed plugin version
+			'plugin_version' => '1.4', // currently tracks initially installed plugin version
 			'settingspage' => 'design',
-			'displaytype' => 'icons',
+			'displaytype' => 'genericons',
 			'size' => '',
 			'borderradius' => '3',
 			'respond_small' => '600', // Android uses this value to distinguish between phone & tablet
@@ -73,9 +73,11 @@ function cxnh_quickshare_add_defaults() {
 			'pages' => 0,
 			'attachments' => 1,
 			'everything' => 0,
+			'excluded_ids' => '',
 			
 			'facebook' => 1,
 			'twitter' => 1,
+			'twitter_user' => '', // Needed to optimize Twitter's interactions
 			'pintrest' => 1,
 			'linkedin' => 1,
 			'googleplus' => 1,
@@ -88,18 +90,18 @@ function cxnh_quickshare_add_defaults() {
 			'hidepintrest' => 0,
 			
 			//common to 2 styles
-			'inherit_color' => 1,
+			'inherit_color' => 0,
 			'bgtransparent' => 1,
-			'color' => '#000090',
-			'hovercolor' => '#a00000',
-			'bgcolor' => '#500000',
+			'color' => '#2c12ed',
+			'hovercolor' => '#bb2255',
+			'bgcolor' => '#f1e6b3',
 			'customcss' => '',
 			
 			//icons style
 			
 			//genericons style
 			'monochrome' => 1,
-			'monochrome_hover' => 1,
+			'monochrome_hover' => 0,
 			
 			//text style
 			'text_icons' => 1,
@@ -110,7 +112,7 @@ function cxnh_quickshare_add_defaults() {
 			'effect-round' => 0,
 			'effect-glow' => 0,
 			'effect-contract' => 0,
-			'effect-expand' => 0
+			'effect-expand' => 1
 		);
 		update_option('cxnh_quickshare_options', $arr);
 	}
@@ -147,7 +149,7 @@ function cxnh_quickshare_admin_head(){
 	<style type="text/css">
 		.icons .text-option, .icons .genericons-option, .icons .n-icons-option { display: none; }
 		.genericons .text-option, .genericons .icons-option, .genericons .n-genericons-option { display: none; }
-		.text .icon-option, .text .genericons-option { display: none; }
+		.text .icon-option, .text .genericons-option, .text .n-text-option { display: none; }
 		label { clear: both; }
 		.hidden { display: none; }
 		.quickshare-container {
@@ -158,6 +160,9 @@ function cxnh_quickshare_admin_head(){
 			top: 50%;
 			padding: .4em 5px;
 			background: #fff;
+			cursor: move;
+			border: none;
+			box-shadow: 0px 1px 1px 0px rgba(0,0,0,0.1);
 		}
 		@media only screen and (max-width: 900px) {
 			.quickshare-container { display: none; }
@@ -208,6 +213,14 @@ if (isset($_GET['page']) && $_GET['page'] == 'quickshare/quickshare.php') {
 }
 function cxnh_quickshare_render_form(){
 	$options = get_option('cxnh_quickshare_options');
+
+	// added in 1.4
+	if(!array_key_exists('excluded_ids',$options))
+		$options['excluded_ids'] = '';
+	
+	// added in 1.5
+	if(!array_key_exists('twitter_user',$options))
+		$options['twitter_user'] = '';
 ?>
 <div class="wrap">
 	<h2 class="nav-tab-wrapper">
@@ -223,8 +236,11 @@ function cxnh_quickshare_render_form(){
 				<label><input name="cxnh_quickshare_options[everywhere]" id="displayeverywhere" type="checkbox" value="1" <?php if (isset($options['everywhere'])) { checked('1', $options['everywhere']); } ?> /> Everywhere the_content() is used (including custom post types)</label><br class="display-option"/>
 				<label class="display-option"><input name="cxnh_quickshare_options[posts]" type="checkbox" value="1" <?php if (isset($options['posts'])) { checked('1', $options['posts']); } ?> /> Posts</label><br class="display-option"/>
 				<label class="display-option"><input name="cxnh_quickshare_options[pages]" type="checkbox" value="1" <?php if (isset($options['pages'])) { checked('1', $options['pages']); } ?> /> Pages</label><br class="display-option"/>
-				<label class="display-option"><input name="cxnh_quickshare_options[attachments]" type="checkbox" value="1" <?php if (isset($options['attachments'])) { checked('1', $options['attachments']); } ?> /> Attachments <span style="font-style: italics;">(may not display in some themes if the image description field is empty)</span></label>
+				<label class="display-option"><input name="cxnh_quickshare_options[attachments]" type="checkbox" value="1" <?php if (isset($options['attachments'])) { checked('1', $options['attachments']); } ?> /> Media Attachments <span style="font-style: italics;">(may not display in some themes if the description field is empty)</span></label>
+				<p>Use the <code>[quickshare]</code> shortcode to display QuickShare in custom places; for example, on only one specific page.</p>
 				<p>If you want to display the QuickShare links anywhere else, use <code>&lt;?php do_quickshare_output( $url, $title, $source, $description, $imgurl ); ?&gt;</code> in your templates.</p>
+				<h5>Excluded Posts/Pages:</h5>
+				<label><input name="cxnh_quickshare_options[excluded_ids]" type="text" value="<?php echo $options['excluded_ids']; ?>" /> Enter a comma-separated list of post IDs (of any type) that QuickShare won't display on.</label>
 			</td>
 		</tr>
 		<tr>
@@ -237,13 +253,14 @@ function cxnh_quickshare_render_form(){
 			<th scope="row">Share Types</th>
 			<td style="column-count: 2; -webkit-column-count: 2; -moz-column-count: 2;">
 				<label><input name="cxnh_quickshare_options[facebook]" type="checkbox" value="1" <?php if (isset($options['facebook'])) { checked('1', $options['facebook']); } ?> /> Facebook</label><br/>
-				<label><input name="cxnh_quickshare_options[twitter]" type="checkbox" value="1" <?php if (isset($options['twitter'])) { checked('1', $options['twitter']); } ?> /> Twitter</label><br/>
+				<label><input name="cxnh_quickshare_options[twitter]" type="checkbox" value="1" <?php if (isset($options['twitter'])) { checked('1', $options['twitter']); } ?> /> Twitter</label>
+					@<input name="cxnh_quickshare_options[twitter_user]" type="text" value="<?php echo $options['twitter_user']; ?>" placeholder="username (optional)"/><br/>
 				<label><input name="cxnh_quickshare_options[pintrest]" type="checkbox" value="1" <?php if (isset($options['pintrest'])) { checked('1', $options['pintrest']); } ?> /> Pinterest</label><br/>
 				<label><input name="cxnh_quickshare_options[linkedin]" type="checkbox" value="1" <?php if (isset($options['linkedin'])) { checked('1', $options['linkedin']); } ?> /> Linkedin</label><br/>
 				<label><input name="cxnh_quickshare_options[googleplus]" type="checkbox" value="1" <?php if (isset($options['googleplus'])) { checked('1', $options['googleplus']); } ?> /> Google+</label><br/>
 				<label><input name="cxnh_quickshare_options[tumblr]" type="checkbox" value="1" <?php if (isset($options['tumblr'])) { checked('1', $options['tumblr']); } ?> /> Tumblr</label><br/>
-				<label class="n-genericons-option"><input name="cxnh_quickshare_options[reddit]" type="checkbox" value="1" <?php if (isset($options['reddit'])) { checked('1', $options['reddit']); } ?> /> Reddit</label><br class="n-genericons-option"/>
-				<label class="n-genericons-option"><input name="cxnh_quickshare_options[stumbleupon]" type="checkbox" value="1" <?php if (isset($options['stumbleupon'])) { checked('1', $options['stumbleupon']); } ?> /> Stumbleupon</label><br class="n-genericons-option"/>
+				<label><input name="cxnh_quickshare_options[reddit]" type="checkbox" value="1" <?php if (isset($options['reddit'])) { checked('1', $options['reddit']); } ?> /> Reddit</label><br/>
+				<label><input name="cxnh_quickshare_options[stumbleupon]" type="checkbox" value="1" <?php if (isset($options['stumbleupon'])) { checked('1', $options['stumbleupon']); } ?> /> Stumbleupon</label><br/>
 				<label><input name="cxnh_quickshare_options[email]" type="checkbox" value="1" <?php if (isset($options['email'])) { checked('1', $options['email']); } ?> /> Email</label><br/>
 			</td>
 		</tr>
@@ -260,8 +277,8 @@ function cxnh_quickshare_render_form(){
 		<tr>
 			<th scope="row">Social Graph Meta<br><em>Strongly Recommended</em></th>
 			<td>
-				<label><input name="cxnh_quickshare_options[ogmeta]" type="checkbox" value="1" <?php if (isset($options['ogmeta'])) { checked('1', $options['ogmeta']); } ?> /> Add Open Graph Meta Tags (in the html <code>&lt;head&gt;</code>) to single posts and pages using QuickShare (optimizes Facebook and Google+ sharing). The following properties are specified: <code>og:title, og:url, og:description, og:image, og:site_name</code>.</label>
-				<p style="font-style: italic;">You should only disable this option if you know that this information is provided by your theme or another plugin.</p>
+				<label><input name="cxnh_quickshare_options[ogmeta]" type="checkbox" value="1" <?php if (isset($options['ogmeta'])) { checked('1', $options['ogmeta']); } ?> /> Add Open Graph Meta Tags (in the html <code>&lt;head&gt;</code>) to single posts and pages using QuickShare (optimizes Facebook and Google+ sharing/SEO). The following properties are specified: <code>og:title, og:url, og:description, og:image, og:site_name</code>.</label>
+				<p style="font-style: italic;">You should only disable this option if you know that this information is provided by your theme or another plugin (SEO plugins are likely to add it).</p>
 			</td>
 		</tr>
 	</table>
@@ -325,7 +342,7 @@ function cxnh_quickshare_render_form(){
 		<tr>
 			<th scope="row">Hover Effects</th>
 			<td>
-				<label><input name="cxnh_quickshare_options[effect-spin]" id="effect-spin" type="checkbox" value="1" <?php if (isset($options['effect-spin'])) { checked('1', $options['effect-spin']); } ?> /> Spin <span class="text-option">(discouraged with text display)</span></label><br/>
+				<label><input name="cxnh_quickshare_options[effect-spin]" id="effect-spin" type="checkbox" value="1" <?php if (isset($options['effect-spin'])) { checked('1', $options['effect-spin']); } ?> /> <span class="n-text-option">Spin</span><span class="text-option">Skew</span></label><br/>
 				<label><input name="cxnh_quickshare_options[effect-round]" id="effect-round" type="checkbox" value="1" <?php if (isset($options['effect-round'])) { checked('1', $options['effect-round']); } ?> /> Round</label><br/>
 				<label><input name="cxnh_quickshare_options[effect-glow]" id="effect-glow" type="checkbox" value="1" <?php if (isset($options['effect-glow'])) { checked('1', $options['effect-glow']); } ?> /> Glow</label><br/>
 				<label><input name="cxnh_quickshare_options[effect-contract]" id="effect-contract" type="checkbox" value="1" <?php if (isset($options['effect-contract'])) { checked('1', $options['effect-contract']); } ?> /> Contract</label><br/>
@@ -353,7 +370,7 @@ function cxnh_quickshare_render_form(){
 			</td>
 		</tr>
 		<tr><td colspan="2">
-		<div class="quickshare-container">
+		<div id="quickshare-preview" class="quickshare-container">
 		<ul class="<?php echo cxnh_quickshare_get_ulclass(); ?>" id="quickshare-design-preview">
 			<li class="quickshare-share"><?php echo cxnh_quickshare_getOption('sharelabel',$options); ?></li> 
 			<?php if(cxnh_quickshare_getOption('facebook',$options)){ ?><li><a href="javascript:void(0)" title="Share on Facebook"><span class="quickshare-facebook">Facebook</span></a></li><?php } ?>
@@ -383,11 +400,26 @@ function cxnh_quickshare_validate_options($input) {
 	// sanitize img url
 	$input['imgurl'] = esc_url($input['customcss']);
 	
-	// sanitize text field
+	// sanitize text fields
 	$input['sharelabel'] = sanitize_text_field($input['sharelabel']); // not allowing html here because it should be a plaintext label and can be formated with custom css (it's already in an <li>)
+	$input['twitter_user'] = sanitize_text_field($input['twitter_user']);
 	
 	// sanitize numeric inputs
 	$input['borderradius'] = absint($input['borderradius']);
+	
+//	sanitize_hex_color is only available in the theme customizer...
+//	$input['color'] = sanitize_hex_color( $input['color'] );
+//	$input['hovercolor'] = sanitize_hex_color( $input['hovercolor'] );
+//	$input['bgcolor'] = sanitize_hex_color( $input['bgcolor'] );
+	
+	// sanitize the excluded_ids field
+	if( array_key_exists( 'excluded_ids', $input ) ) {
+		$ids_arr = explode( ',', $input['excluded_ids'] );
+		$ids_arr_2 = array();
+		foreach( $ids_arr as $id )
+			$ids_arr_2[] = absint( trim( $id ) );
+		$input['excluded_ids'] = implode( ',', array_filter( $ids_arr_2 ) );
+	}
 	
 	// validate css
 	//TODO: some form of css validation to minimize user error
@@ -405,25 +437,62 @@ function cxnh_quickshare_getOption( $option, $options = null ) {
 		return false;
 }
 
-// output
-add_filter('the_content', 'cxnh_add_quickshare_output',15);
+// determine if we should display QuickShare on the current object
+function cxnh_quickshare_show_output() {
+	$options = get_option('cxnh_quickshare_options');
+	global $post;
+	global $quickshare_in_excerpt;
+	
+	$output = false;
+	
+	if ( is_feed() )
+		$output = false;
+	elseif ( $quickshare_in_excerpt )
+		$output = false;
+	elseif ( cxnh_quickshare_getOption('everywhere',$options) )
+		$output = true;
+	elseif ( cxnh_quickshare_getOption('posts',$options) && get_post_type() == 'post' )
+		$output = true;
+	elseif ( cxnh_quickshare_getOption('pages',$options) && get_post_type() == 'page' )
+		$output = true;
+	elseif ( cxnh_quickshare_getOption('attachments',$options) && get_post_type() == 'attachment' ) 
+		$output = true;
+	
+	$xids = cxnh_quickshare_getOption('excluded_ids',$options);
+	if($xids) {
+		$xids_arr = explode(',',$xids);
+		if(in_array($post->ID,$xids_arr))
+			$output = false;
+	}
+	
+	unset($quickshare_in_excerpt);
+	
+	return $output;
+}
+
+// All of the functions that display the QuickShare output.
+// Several things are run site-wide (such as styles & og meta) because we don't know
+// where the user might be using the custom output functions or the shortcode, and
+// this data won't hurt anything anyway.
 add_action('wp_enqueue_scripts','cxnh_quickshare_styles');
-add_action('wp_head','cxnh_quickshare_head');
 function cxnh_quickshare_styles() {
 	wp_enqueue_style('quickshare',plugins_url('/quickshare.css',__FIlE__));
 	if(cxnh_quickshare_getOption('displaytype') == 'genericons' || (cxnh_quickshare_getOption('displaytype') == 'text' && cxnh_quickshare_getOption('text_icons')))
 		wp_enqueue_style('genericons',plugins_url('/genericons/genericons.css',__FILE__));
 }
+
+add_action('wp_head','cxnh_quickshare_head');
 function cxnh_quickshare_head() {
 	$options = get_option('cxnh_quickshare_options');
 	
 	// add open graph tags if appropriate
-	if( cxnh_quickshare_getOption('ogmeta',$options) && ( (is_single() && cxnh_quickshare_getOption('posts',$options)) || (is_page() && cxnh_quickshare_getOption('ogimage',$options)) ) ){
+	if( cxnh_quickshare_getOption('ogmeta',$options) && is_singular() ) {
 		echo '<meta name="og:title" content="' . get_the_title() . '" />';
-		echo '<meta name="og:image" content="' . cxnh_quickshare_get_post_image() . '" />';
+		if(cxnh_quickshare_get_post_image()) 
+			echo '<meta name="og:image" content="' . cxnh_quickshare_get_post_image() . '" />';
 		echo '<meta name="og:url" content="' . get_permalink() . '" />';
 		echo '<meta name="og:description" content="' . cxnh_quickshare_get_post_description() . '" />';
-		if(!is_front_page())
+		if( !is_front_page() )
 			echo '<meta name="og:site_name" content="' . get_bloginfo('name') . '" />'; // to be used if this object/webpage is part of a larger website - not really the case for the homepage
 	}
 	
@@ -489,25 +558,42 @@ function cxnh_quickshare_head() {
 	<?php
 }
 
-// add_quickshare_optput is the filter that appends quickshare to the_content
+// add the QuickShare shortcode
+add_shortcode( 'quickshare', 'cxnh_do_quickshare_shortcode' );
+function cxnh_do_quickshare_shortcode( $atts ){
+	return cxnh_quickshare_makeOutput();
+}
+
+// cxnh_add_quickshare_optput is the filter that appends quickshare to the_content
+add_filter('the_content', 'cxnh_add_quickshare_output',15);
+
 function cxnh_add_quickshare_output( $content ) {
 	$options = get_option('cxnh_quickshare_options');
-	if( is_feed() || (!cxnh_quickshare_getOption('everywhere',$options) && 
-	  ( ( !cxnh_quickshare_getOption('posts',$options) && get_post_type() == 'post')
-	  || ( !cxnh_quickshare_getOption('pages',$options) && get_post_type() == 'page')
-	  || ( !cxnh_quickshare_getOption('attachments',$options) && get_post_type() == 'attachment') ) ) )
-		return $content;
-	else {
+	if( cxnh_quickshare_show_output() ) {
 		$sharecode = cxnh_quickshare_makeOutput();
 		return $content . $sharecode;
 	}
+	else
+		return $content;
 }
 
-// do_quickshare_output() is used for custom quickshare output in template files
+// if we're in the_excerpt, set a flag so that we don't display QuickShare
+// necessary because WordPress applies the_content filters to the_excerpt
+add_filter('get_the_excerpt', 'cxnh_quickshare_inexcerpt', 1);
+function cxnh_quickshare_inexcerpt( $excerpt ) {
+	global $quickshare_in_excerpt;
+	$quickshare_in_excerpt = true;
+	
+	return $excerpt;
+}
+
+// do_quickshare_output() is used for custom QuickShare output in template files
 function do_quickshare_output( $url=null, $title=null, $source=null, $description=null, $imgurl=null ) {
 	$sharecode = cxnh_quickshare_makeOutput( $url, $title, $source, $description, $imgurl );
 	echo $sharecode;
 }
+
+// create the actual html for QuickShare, and return it
 function cxnh_quickshare_makeOutput( $url=null, $title=null, $source=null, $description=null, $imgurl=null ) {
 	$options = get_option('cxnh_quickshare_options');
 	global $post;
@@ -535,7 +621,7 @@ function cxnh_quickshare_makeOutput( $url=null, $title=null, $source=null, $desc
 	<ul class="<?php echo cxnh_quickshare_get_ulclass(); ?>">
 		<li class="quickshare-share"><?php echo cxnh_quickshare_getOption('sharelabel',$options); ?></li> 
 		<?php if(cxnh_quickshare_getOption('facebook',$options)){ ?><li><a href="https://facebook.com/sharer.php?u=<?php echo $url; ?>&amp;t=<?php echo $title.'+<+'.$source; ?>" target="_blank" title="Share on Facebook"><span class="quickshare-facebook">Facebook</span></a></li><?php } ?>
-		<?php if(cxnh_quickshare_getOption('twitter',$options)){ ?><li><a href="https://twitter.com/share?url=<?php echo $url; ?>" target="_blank" title="Share on Twitter"><span class="quickshare-twitter">Twitter</span></a></li><?php } ?>
+		<?php if(cxnh_quickshare_getOption('twitter',$options)){ ?><li><a href="https://twitter.com/intent/tweet?url=<?php echo $url; ?>&amp;text=<?php echo $title.'+<+'.$source; if( cxnh_quickshare_getOption( 'twitter_user' ) ) { echo '&amp;via=' . cxnh_quickshare_getOption( 'twitter_user' ); } ?>" target="_blank" title="Share on Twitter"><span class="quickshare-twitter">Twitter</span></a></li><?php } ?>
 		<?php if(cxnh_quickshare_getOption('pintrest',$options) && ($imgurl != urlencode(cxnh_quickshare_getOption('image',$options)) || !cxnh_quickshare_getOption('hidepintrest',$options))){ ?><li><a href="http://pinterest.com/pin/create/button/?url=<?php echo $url; ?>&amp;media=<?php echo $imgurl; ?>&amp;description=<?php echo $description; ?>" target="_blank" title="Share on Pinterest"><span class="quickshare-pinterest">Pinterest</span></a></li><?php } ?>
 		<?php if(cxnh_quickshare_getOption('linkedin',$options)){ ?><li><a href="http://linkedin.com/shareArticle?mini=true&amp;url=<?php echo $url; ?>&amp;title=<?php echo $title; ?>&amp;source=<?php echo $source; ?>&amp;summary=<?php echo $description; ?>" title="Share on Linkedin" target="_blank"><span class="quickshare-linkedin">Linkedin</span></a></li><?php } ?>
 		<?php if(cxnh_quickshare_getOption('googleplus',$options)){ ?><li><a href="https://plus.google.com/share?url=<?php echo $url; ?>" target="_blank" title="Share on Google+"><span class="quickshare-googleplus">Google+</span></a></li><?php } ?>
@@ -548,6 +634,7 @@ function cxnh_quickshare_makeOutput( $url=null, $title=null, $source=null, $desc
 <?php
 	return ob_get_clean();
 }
+
 function cxnh_quickshare_get_ulclass() {
 		$options = get_option('cxnh_quickshare_options');
 		$type = cxnh_quickshare_getOption('displaytype',$options);
@@ -620,6 +707,7 @@ function cxnh_quickshare_get_post_image() {
 	else
 		return cxnh_quickshare_getOption('image');
 }
+
 function cxnh_quickshare_get_post_description() {
 	// essentially a summary of get_the_excerpt(), but avoiding most filters other than custom ones (otherwise results in infinite loop)
 	$post = get_post();

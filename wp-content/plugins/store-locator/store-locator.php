@@ -2,40 +2,38 @@
 /*
 Plugin Name: Store Locator
 Plugin URI: http://www.viadat.com/store-locator
-Description: A store locator plugin that gives you the ability to effectively show important locations in an easily searchable manner using Google Maps.
-Version: 1.9.7
+Description: A full-featured map maker & location management interface for creating WordPress store locators and address location maps using Google Maps, featuring several addons & themes.  Manage a few or thousands of locations effortlessly with setup in minutes.
+Version: 3.16
 Author: Viadat Creations
 Author URI: http://www.viadat.com
 */
 
-$sl_version="1.9.7";
-$sl_db_version=1.9;
-include_once("variables.sl.php");
-include_once("copyfolder.lib.php");
-include_once("functions.sl.php");
-include_once("via-latest.php");
-
-register_activation_hook( __FILE__, 'sl_install_tables');
-register_activation_hook( __FILE__, 'initialize_variables');
-
-//add_action('wp_head', 'sl_install_tables');
-
-add_action('wp_head', 'head_scripts');
-// add_action('wp_footer', 'foot_scripts');
-
-add_filter('the_content', 'ajax_map', 7);
+$sl_version="3.16";
+define('SL_VERSION', $sl_version);
+$sl_db_version=3.0;
+include_once("sl-define.php");
+include_once(SL_INCLUDES_PATH."/copyfolder.lib.php");
 
 add_action('admin_menu', 'sl_add_options_page');
+add_action('wp_head', 'sl_head_scripts');
 
-if (ereg($sl_dir, $_SERVER['REQUEST_URI'])) {
-	add_action('admin_print_scripts', 'add_admin_javascript');
-	add_action('admin_print_styles','add_admin_stylesheet');
+
+include_once("sl-functions.php");
+include_once(SL_INCLUDES_PATH."/via-latest.php");
+include_once(SL_INCLUDES_PATH."/update-keys.php");
+
+register_activation_hook( __FILE__, 'sl_install_tables');
+
+add_action('the_content', 'sl_template');
+	
+if (preg_match("@$sl_dir@", $_SERVER['REQUEST_URI'])) {
+	add_action("admin_print_scripts", 'sl_add_admin_javascript');
+	add_action("admin_print_styles",'sl_add_admin_stylesheet');
 }
+load_plugin_textdomain(SL_TEXT_DOMAIN, "", "../uploads/sl-uploads/languages/");
 
-load_plugin_textdomain($text_domain, "", "../uploads/sl-uploads/languages/");
-
-add_filter('option_update_plugins', 'sl_plugin_prevent_upgrade');
-add_filter('transient_update_plugins', 'sl_plugin_prevent_upgrade');
+//add_filter('option_update_plugins', 'sl_plugin_prevent_upgrade');
+//add_filter('transient_update_plugins', 'sl_plugin_prevent_upgrade');
 
 function sl_plugin_prevent_upgrade($opt) {
 	global $update_class;
@@ -51,17 +49,16 @@ function sl_plugin_prevent_upgrade($opt) {
 	return $opt;
 }
 
-function sl_plugin_update_disabled_notice() {
-	global $sl_dir, $update_class;
-	echo '<tr class="plugin-update-tr"><td class="plugin-update" colspan="5" style=""><a href="./admin.php?page='.$sl_dir.'/news-upgrades.php&upgrade=1&_wpnonce='.wp_create_nonce('my-nonce').'"><div class="'.$update_class.'"><b>Click Here to Upgrade Automatically</b></a> <span style="font-weight:normal">(preserves added themes, addons, images, icons, language files)</span> <!-- or <a href="http://www.viadat.com/vdl/store-locator.zip">Download the latest version</a--></div></td></tr>';
-}
-
 function sl_update_db_check() {
     global $sl_db_version;
-    if (get_site_option('sl_db_version') != $sl_db_version) {
+    if (sl_data('sl_db_version') != $sl_db_version) {
         sl_install_tables();
-		initialize_variables();
     }
 }
 add_action('plugins_loaded', 'sl_update_db_check');
+
+/*add_action('activated_plugin','save_error');
+function save_error(){
+    update_option('plugin_error',  ob_get_contents());
+}*/
 ?>
