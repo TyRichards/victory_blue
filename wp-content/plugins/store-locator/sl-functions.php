@@ -1181,7 +1181,7 @@ if (!function_exists("sl_do_geocoding")){
 	global $wpdb, $text_domain, $sl_vars;
 
 	// Initialize delay in geocode speed
-	$delay = 200000; $ccTLD=$sl_vars['map_region']; $sensor=$sl_vars['sensor'];
+	$delay = 100000; $ccTLD=$sl_vars['map_region']; $sensor=$sl_vars['sensor'];
 	$base_url = "https://maps.googleapis.com/maps/api/geocode/json?";
 
 	if ($sensor!="" && !empty($sensor) && ($sensor === "true" || $sensor === "false" )) {$base_url .= "sensor=".$sensor;} else {$base_url .= "sensor=false";}
