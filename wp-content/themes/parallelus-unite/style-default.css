@@ -197,8 +197,8 @@ a.img:hover img			{ border-color: #fff; }
 
 /* logo #Logo	{ float: left; margin: -60px 0 24px -3px;}*/
 #Logo {
-float: left;
-margin: 17px 0 17px 0px;
+	float: left;
+	margin: 60px 0 64px 0px;
 }
 /*#Logo a { display: block; width: 368px; height: 107px;
 	background: transparent url("images/logo.png") no-repeat 0 0;}*/
@@ -210,20 +210,20 @@ margin: 17px 0 17px 0px;
 /* design structure */
 #Wrapper, #PageWrapper	{ position: relative; }	/* IE needs this to position content when using top panel (#ContentPanel) */
 
-#PageWrapper { width: 990px; margin: 0 auto; padding: 25px 0 0;}
+#PageWrapper { width: 990px; margin: 0 auto; padding: 45px 0 0;}
 	
-.pageTop {
+/*.pageTop {
 	height: 10px; 
 	overflow: hidden;
-	background: transparent url("images/pageBg-top.png") no-repeat 0 0;}
+	background: transparent url("images/pageBg-top.png") no-repeat 0 0;}*/
 	
 .pageTop .contact-info {
 	height: 25px;
-	width: 830px;
+	width: 500px;
 	position: absolute;
-	right: 12px;
-	top: 0px;
-	text-align: right;
+	left: 12px;
+	top: 6px;
+	text-align: left;
 }
 
 .pageTop .contact-info a {
@@ -231,16 +231,24 @@ margin: 17px 0 17px 0px;
 	font-size: 8px;
 	font-family: 'Oswald', Arial, Helvetica, Sans Serif;
 	text-align: right;
-	font-size: 11px;
-	padding-left: 22px;
+	font-size: 13px;
+	padding-right: 8px;
 }
 
 .side-box {
 height: 125px;
 width: 68px;
 position: absolute;
-right: 27px;
-top: 45px;
+right: 257px;
+top: 102px;
+}
+
+.victory-with-valvoline {
+height: 169px;
+width: 181px;
+position: absolute;
+right: 29px;
+top: 70px;
 }
 
 .side-box a {
@@ -276,7 +284,7 @@ font-weight: normal;
 	height: 10px; overflow: hidden; margin: 0 0 0.4em;
 	background: transparent url("images/pageBg-bottom.png") no-repeat 0 0;}
 
-#Header, .pageMain { background: transparent url("images/pageBg-repeat.png") repeat-y 0 0;}
+#Header { background: transparent url("images/pageBg-repeat.png") repeat-y 0 0; }
 	
 #Header, .pageMain, #Footer {width: 990px;}	/* must be specified for PNG Fix to work (IE 6 issue) */
 
@@ -700,6 +708,103 @@ div.contact-info form button.submit span { background:none; margin:0; padding:0;
 margin: 0 !important;
 }
 
-
-
 .tooltip { width:auto !important; }
+
+
+/* Style Rules added by Paradox ***********************************************/
+
+/* Gravity Forms */
+
+.gfield { padding-left: 0px; background: none; }
+
+body .gform_wrapper input[type=text], 
+body .gform_wrapper input[type=url], 
+body .gform_wrapper input[type=email], 
+body .gform_wrapper input[type=tel], 
+body .gform_wrapper input[type=number], 
+body .gform_wrapper input[type=password],
+body .gform_wrapper textarea {
+	outline-style: none;
+	font-size: 16px;
+	font-family: inherit;
+	padding: 9px 0px 9px 7px;
+	letter-spacing: normal;
+}
+
+.gfield input:focus,
+.gfield textarea:focus { background: rgb(227, 227, 244); }
+
+select {
+	margin-top: 10px;
+	display: block;
+	width: 100%;
+	height: 34px;
+	padding: 6px 12px;
+	font-size: 14px;
+	line-height: 1.42857143;
+	color: #555;
+	background-color: #fff;
+	background-image: none;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+	box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+	-webkit-transition: border-color ease-in-out .15s,-webkit-box-shadow ease-in-out .15s;
+	-o-transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+	transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+}
+
+/* Typography */
+
+h1.headline {
+	font-size: 35px;
+	line-height: normal;
+	margin-bottom: 8px;
+}
+
+h3.gform_title { font-size: 24px!important; }
+
+.sf-menu li li a { padding: 8px 1em!important; }
+.sf-menu a { padding: 0px 19px 0 19px!important; }
+a > .sf-sub-indicator {
+background-position: 0px -102px;
+top: 5px;
+}
+
+.btn-primary { 
+	color: #fff!important;
+	background-color: #0067ad;
+	border-color: #2e6da4;
+	font-family: "Oswald", Arial, Helvetica, Garuda, sans-serif;
+	text-transform: uppercase;
+
+	display: inline-block;
+	padding: 6px 18px;
+	margin-bottom: 0;
+	font-size: 16px;
+	font-weight: 400;
+	line-height: 1.42857143;
+	text-align: center;
+	white-space: nowrap;
+	vertical-align: middle;
+	-ms-touch-action: manipulation;
+	touch-action: manipulation;
+	cursor: pointer;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	background-image: none;
+	border: 1px solid transparent;
+	border-radius: 4px;	
+}
+
+.call-to-action {
+	position: absolute;
+	top: 0;
+	right: 10px;
+}
+
+.call-to-action .btn-primary {
+	margin-left: 5px;
+}

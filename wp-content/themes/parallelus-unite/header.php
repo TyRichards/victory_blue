@@ -24,6 +24,7 @@
 	<!-- Style sheets -->
 	<link rel="stylesheet" type="text/css" href="<?php echo $cssPath ?>css/base.css" />
 	<link rel="stylesheet" type="text/css" href="<?php echo $cssPath ?>style-default.css" />
+	<link rel="stylesheet" type="text/css" href="<?php echo $cssPath ?>css/font-awesome.min.css" />
 	<?php 
 	// Tool Tips CSS
 	if (get_theme_var('toolTipsActive') !== '' || get_theme_var('toolTipsAllTitles') == true) {
@@ -381,9 +382,18 @@ if (theme_var('slideShowDisabled', 'return') != true && is_home()) {
 	<div id="PageWrapper">
 		<div class="pageTop">
         	<div class="contact-info">
-            <a href="http://g.co/maps/hgjk3">1670 Keller Parkway, Suite 247 Keller, TX 76248</a>
-            <a href="tel:817-431-9894">817-431-9894</a>
-            <span id="subscriber"><?php echo do_shortcode("[subscribe2]"); ?></span>
+	            <!-- <a href="http://g.co/maps/hgjk3">1670 Keller Parkway, Suite 247 Keller, TX 76248</a> -->
+	            <a href="tel:817-431-9894">(817) 337-3311</a>						
+				<a href="https://www.facebook.com/pages/Victory-Blue-DEF/231252883587702" target="_blank" title="Facebook"><i class="fa fa-facebook-square fa-2x"></i></a>
+				<a href="https://twitter.com/victoryblue_def" target="_blank" title="Twitter"><i class="fa fa-twitter-square fa-2x"></i></a>
+				<a href="https://plus.google.com/+GovictoryblueDEF" target="_blank" title="Google Plus"><i class="fa fa-google-plus-square fa-2x"></i></a>
+				<a href="https://www.linkedin.com/company/1130377" target="_blank" title="LinkedIn"><i class="fa fa-linkedin-square fa-2x"></i></a>
+				<a href="https://www.youtube.com/VictoryBlueDEF" target="_blank" title="YouTube"><i class="fa fa-youtube-square fa-2x"></i></a>
+	            <!-- <span id="subscriber"><?php // echo do_shortcode("[subscribe2]"); ?></span> -->
+            </div>
+            <div class="call-to-action">
+            	<a class="btn-primary" href="/distributors">Become a Distributor</a>
+            	<a class="btn-primary" href="/consumers">Buy Victory Blue</a>
             </div>
         </div>
 		<div id="Header">
@@ -411,60 +421,16 @@ if (theme_var('slideShowDisabled', 'return') != true && is_home()) {
 					$themeLogo = '<a href="'. get_bloginfo('url') .'"></a>';
 				}
 			?>
-			<div id="Logo">
-            <div class="side-box">
-            <a href="http://www.api.org/" target="blank" alt="API Certified"><img class="api" src="<?php bloginfo('url'); ?>/images/api-logo.png"/></a>
-            <a href="http://en.wikipedia.org/wiki/Selective_catalytic_reduction" target="blank" alt="For use with SCR Engines"><img class="src" src="<?php bloginfo('url'); ?>/images/scr-logo.png"/></a>
-            </div>
-            <div style="position: absolute;
-z-index: 99;
-top: 45px;
-right: 111px;
-width: 190px;
-background: #ECF5FC;
-padding: 5px;
-border: 1px dotted #CCD9E3;
-text-align: center;
-height: 59px;
-font-family: Arial, Helvetica, sans-serif;
-font-size: 13px;
-line-height: 26px;
-padding-top: 12px;">
-            
-            <?php
-			
-			if ( is_user_logged_in() ) {
-				global $current_user;
-
-				get_currentuserinfo();
-				echo 'Welcome, '.$current_user->user_firstname.' '.$current_user->user_lastname.'<br />';
-				echo '<a class="matt" href="/?page_id=57">Account</a> | <a class="matt" href="/?page_id=10">Order</a> | <a class="matt" href="'.wp_logout_url().'">Logout</a>';
-				
-			} else {
-				echo 'Welcome, Guest!<br>';
-				echo '<a class="matt" href="/?page_id=38">Order</a> | <a class="matt" href="#topReveal" >Login</a>';
-			
-			};
-			
-			?>
-            
-            
-</div>
-<div style="position: absolute;
-z-index: 99;
-top: 139px;
-right: 111px;
-width: 200px;
-text-align: right;
-font-size: 10px;
-color: #999;">
-<!--<img src="http://www.govictoryblue.com/images/social/follow.gif" width="67" height="32" alt="Facebook" display="none />-->
-<a href="http://www.twitter.com/victoryblue_def" target="_blank"><img src="http://www.govictoryblue.com/images/twitter.png" alt="Twitter" width="28" height="27" border="0" style="margin-left:-27px;" /></a>
-<a href="http://www.facebook.com/pages/Victory-Blue-DEF/231252883587702?sk=wall" target="_blank"><img src="http://www.govictoryblue.com/images/facebook.png" alt="Facebook" width="28" height="27" border="0" style="margin-left:-27px;" /></a>
-<a href="http://www.linkedin.com/company/1130377?trk=NUS_CMPY_FOL-nhre" target="_blank"><img src="http://www.govictoryblue.com/images/linkedin.png" alt="Linkedin" width="28" height="27" border="0" style="margin-left:-27px;" /></a>
-<a href="http://www.youtube.com/victorybluedef" target="_blank"><img src="http://www.govictoryblue.com/images/youtube.png" alt="YoutTube" width="28" height="27" border="0" style="margin-left:-27px;" /></a></div>
+			<div id="Logo">				         
 				<?php echo $themeLogo; ?>
 			</div>
+			<div class="victory-with-valvoline">
+				<a href="http://victorywithvalvoline.com" target="blank" alt="Victory With Valvoline"><img class="vwv" src="<?php bloginfo('url'); ?>/images/victory-with-valvoline.png"/></a>
+			</div>
+            <div class="side-box">
+	            <a href="http://www.api.org/" target="blank" alt="API Certified"><img class="api" src="<?php bloginfo('url'); ?>/images/api-logo.png"/></a>
+	            <a href="http://en.wikipedia.org/wiki/Selective_catalytic_reduction" target="blank" alt="For use with SCR Engines"><img class="src" src="<?php bloginfo('url'); ?>/images/scr-logo.png"/></a>
+            </div>   			
 			
 			<!-- End of Content -->
 			<div class="clear"></div>

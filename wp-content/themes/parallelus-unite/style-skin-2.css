@@ -99,7 +99,7 @@ a.img:hover img			{ border-color: #fff; }									/* hover effect - image */
 
 .pageTop			{ background-image: url("images/skins/skin-2/pageBg-top.png"); }		/* page top */
 .pageBottom			{ background-image: url("images/skins/skin-2/pageBg-bottom.png"); }	/* page bottom */
-#Header, .pageMain	{ background-image: url("images/skins/skin-2/pageBg-repeat.png"); }	/* repeating page graphic */
+.pageMain	{ background-image: url("images/skins/skin-2/pageBg-repeat.png"); }	/* repeating page graphic */
 #FooterTop			{ background-image: url("images/skins/skin-2/footerBg-top.png"); }	/* footer top */
 #FooterContent		{ background-image: url("images/skins/skin-2/footerBg-repeat.png"); }	/* repeating footer graphic */
 #FooterBottom		{ background-image: url("images/skins/skin-2/footerBg-bottom.png"); }	/* footer bottom */
