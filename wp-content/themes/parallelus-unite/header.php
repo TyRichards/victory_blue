@@ -425,7 +425,7 @@ if (theme_var('slideShowDisabled', 'return') != true && is_home()) {
 				<?php echo $themeLogo; ?>
 			</div>
 			<div class="victory-with-valvoline">
-				<a href="http://valvoline.com" target="blank" alt="Victory With Valvoline"><img class="vwv" src="<?php bloginfo('url'); ?>/images/victory-with-valvoline.png"/></a>
+				<a href="http://victorywithvalvoline.com" target="blank" alt="Victory With Valvoline"><img class="vwv" src="<?php bloginfo('url'); ?>/images/victory-with-valvoline.png"/></a>
 			</div>
             <div class="side-box">
 	            <a href="http://www.api.org/" target="blank" alt="API Certified"><img class="api" src="<?php bloginfo('url'); ?>/images/api-logo.png"/></a>
